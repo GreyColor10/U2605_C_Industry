@@ -21,10 +21,10 @@ protected:
 	TArray<FIntPoint> GridPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Conveyor|Data")
-	float GridSize = 50.0f;
+	float HalfGridSize = 50.0f;
 
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Type", meta = (DeprecatedProperty, DeprecationMessage = "삭제 예정인 데이터입니다."))
-	EConveyorType ConveyorType = EConveyorType::Max;*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Type", meta = (DeprecatedProperty, DeprecationMessage = "삭제 예정인 데이터입니다."))
+	EConveyorType ConveyorType = EConveyorType::Straight;
 
 public:	
 	ACConveyorBase();
@@ -35,6 +35,11 @@ protected:
 public:
 	FORCEINLINE USplineComponent* GetSplineComponent() const { return SplineComp; }
 	/*FORCEINLINE const TArray<FIntPoint>& GetGridPoints() const { return GridPoints; }*/
+	FORCEINLINE EConveyorType GetConveyorType() const { return ConveyorType; }
+
+public:
+	FVector GetExitDirection() const;
+	FVector GetExitTargetLocation() const;
 
 private:
 	TArray<FIntVector> SetupSplineFromGrid();

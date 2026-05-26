@@ -2,10 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/IClickable.h"
 #include "CProductionEquipment_Base.generated.h"
 
 UCLASS()
-class U2605_C_API ACProductionEquipment_Base : public AActor
+class U2605_C_API ACProductionEquipment_Base 
+	: public AActor
+	, public IIClickable
+
 {
 	GENERATED_BODY()
 	
