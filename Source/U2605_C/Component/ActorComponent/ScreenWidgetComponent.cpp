@@ -4,11 +4,11 @@
 #include "GameFramework/PlayerController.h"
 
 #include "Widget/CUserWidget_Screen.h"
-#include "Communication/CommunicationSubsystem_UI.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
-void UScreenWidgetComponent::OnShippable(FProductData InProductData)
+void UScreenWidgetComponent::OnShippable(int InTotalManduNum)
 {
-	UI_Player->OnProductShipAble(InProductData);
+	UI_Player->OnProductShipAble(InTotalManduNum);
 }
 
 UScreenWidgetComponent::UScreenWidgetComponent()
@@ -39,7 +39,7 @@ void UScreenWidgetComponent::BeginPlay()
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCommunicationSubsystem_UI>();
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->GetShippableDel().AddDynamic(this, &UScreenWidgetComponent::OnShippable);
@@ -59,7 +59,7 @@ void UScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCommunicationSubsystem_UI>();
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->GetShippableDel().RemoveAll(this);

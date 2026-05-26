@@ -3,13 +3,13 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "StructData/CStructDatas.h" 
-#include "CommunicationSubsystem_IO.generated.h"
+#include "CCommunicationSubsystem_IO.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FProductStarted, AActor*,  const FProductData&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FProductDelivered, AActor*,  const FProductData&);
 
 UCLASS()
-class U2605_C_API UCommunicationSubsystem_IO : public UGameInstanceSubsystem
+class U2605_C_API UCCommunicationSubsystem_IO : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 

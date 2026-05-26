@@ -1,7 +1,7 @@
-﻿#include "Communication/CommunicationSubsystem_IO.h"
+﻿#include "Communication/CCommunicationSubsystem_IO.h"
 #include "Global.h"
 
-void UCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEquip, const FProductData& InProductData)
+void UCCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEquip, const FProductData& InProductData)
 {
 	CheckFalse(OnProductStarted.IsBound());
 	CheckNotValid(InStartedEquip);
@@ -9,7 +9,7 @@ void UCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEqui
 	OnProductStarted.Broadcast(InStartedEquip, InProductData);
 }
 
-void UCommunicationSubsystem_IO::BroadcastOnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData)
+void UCCommunicationSubsystem_IO::BroadcastOnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData)
 {
 	CheckFalse(OnProductDelivered.IsBound());
 	CheckNotValid(InDeliveredEquip);

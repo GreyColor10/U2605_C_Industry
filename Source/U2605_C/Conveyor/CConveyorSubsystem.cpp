@@ -1,9 +1,8 @@
 ﻿#include "Conveyor/CConveyorSubsystem.h"
 #include "Global.h"
 
-#include "Communication/CommunicationSubsystem_UI.h"
 #include "Conveyor/CConveyorGraph.h"
-#include "Communication/CommunicationSubsystem_IO.h"
+#include "Communication/CCommunicationSubsystem_IO.h"
 
 void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -20,7 +19,7 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>();
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
 	ioSubsystem->GetProductStartedDel().AddUObject(this, &UCConveyorSubsystem::OnProductStarted);
@@ -33,7 +32,7 @@ void UCConveyorSubsystem::Deinitialize()
 	{
 		if (UGameInstance* game = world->GetGameInstance())
 		{
-			if (UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>())
+			if (UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>())
 				ioSubsystem->GetProductStartedDel().RemoveAll(this);
 		}
 	}
@@ -120,20 +119,13 @@ void UCConveyorSubsystem::OnBroadCast(TArray<FProductArrival>& InArrived)
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
-
-	UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>();
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
 	CheckNotValid(Graph);
 
 	for (FProductArrival& arrival : InArrived)
 	{
-		// 1) UI 수익 알림 (기존)
-		commuSubsystem_UI->BroadcastOnShippable(arrival.ProductData);
-
-		// 2) 도착 지점 근처 Sink 찾기 → 있으면 입고 알림
 		AActor* nearestSink = Graph->FindNearestSinkTo(arrival.ArrivalLocation);
 		if (IsValid(nearestSink))
 		{

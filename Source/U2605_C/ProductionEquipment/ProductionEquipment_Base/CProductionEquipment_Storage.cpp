@@ -1,7 +1,7 @@
 ﻿#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
 #include "Global.h"
 
-#include "Communication/CommunicationSubsystem_IO.h"
+#include "Communication/CCommunicationSubsystem_IO.h"
 #include "Conveyor/CConveyorSubsystem.h"
 
 void ACProductionEquipment_Storage::BeginPlay()
@@ -23,7 +23,7 @@ void ACProductionEquipment_Storage::BeginPlay()
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>();
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
 	ioSubsystem->GetProductDeliveredDel().AddUObject(this, &ACProductionEquipment_Storage::OnProductDelivered);
@@ -41,7 +41,7 @@ void ACProductionEquipment_Storage::EndPlay(const EEndPlayReason::Type EndPlayRe
 
 		if (UGameInstance* game = world->GetGameInstance())
 		{
-			if (UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>())
+			if (UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>())
 				ioSubsystem->GetProductDeliveredDel().RemoveAll(this);
 		}
 	}
@@ -59,7 +59,7 @@ bool ACProductionEquipment_Storage::ShipProduct()
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValidResult(game, false);
 
-	UCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCommunicationSubsystem_IO>();
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValidResult(ioSubsystem, false);
 
 	// FIFO 출고

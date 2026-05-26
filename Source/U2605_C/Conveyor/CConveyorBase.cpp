@@ -33,7 +33,7 @@ void ACConveyorBase::BeginPlay()
 
 	conveyorSystem->RegisterConveyor(this, SplineComp, intVectorsArray);
 
-	DrawDebugSphere(GetWorld(), GetExitTargetLocation(), 30.0f, 12, FColor::Red, true, 30.0f);
+	/*DrawDebugSphere(GetWorld(), GetExitTargetLocation(), 30.0f, 12, FColor::Red, true, 30.0f);*/
 }
 
 FVector ACConveyorBase::GetExitDirection() const

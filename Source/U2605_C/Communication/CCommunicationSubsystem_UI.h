@@ -3,12 +3,12 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "StructData/CStructDatas.h"
-#include "CommunicationSubsystem_UI.generated.h"
+#include "CCommunicationSubsystem_UI.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShippable, FProductData, InProductData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShippable, int, InTotalManduNum);
 
 UCLASS()
-class U2605_C_API UCommunicationSubsystem_UI : public UGameInstanceSubsystem
+class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
@@ -17,6 +17,6 @@ private:
 	FShippable OnShippable;
 
 public:
-	void BroadcastOnShippable(FProductData& InProductData);
+	void BroadcastOnShippable(int InTotalManduNum);
 	FORCEINLINE FShippable& GetShippableDel() { return OnShippable; };
 };

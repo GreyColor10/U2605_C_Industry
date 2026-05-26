@@ -19,7 +19,7 @@ private:
 
 private:
 	UFUNCTION()
-	void OnShippable(FProductData InProductData);
+	void OnShippable(int InTotalManduNum);
 
 public:	
 	UScreenWidgetComponent();
