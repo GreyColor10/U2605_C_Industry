@@ -17,13 +17,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<UStaticMesh> InstancingMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Conveyor|Data")
-	TArray<FIntPoint> GridPoints;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Conveyor|Data")
-	float HalfGridSize = 50.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Type", meta = (DeprecatedProperty, DeprecationMessage = "삭제 예정인 데이터입니다."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Type")
 	EConveyorType ConveyorType = EConveyorType::Straight;
 
 public:	
@@ -34,7 +28,6 @@ protected:
 
 public:
 	FORCEINLINE USplineComponent* GetSplineComponent() const { return SplineComp; }
-	/*FORCEINLINE const TArray<FIntPoint>& GetGridPoints() const { return GridPoints; }*/
 	FORCEINLINE EConveyorType GetConveyorType() const { return ConveyorType; }
 
 public:
@@ -42,6 +35,10 @@ public:
 	FVector GetExitTargetLocation() const;
 
 private:
+	TArray<FIntPoint> GetGridPointsForType() const;
 	TArray<FIntVector> SetupSplineFromGrid();
 	FIntVector GetGridKey(const FVector& InLocation);
+
+private:
+	static constexpr float HalfGridSize = 50.0f;
 };

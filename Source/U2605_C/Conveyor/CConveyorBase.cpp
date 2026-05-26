@@ -30,7 +30,6 @@ void ACConveyorBase::BeginPlay()
 
 	UCConveyorSubsystem* conveyorSystem = world->GetSubsystem<UCConveyorSubsystem>();
 	CheckNotValid(conveyorSystem);
-	CheckFalse(GridPoints.Num() > 0);
 
 	conveyorSystem->RegisterConveyor(this, SplineComp, intVectorsArray);
 
@@ -57,23 +56,48 @@ FVector ACConveyorBase::GetExitDirection() const
 
 FVector ACConveyorBase::GetExitTargetLocation() const
 {
-	FVector localLastPointPos = FVector(GridPoints.Last().X * HalfGridSize, GridPoints.Last().Y * HalfGridSize, 0.0f);
-	FVector worldLastPointPos = GetActorTransform().TransformPosition(localLastPointPos);
+	TArray<FIntPoint> gridPoints = GetGridPointsForType();
+	CheckFalseResult(gridPoints.Num() > 0, FVector::ZeroVector);
+
+	const FIntPoint& lastPoint = gridPoints.Last();
+	FTransform actorTransform = GetActorTransform();
+
+	FVector localLastPointPos = FVector(lastPoint.X * HalfGridSize, lastPoint.Y * HalfGridSize, 0.0f);
+	FVector worldLastPointPos = actorTransform.TransformPosition(localLastPointPos);
 	return worldLastPointPos + GetExitDirection() * HalfGridSize;
+}
+
+TArray<FIntPoint> ACConveyorBase::GetGridPointsForType() const
+{
+	switch (ConveyorType)
+	{
+	case EConveyorType::Straight:
+		return { FIntPoint(0, 0), FIntPoint(1, 0), FIntPoint(2, 0) };
+
+	case EConveyorType::Left:
+		return { FIntPoint(0, 0), FIntPoint(1, 0), FIntPoint(1, -1) };
+
+	case EConveyorType::Right:
+		return { FIntPoint(0, 0), FIntPoint(1, 0), FIntPoint(1, 1) };
+
+	default:
+		return { FIntPoint(0, 0), FIntPoint(1, 0) , FIntPoint(2, 0) };
+	}
 }
 
 TArray<FIntVector> ACConveyorBase::SetupSplineFromGrid()
 {
 	CheckNotValidResult(SplineComp,{});
-	CheckFalseResult(GridPoints.Num(),{});
+	TArray<FIntPoint> gridPoints = GetGridPointsForType();
+	CheckFalseResult(gridPoints.Num() > 0, {});
 	
 	TArray<FIntVector> intVectors;
 	SplineComp->ClearSplinePoints(false);
 	FTransform actorTransform = GetActorTransform();
 
-	for (int32 i = 0; i < GridPoints.Num(); ++i)
+	for (int32 i = 0; i < gridPoints.Num(); ++i)
 	{
-		FVector localPointPos = FVector(GridPoints[i].X * HalfGridSize, GridPoints[i].Y * HalfGridSize, 0.0f);
+		FVector localPointPos = FVector(gridPoints[i].X * HalfGridSize, gridPoints[i].Y * HalfGridSize, 0.0f);
 		FVector worldPointPos = actorTransform.TransformPosition(localPointPos);
 		SplineComp->AddSplinePoint(worldPointPos, ESplineCoordinateSpace::World, false);
 		SplineComp->SetSplinePointType(i, ESplinePointType::Linear, false);
@@ -92,4 +116,3 @@ FIntVector ACConveyorBase::GetGridKey(const FVector& InLocation)
 		FMath::RoundToInt(InLocation.Z / HalfGridSize)
 	);
 }
-
