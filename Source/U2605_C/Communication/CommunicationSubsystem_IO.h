@@ -1,0 +1,26 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "StructData/CStructDatas.h" 
+#include "CommunicationSubsystem_IO.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FProductStarted, AActor*,  const FProductData&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FProductDelivered, AActor*,  const FProductData&);
+
+UCLASS()
+class U2605_C_API UCommunicationSubsystem_IO : public UGameInstanceSubsystem
+{
+	GENERATED_BODY()
+
+private:
+	FProductStarted OnProductStarted;
+	FProductDelivered OnProductDelivered;
+
+public:
+	void BroadcastOnProductStarted(AActor* InStartedEquip, const FProductData& InProductData);
+	void BroadcastOnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData);
+
+	FORCEINLINE FProductStarted& GetProductStartedDel() { return OnProductStarted; };
+	FORCEINLINE FProductDelivered& GetProductDeliveredDel() { return OnProductDelivered; };
+};

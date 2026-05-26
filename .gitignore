@@ -1,0 +1,23 @@
+# 언리얼 빌드/캐시 산출물
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+Build/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.sln
+*.suo
+*.VC.db
+*.VC.opendb
+CLAUDE.md
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 패키징 결과물
+*.ipa
+*.apk
