@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "Components/SplineComponent.h"
 
-#include "MeshInstancing/CInstanedMeshSubsystem.h"
+#include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Conveyor/CConveyorSubsystem.h"
 
 ACConveyorBase::ACConveyorBase()

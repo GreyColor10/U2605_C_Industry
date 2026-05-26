@@ -76,14 +76,14 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 
 	//타이머가 시작할 때 나이아가라 컴포넌트도 같이 킴
 	FTimerDelegate del;
-	del.BindUObject(this, &UCConveyorSubsystem::UpdateDProductItemsFlow);
+	del.BindUObject(this, &UCConveyorSubsystem::UpdatedProductItemsFlow);
 	manager.SetTimer(ConveyorHandle, del, 0.5f, true);
 
 	if (OnNiagaraCompActive.IsBound())
 		OnNiagaraCompActive.Broadcast(true);
 }
 
-void UCConveyorSubsystem::UpdateDProcdutItemsFlow()
+void UCConveyorSubsystem::UpdatedProductItemsFlow()
 {
 	TArray<FVector> locationsArray;
 	TArray<FProductArrival> arrivedProducts;

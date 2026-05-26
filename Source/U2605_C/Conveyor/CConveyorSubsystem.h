@@ -29,7 +29,7 @@ public:
 
 private:
 	void StartSimulationIfNeeded();
-	void UpdateDProductItemsFlow();
+	void UpdatedProductItemsFlow();
 	void OnBroadCast(TArray<FProductArrival>& InArrived);
 	
 private:

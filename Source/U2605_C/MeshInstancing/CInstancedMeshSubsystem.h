@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "CInstanedMeshSubsystem.generated.h"
+#include "CInstancedMeshSubsystem.generated.h"
 
 class UHierarchicalInstancedStaticMeshComponent;
 

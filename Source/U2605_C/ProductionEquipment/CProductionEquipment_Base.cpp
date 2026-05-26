@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "Components/CapsuleComponent.h"
 
-#include "MeshInstancing/CInstanedMeshSubsystem.h"
+#include "MeshInstancing/CInstancedMeshSubsystem.h"
 
 ACProductionEquipment_Base::ACProductionEquipment_Base()
 {
