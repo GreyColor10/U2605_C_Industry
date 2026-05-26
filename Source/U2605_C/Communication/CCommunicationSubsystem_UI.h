@@ -5,7 +5,7 @@
 #include "StructData/CStructDatas.h"
 #include "CCommunicationSubsystem_UI.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShippable, int, InTotalManduNum);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTotalProductCountUpdated, int, InTotalProductNum);
 
 UCLASS()
 class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
@@ -14,9 +14,9 @@ class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
 	
 private:
 	UPROPERTY()
-	FShippable OnShippable;
+	FTotalProductCountUpdated OnTotalProductCountUpdated;
 
 public:
-	void BroadcastOnShippable(int InTotalManduNum);
-	FORCEINLINE FShippable& GetShippableDel() { return OnShippable; };
+	void BroadcastOnTotalProductCountUpdated(int InTotalProductNum);
+	FORCEINLINE FTotalProductCountUpdated& GetOnTotalProductCountUpdatedDel() { return OnTotalProductCountUpdated; };
 };

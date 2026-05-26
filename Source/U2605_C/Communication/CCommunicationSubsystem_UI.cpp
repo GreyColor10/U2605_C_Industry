@@ -1,8 +1,8 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
-void UCCommunicationSubsystem_UI::BroadcastOnShippable(int InTotalManduNum)
+void UCCommunicationSubsystem_UI::BroadcastOnTotalProductCountUpdated(int InTotalProductNum)
 {
-	CheckFalse(OnShippable.IsBound());
-	OnShippable.Broadcast(InTotalManduNum);
+	if (OnTotalProductCountUpdated.IsBound())
+		OnTotalProductCountUpdated.Broadcast(InTotalProductNum);
 }

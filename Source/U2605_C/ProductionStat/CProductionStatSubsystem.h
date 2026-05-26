@@ -18,5 +18,5 @@ public:
 	void OnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData);;
 
 private:
-	int TotalManduNum = 0;
+	int TotalProductNum = 0;
 };

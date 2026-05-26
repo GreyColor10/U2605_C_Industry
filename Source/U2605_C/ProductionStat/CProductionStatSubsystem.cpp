@@ -34,7 +34,7 @@ void UCProductionStatSubsystem::Deinitialize()
 
 void UCProductionStatSubsystem::OnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData)
 {
-	TotalManduNum++;
+	TotalProductNum++;
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -45,5 +45,5 @@ void UCProductionStatSubsystem::OnProductDelivered(AActor* InDeliveredEquip, con
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->BroadcastOnShippable(TotalManduNum);
+	commuSubsystem_UI->BroadcastOnTotalProductCountUpdated(TotalProductNum);
 }

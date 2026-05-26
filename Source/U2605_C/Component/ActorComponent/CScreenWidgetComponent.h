@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "StructData/CStructDatas.h"
-#include "ScreenWidgetComponent.generated.h"
+#include "CScreenWidgetComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class U2605_C_API UScreenWidgetComponent : public UActorComponent
+class U2605_C_API UCScreenWidgetComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -19,10 +19,10 @@ private:
 
 private:
 	UFUNCTION()
-	void OnShippable(int InTotalManduNum);
+	void OnTotalProductCountUpdated(int TotalProductNum);
 
 public:	
-	UScreenWidgetComponent();
+	UCScreenWidgetComponent();
 
 public:
 	void BeginPlay() override;

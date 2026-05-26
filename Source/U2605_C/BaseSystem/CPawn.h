@@ -40,7 +40,7 @@ protected:
 	TObjectPtr<class UCNiagaraComponent> GlobalDataParticleComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
-	TObjectPtr<class UScreenWidgetComponent> ScreenWidgetComponent = nullptr;
+	TObjectPtr<class UCScreenWidgetComponent> ScreenWidgetComponent = nullptr;
 
 public:
 	ACPawn();

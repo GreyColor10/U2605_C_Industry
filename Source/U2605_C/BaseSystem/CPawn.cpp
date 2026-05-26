@@ -8,7 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Conveyor/CConveyorSubsystem.h"
-#include "Component/ActorComponent/ScreenWidgetComponent.h"
+#include "Component/ActorComponent/CScreenWidgetComponent.h"
 #include "Component/CNiagaraComponent.h"
 
 ACPawn::ACPawn()
@@ -35,7 +35,7 @@ ACPawn::ACPawn()
 	GlobalDataParticleComponent->SetAutoDestroy(false);
 	GlobalDataParticleComponent->SetAutoActivate(false);
 
-	ScreenWidgetComponent = CreateDefaultSubobject<UScreenWidgetComponent>(TEXT("ScreenWidgetComponent"));
+	ScreenWidgetComponent = CreateDefaultSubobject<UCScreenWidgetComponent>(TEXT("ScreenWidgetComponent"));
 }
 
 void ACPawn::BeginPlay()

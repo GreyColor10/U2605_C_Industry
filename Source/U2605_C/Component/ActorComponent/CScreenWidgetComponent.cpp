@@ -1,4 +1,4 @@
-﻿#include "Component/ActorComponent/ScreenWidgetComponent.h"
+﻿#include "Component/ActorComponent/CScreenWidgetComponent.h"
 #include "Global.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -6,17 +6,17 @@
 #include "Widget/CUserWidget_Screen.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
-void UScreenWidgetComponent::OnShippable(int InTotalManduNum)
+void UCScreenWidgetComponent::OnTotalProductCountUpdated(int TotalProductNum)
 {
-	UI_Player->OnProductShipAble(InTotalManduNum);
+	UI_Player->OnTotalProductCountUpdated(TotalProductNum);
 }
 
-UScreenWidgetComponent::UScreenWidgetComponent()
+UCScreenWidgetComponent::UCScreenWidgetComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UScreenWidgetComponent::BeginPlay()
+void UCScreenWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
@@ -42,10 +42,10 @@ void UScreenWidgetComponent::BeginPlay()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetShippableDel().AddDynamic(this, &UScreenWidgetComponent::OnShippable);
+	commuSubsystem_UI->GetOnTotalProductCountUpdatedDel().AddDynamic(this, &UCScreenWidgetComponent::OnTotalProductCountUpdated);
 }
 
-void UScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (IsValid(UI_Player))
 	{
@@ -62,7 +62,7 @@ void UScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetShippableDel().RemoveAll(this);
+	commuSubsystem_UI->GetOnTotalProductCountUpdatedDel().RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
 }
