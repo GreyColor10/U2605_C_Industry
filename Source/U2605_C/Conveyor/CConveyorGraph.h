@@ -41,12 +41,11 @@ public:
 	FConveyorNodeInfo* FindNode(AActor* InActor);
 	FConveyorNodeInfo* FindEntryNode();
 
-	// 추가: 위치 기반 진입 컨베이어 찾기
-	FConveyorNodeInfo* FindEntryNodeNearestTo(const FVector& InLocation);
-
 	void RegisterSink(AActor* InSink);
 	void UnregisterSink(AActor* InSink);
-	AActor* FindNearestSinkTo(const FVector& InLocation);
+
+	void FindEntryNodesConnectedTo(const FVector& InLocation, TArray<FConveyorNodeInfo*>& OutNodes);
+	void FindSinksConnectedTo(const FVector& InLocation, TArray<AActor*>& OutSinks);
 
 	FORCEINLINE const TMap<AActor*, FConveyorNodeInfo>& GetMap() const { return ConveyorMap; }
 };

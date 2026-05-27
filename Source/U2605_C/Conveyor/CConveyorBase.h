@@ -38,7 +38,4 @@ private:
 	TArray<FIntPoint> GetGridPointsForType() const;
 	TArray<FIntVector> SetupSplineFromGrid();
 	FIntVector GetGridKey(const FVector& InLocation);
-
-private:
-	static constexpr float HalfGridSize = 50.0f;
 };

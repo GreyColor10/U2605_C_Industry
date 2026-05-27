@@ -65,32 +65,6 @@ FConveyorNodeInfo* UCConveyorGraph::FindEntryNode()
 	return nullptr;
 }
 
-FConveyorNodeInfo* UCConveyorGraph::FindEntryNodeNearestTo(const FVector& InLocation)
-{
-	FConveyorNodeInfo* bestNode = nullptr;
-	float bestDistSq = TNumericLimits<float>::Max();
-
-	for (auto& pair : ConveyorMap)
-	{
-		FConveyorNodeInfo& node = pair.Value;
-		if (!node.bIsEntryNode) continue;
-		if (!node.ConveyorActor.IsValid()) continue;
-		if (!node.SplineComponent.IsValid()) continue;
-
-		// Spline 시작 지점의 월드 좌표
-		FVector startWorld = node.SplineComponent->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
-		float distSq = FVector::DistSquared(InLocation, startWorld);
-
-		if (distSq < bestDistSq)
-		{
-			bestDistSq = distSq;
-			bestNode = &node;
-		}
-	}
-
-	return bestNode;
-}
-
 void UCConveyorGraph::RegisterSink(AActor* InSink)
 {
 	CheckNotValid(InSink);
@@ -105,23 +79,32 @@ void UCConveyorGraph::UnregisterSink(AActor* InSink)
 		});
 }
 
-AActor* UCConveyorGraph::FindNearestSinkTo(const FVector& InLocation)
+void UCConveyorGraph::FindEntryNodesConnectedTo(const FVector& InLocation, TArray<FConveyorNodeInfo*>& OutNodes)
 {
-	AActor* bestSink = nullptr;
-	float bestDistSq = TNumericLimits<float>::Max();
+	for (auto& pair : ConveyorMap)
+	{
+		FConveyorNodeInfo& node = pair.Value;
+		if (!node.bIsEntryNode) continue;
+		if (!node.ConveyorActor.IsValid()) continue;
+		if (!node.SplineComponent.IsValid()) continue;
 
+		FVector startWorld = node.SplineComponent->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
+		float dist = FVector::Dist(InLocation, startWorld);
+
+		if (FMath::IsNearlyEqual(dist, GridConstants::HalfGridSize, GridConstants::ConnectionTolerance))
+			OutNodes.Add(&node);
+	}
+}
+
+void UCConveyorGraph::FindSinksConnectedTo(const FVector& InLocation, TArray<AActor*>& OutSinks)
+{
 	for (const TWeakObjectPtr<AActor>& weakSink : Sinks)
 	{
 		if (!weakSink.IsValid()) continue;
 		AActor* sink = weakSink.Get();
 
-		float distSq = FVector::DistSquared(InLocation, sink->GetActorLocation());
-		if (distSq < bestDistSq)
-		{
-			bestDistSq = distSq;
-			bestSink = sink;
-		}
+		float dist = FVector::Dist(InLocation, sink->GetActorLocation());
+		if (FMath::IsNearlyEqual(dist, GridConstants::HalfGridSize, GridConstants::ConnectionTolerance))
+			OutSinks.Add(sink);
 	}
-
-	return bestSink;
 }

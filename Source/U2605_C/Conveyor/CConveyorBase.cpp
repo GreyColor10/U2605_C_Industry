@@ -62,9 +62,9 @@ FVector ACConveyorBase::GetExitTargetLocation() const
 	const FIntPoint& lastPoint = gridPoints.Last();
 	FTransform actorTransform = GetActorTransform();
 
-	FVector localLastPointPos = FVector(lastPoint.X * HalfGridSize, lastPoint.Y * HalfGridSize, 0.0f);
+	FVector localLastPointPos = FVector(lastPoint.X * GridConstants::HalfGridSize, lastPoint.Y * GridConstants::HalfGridSize, 0.0f);
 	FVector worldLastPointPos = actorTransform.TransformPosition(localLastPointPos);
-	return worldLastPointPos + GetExitDirection() * HalfGridSize;
+	return worldLastPointPos + GetExitDirection() * GridConstants::HalfGridSize;
 }
 
 TArray<FIntPoint> ACConveyorBase::GetGridPointsForType() const
@@ -97,7 +97,7 @@ TArray<FIntVector> ACConveyorBase::SetupSplineFromGrid()
 
 	for (int32 i = 0; i < gridPoints.Num(); ++i)
 	{
-		FVector localPointPos = FVector(gridPoints[i].X * HalfGridSize, gridPoints[i].Y * HalfGridSize, 0.0f);
+		FVector localPointPos = FVector(gridPoints[i].X * GridConstants::HalfGridSize, gridPoints[i].Y * GridConstants::HalfGridSize, 0.0f);
 		FVector worldPointPos = actorTransform.TransformPosition(localPointPos);
 		SplineComp->AddSplinePoint(worldPointPos, ESplineCoordinateSpace::World, false);
 		SplineComp->SetSplinePointType(i, ESplinePointType::Linear, false);
@@ -111,8 +111,8 @@ TArray<FIntVector> ACConveyorBase::SetupSplineFromGrid()
 FIntVector ACConveyorBase::GetGridKey(const FVector& InLocation)
 {
 	return FIntVector(
-		FMath::RoundToInt(InLocation.X / HalfGridSize),
-		FMath::RoundToInt(InLocation.Y / HalfGridSize),
-		FMath::RoundToInt(InLocation.Z / HalfGridSize)
+		FMath::RoundToInt(InLocation.X / GridConstants::HalfGridSize),
+		FMath::RoundToInt(InLocation.Y / GridConstants::HalfGridSize),
+		FMath::RoundToInt(InLocation.Z / GridConstants::HalfGridSize)
 	);
 }

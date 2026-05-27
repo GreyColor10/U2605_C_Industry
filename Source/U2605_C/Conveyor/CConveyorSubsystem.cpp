@@ -121,16 +121,15 @@ void UCConveyorSubsystem::OnBroadCast(TArray<FProductArrival>& InArrived)
 
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
-
 	CheckNotValid(Graph);
 
 	for (FProductArrival& arrival : InArrived)
 	{
-		AActor* nearestSink = Graph->FindNearestSinkTo(arrival.ArrivalLocation);
-		if (IsValid(nearestSink))
-		{
-			ioSubsystem->BroadcastOnProductDelivered(nearestSink, arrival.ProductData);
-		}
+		TArray<AActor*> sinks;
+		Graph->FindSinksConnectedTo(arrival.ArrivalLocation, sinks);
+
+		for (AActor* sink : sinks)
+			ioSubsystem->BroadcastOnProductDelivered(sink, arrival.ProductData);
 	}
 }
 
@@ -140,12 +139,15 @@ void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProdu
 	CheckNotValid(Graph);
 	CheckNull(Simulator);
 
-	// Source 위치에서 가장 가까운 진입 컨베이어 찾기
-	FConveyorNodeInfo* entryNode = Graph->FindEntryNodeNearestTo(InSourceStorage->GetActorLocation());
-	CheckNull(entryNode);
-	CheckFalse(entryNode->ConveyorActor.IsValid());
+	TArray<FConveyorNodeInfo*> entryNodes;
+	Graph->FindEntryNodesConnectedTo(InSourceStorage->GetActorLocation(), entryNodes);
+	CheckFalse(entryNodes.Num() > 0);
 
-	Simulator->AddProductAtEntry(entryNode->ConveyorActor.Get(), InProductData);
+	for (FConveyorNodeInfo* entryNode : entryNodes)
+	{
+		if (!entryNode->ConveyorActor.IsValid()) continue;
+		Simulator->AddProductAtEntry(entryNode->ConveyorActor.Get(), InProductData);
+	}
 
 	StartSimulationIfNeeded();
 }
