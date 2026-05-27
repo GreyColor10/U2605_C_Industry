@@ -10,3 +10,11 @@ enum class EConveyorType : uint8
     Left        UMETA(DisplayName = "좌회전"),
     Right       UMETA(DisplayName = "우회전"),
 };
+
+UENUM(BlueprintType)
+enum class EEquipmentState : uint8
+{
+    Idle        UMETA(DisplayName = "대기"),
+    Processing  UMETA(DisplayName = "처리중"),
+    Done        UMETA(DisplayName = "완료"),
+};

@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "Components/SplineComponent.h"
 
-void UCConveyorGraph::RegisterNode(AActor* InActor, USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints)
+void UCConveyorGraph::RegisterNode(AActor* InActor, USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition)
 {
 	CheckNotValid(InActor);
 	CheckNotValid(InSpline);
@@ -13,6 +13,7 @@ void UCConveyorGraph::RegisterNode(AActor* InActor, USplineComponent* InSpline, 
 	newNode.IntPosion[0] = InGridPoints[0];
 	newNode.IntPosion[1] = InGridPoints[InGridPoints.Num() - 1];
 	newNode.NodeDistance = (InSpline->GetNumberOfSplinePoints() - 1) * 50.0f;
+	newNode.SinkPosition = InSinkPosition;
 
 	ConveyorMap.Add(InActor, newNode);
 }
@@ -104,7 +105,7 @@ void UCConveyorGraph::FindSinksConnectedTo(const FVector& InLocation, TArray<AAc
 		AActor* sink = weakSink.Get();
 
 		float dist = FVector::Dist(InLocation, sink->GetActorLocation());
-		if (FMath::IsNearlyEqual(dist, GridConstants::HalfGridSize, GridConstants::ConnectionTolerance))
+		if (FMath::IsNearlyZero(dist, GridConstants::ConnectionTolerance))
 			OutSinks.Add(sink);
 	}
 }

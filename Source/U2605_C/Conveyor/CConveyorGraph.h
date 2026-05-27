@@ -8,15 +8,11 @@ struct FConveyorNodeInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
 	TWeakObjectPtr<AActor> ConveyorActor;
-
-	UPROPERTY()
 	TWeakObjectPtr<class USplineComponent> SplineComponent;
-
 	//컨베이어의 이동 지점의 시작과 끝을 담는 배열
-	UPROPERTY()
 	FIntVector IntPosion[2];
+	FVector SinkPosition;
 
 	TWeakObjectPtr<AActor> NextConveyor;
 	bool bIsEntryNode = true;
@@ -35,7 +31,7 @@ private:
 	TArray<TWeakObjectPtr<AActor>> Sinks;
 
 public:
-	void RegisterNode(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints);
+	void RegisterNode(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition);
 	void Build();
 
 	FConveyorNodeInfo* FindNode(AActor* InActor);

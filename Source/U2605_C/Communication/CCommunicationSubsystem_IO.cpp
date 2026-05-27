@@ -1,6 +1,8 @@
 ﻿#include "Communication/CCommunicationSubsystem_IO.h"
 #include "Global.h"
 
+#include "Interface/IProductReceiver.h"
+
 void UCCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEquip, const FProductData& InProductData)
 {
 	CheckNotValid(InStartedEquip);
@@ -9,10 +11,12 @@ void UCCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEqu
 		OnProductStarted.Broadcast(InStartedEquip, InProductData);
 }
 
-void UCCommunicationSubsystem_IO::BroadcastOnProductDelivered(AActor* InDeliveredEquip, const FProductData& InProductData)
+void UCCommunicationSubsystem_IO::DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData)
 {
-	CheckNotValid(InDeliveredEquip);
+	CheckNotValid(InTargetActor);
 
-	if(OnProductDelivered.IsBound())
-		OnProductDelivered.Broadcast(InDeliveredEquip, InProductData);
+	IIProductReceiver* receiver = Cast<IIProductReceiver>(InTargetActor);
+	CheckNull(receiver);
+
+	receiver->ReceiveProduct(InProductData);
 }

@@ -20,7 +20,7 @@ private:
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-	void RegisterConveyor(AActor* InActor, class USplineComponent* InSpline, TArray<FIntVector>& InGridPoints);
+	void RegisterConveyor(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition);
 	void BuildConveyorNetwork();
 
 	// Storage가 자기 등록 시 호출
@@ -30,7 +30,7 @@ public:
 private:
 	void StartSimulationIfNeeded();
 	void UpdateProductItemsFlow();
-	void OnBroadCast(TArray<FProductArrival>& InArrived);
+	void DeliverArrivedProducts(TArray<FProductArrival>& InArrived);
 	
 private:
 	void OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData);

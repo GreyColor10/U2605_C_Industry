@@ -28,10 +28,12 @@ void ACConveyorBase::BeginPlay()
 	TArray<FIntVector> intVectorsArray;
 	intVectorsArray = SetupSplineFromGrid();
 
+	FVector targetSinkLocation = GetExitTargetLocation();
+
 	UCConveyorSubsystem* conveyorSystem = world->GetSubsystem<UCConveyorSubsystem>();
 	CheckNotValid(conveyorSystem);
 
-	conveyorSystem->RegisterConveyor(this, SplineComp, intVectorsArray);
+	conveyorSystem->RegisterConveyor(this, SplineComp, intVectorsArray, targetSinkLocation);
 
 	/*DrawDebugSphere(GetWorld(), GetExitTargetLocation(), 30.0f, 12, FColor::Red, true, 30.0f);*/
 }

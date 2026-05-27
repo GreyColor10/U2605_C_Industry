@@ -4,28 +4,6 @@
 
 #include "Conveyor/CConveyorGraph.h"
 
-bool FConveyorSimulator::AddDefaultProduct(UCConveyorGraph* InGraph)
-{
-	CheckNotValidResult(InGraph, false);
-
-	FConveyorNodeInfo* entryNode = InGraph->FindEntryNode();
-	CheckNullResult(entryNode, false);
-
-	USplineComponent* startSpline = entryNode->SplineComponent.Get();
-	CheckNotValidResult(startSpline, false);
-
-	FProductData newItem;
-	newItem.CurrentDistance = 0.0f;
-	newItem.MoveSpeed = 50.0f;
-
-	FProductOnConvoyor newProduct;
-	newProduct.ProductData = newItem;
-	newProduct.CurrentConveyor = entryNode->ConveyorActor;
-
-	ProductsOnConveyer.Add(newProduct);
-	return true;
-}
-
 void FConveyorSimulator::AddProductAtEntry(AActor* InEntryConveyor, const FProductData& InProductData)
 {
 	if (!IsValid(InEntryConveyor)) return;
@@ -91,18 +69,10 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 				// 이미 마지막 지점에 도달한 뒤였다면
 				else
 				{
-					// 변경: FProductArrival로 도착 위치도 함께 담아 반환
 					FProductArrival arrival;
 					arrival.ProductData = data;
-
-					TWeakObjectPtr<USplineComponent> splineComp = currInfo->SplineComponent;
-					if (splineComp.IsValid())
-					{
-						float splineLength = splineComp->GetSplineLength();
-						arrival.ArrivalLocation = splineComp->GetLocationAtDistanceAlongSpline(
-							splineLength, ESplineCoordinateSpace::World);
-					}
-
+					arrival.ArrivalLocation = currInfo->SinkPosition;
+					
 					OutArrived.Add(arrival);
 					ProductsOnConveyer.RemoveAt(i);
 					continue;

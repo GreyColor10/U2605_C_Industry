@@ -30,7 +30,7 @@ public:
 	FORCEINLINE USplineComponent* GetSplineComponent() const { return SplineComp; }
 	FORCEINLINE EConveyorType GetConveyorType() const { return ConveyorType; }
 
-public:
+private:
 	FVector GetExitDirection() const;
 	FVector GetExitTargetLocation() const;
 

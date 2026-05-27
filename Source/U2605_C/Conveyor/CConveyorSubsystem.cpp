@@ -39,10 +39,10 @@ void UCConveyorSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UCConveyorSubsystem::RegisterConveyor(AActor* InActor, USplineComponent* InSpline, TArray<FIntVector>& InGridPoints)
+void UCConveyorSubsystem::RegisterConveyor(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition)
 {
 	CheckNotValid(Graph);
-	Graph->RegisterNode(InActor, InSpline, InGridPoints);
+	Graph->RegisterNode(InActor, InSpline, InGridPoints, InSinkPosition);
 }
 
 void UCConveyorSubsystem::BuildConveyorNetwork()
@@ -90,7 +90,7 @@ void UCConveyorSubsystem::UpdateProductItemsFlow()
 	CheckNull(Simulator);
 	Simulator->Step(Graph, locationsArray, arrivedProducts);
 
-	OnBroadCast(arrivedProducts);
+	DeliverArrivedProducts(arrivedProducts);
 
 	if (OnNiagaraCompSetParameter.IsBound())
 		OnNiagaraCompSetParameter.Broadcast(TEXT("DataPositions"), locationsArray);
@@ -109,7 +109,7 @@ void UCConveyorSubsystem::UpdateProductItemsFlow()
 	}
 }
 
-void UCConveyorSubsystem::OnBroadCast(TArray<FProductArrival>& InArrived)
+void UCConveyorSubsystem::DeliverArrivedProducts(TArray<FProductArrival>& InArrived)
 {
 	CheckFalse(InArrived.Num() > 0);
 
@@ -129,7 +129,7 @@ void UCConveyorSubsystem::OnBroadCast(TArray<FProductArrival>& InArrived)
 		Graph->FindSinksConnectedTo(arrival.ArrivalLocation, sinks);
 
 		for (AActor* sink : sinks)
-			ioSubsystem->BroadcastOnProductDelivered(sink, arrival.ProductData);
+			ioSubsystem->DeliverProductTo(sink, arrival.ProductData);
 	}
 }
 
