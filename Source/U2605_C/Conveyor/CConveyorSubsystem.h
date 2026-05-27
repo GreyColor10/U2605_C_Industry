@@ -6,7 +6,8 @@
 #include "CConveyorSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FNiagaraCompActive, const bool);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FNiagaraCompSetParameter, FName , const TArray<FVector>&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FNiagaraCompSetParticlePosition, FName , const TArray<FVector>&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FNiagaraCompSetMeshIndices, FName, const TArray<int32>&);
 
 UCLASS()
 class U2605_C_API UCConveyorSubsystem : public UWorldSubsystem
@@ -23,7 +24,6 @@ public:
 	void RegisterConveyor(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition);
 	void BuildConveyorNetwork();
 
-	// Storage가 자기 등록 시 호출
 	void RegisterSink(AActor* InSink);
 	void UnregisterSink(AActor* InSink);
 
@@ -37,7 +37,8 @@ private:
 
 public:
 	FORCEINLINE FNiagaraCompActive& GetOnNiagaraCompActive() { return OnNiagaraCompActive; };
-	FORCEINLINE FNiagaraCompSetParameter& GetOnNiagaraCompSetParameter() { return OnNiagaraCompSetParameter; };
+	FORCEINLINE FNiagaraCompSetParticlePosition& GetOnNiagaraCompSetParticlePosition() { return OnNiagaraCompSetParticlePosition; };
+	FORCEINLINE FNiagaraCompSetMeshIndices& GetOnNiagaraCompSetMeshIndices() { return OnNiagaraCompSetMeshIndices; }
 
 private:
 	TUniquePtr<class FConveyorSimulator> Simulator;
@@ -46,5 +47,6 @@ private:
 	FTimerHandle ConveyorHandle;
 
 	FNiagaraCompActive OnNiagaraCompActive;
-	FNiagaraCompSetParameter OnNiagaraCompSetParameter;
+	FNiagaraCompSetParticlePosition OnNiagaraCompSetParticlePosition;
+	FNiagaraCompSetMeshIndices OnNiagaraCompSetMeshIndices;
 };

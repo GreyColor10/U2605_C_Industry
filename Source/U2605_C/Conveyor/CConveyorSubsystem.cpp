@@ -85,15 +85,19 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 void UCConveyorSubsystem::UpdateProductItemsFlow()
 {
 	TArray<FVector> locationsArray;
+	TArray<int32> meshIndicesArray;
 	TArray<FProductArrival> arrivedProducts;
 
 	CheckNull(Simulator);
-	Simulator->Step(Graph, locationsArray, arrivedProducts);
+	Simulator->Step(Graph, locationsArray, meshIndicesArray, arrivedProducts);
 
 	DeliverArrivedProducts(arrivedProducts);
 
-	if (OnNiagaraCompSetParameter.IsBound())
-		OnNiagaraCompSetParameter.Broadcast(TEXT("DataPositions"), locationsArray);
+	if (OnNiagaraCompSetParticlePosition.IsBound())
+		OnNiagaraCompSetParticlePosition.Broadcast(TEXT("DataPositions"), locationsArray);
+
+	if (OnNiagaraCompSetMeshIndices.IsBound())
+		OnNiagaraCompSetMeshIndices.Broadcast(TEXT("MeshIndices"), meshIndicesArray);
 
 	// 모든 상품이 빠지면 시뮬레이션 정지
 	if (Simulator->IsEmpty())

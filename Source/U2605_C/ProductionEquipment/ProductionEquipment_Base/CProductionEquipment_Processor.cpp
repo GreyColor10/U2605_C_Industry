@@ -51,6 +51,7 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	FProductData processedProduct;
 	processedProduct.CurrentDistance = 0.0f;
 	processedProduct.bArrived = false;
+	processedProduct.ProcessStage++;
 
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 

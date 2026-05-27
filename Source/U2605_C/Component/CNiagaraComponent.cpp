@@ -14,3 +14,14 @@ void UCNiagaraComponent::SetVectorArrayUserParameter(FName InParaName, const TAr
 
 	MarkRenderStateDirty();
 }
+
+void UCNiagaraComponent::SetIntArrayUserParameter(FName InParaName, const TArray<int32>& InArrayData)
+{
+	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+		this,
+		InParaName,
+		InArrayData
+	);
+
+	MarkRenderStateDirty();
+}

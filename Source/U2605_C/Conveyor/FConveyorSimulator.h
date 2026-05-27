@@ -22,13 +22,13 @@ class FConveyorSimulator
 {
 public:
 	void AddProductAtEntry(AActor* InEntryConveyor, const FProductData& InProductData);
-	void Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<FProductArrival>& OutArrived);
+	void Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices, TArray<FProductArrival>& OutArrived);
 
 	FORCEINLINE int32 Num() const { return ProductsOnConveyer.Num(); }
 	FORCEINLINE bool IsEmpty() const { return ProductsOnConveyer.IsEmpty(); }
 
 private:
-	void AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations);
+	void AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices);
 
 private:
 	TArray<FProductOnConvoyor> ProductsOnConveyer;

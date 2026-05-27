@@ -58,7 +58,8 @@ void ACPawn::BeginPlay()
 	CheckNotValid(conveyorSystem);
 
 	conveyorSystem->GetOnNiagaraCompActive().AddUObject(this, &ACPawn::OnNiagaraCompActive);
-	conveyorSystem->GetOnNiagaraCompSetParameter().AddUObject(this, &ACPawn::OnNiagaraCompSetParameter);
+	conveyorSystem->GetOnNiagaraCompSetParticlePosition().AddUObject(this, &ACPawn::OnNiagaraCompSetParticlePosition);
+	conveyorSystem->GetOnNiagaraCompSetMeshIndices().AddUObject(this, &ACPawn::OnNiagaraCompSetMeshIndices);
 }
 
 
@@ -109,8 +110,14 @@ void ACPawn::OnNiagaraCompActive(const bool InBool)
 	GlobalDataParticleComponent->SetActive(InBool);
 }
 
-void ACPawn::OnNiagaraCompSetParameter(FName InParaName, const TArray<FVector>& InArrayData)
+void ACPawn::OnNiagaraCompSetParticlePosition(FName InParaName, const TArray<FVector>& InArrayData)
 {
 	CheckNotValid(GlobalDataParticleComponent);
 	GlobalDataParticleComponent->SetVectorArrayUserParameter(InParaName, InArrayData);
+}
+
+void ACPawn::OnNiagaraCompSetMeshIndices(FName InParaName, const TArray<int32>& InArrayData)
+{
+	CheckNotValid(GlobalDataParticleComponent);
+	GlobalDataParticleComponent->SetIntArrayUserParameter(InParaName, InArrayData);
 }

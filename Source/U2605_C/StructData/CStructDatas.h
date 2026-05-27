@@ -26,6 +26,8 @@ public:
 	UPROPERTY()
 	bool bArrived = false;
 
+	UPROPERTY()
+	int32 ProcessStage = 0;
 	/*UPROPERTY(BlueprintReadOnly)
 	float value = 100.0f;*/
 };

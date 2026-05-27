@@ -15,11 +15,12 @@ void FConveyorSimulator::AddProductAtEntry(AActor* InEntryConveyor, const FProdu
 	ProductsOnConveyer.Add(newProduct);
 }
 
-void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<FProductArrival>& OutArrived)
+void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices, TArray<FProductArrival>& OutArrived)
 {
 	CheckNotValid(InGraph);
 
 	OutPositions.Reserve(ProductsOnConveyer.Num());
+	OutMeshIndices.Reserve(ProductsOnConveyer.Num());
 
 	for (int32 i = ProductsOnConveyer.Num() - 1; i >= 0; --i)
 	{
@@ -48,7 +49,7 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 				TWeakObjectPtr<class USplineComponent> nextSplineComp = nextInfo->SplineComponent;
 				if (!nextSplineComp.IsValid()) continue;
 
-				AddLocationArray(nextSplineComp.Get(), data, OutPositions);
+				AddLocationArray(nextSplineComp.Get(), data, OutPositions, OutMeshIndices);
 				ProductsOnConveyer[i].CurrentConveyor = currInfo->NextConveyor;
 				continue;
 			}
@@ -63,7 +64,7 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 					TWeakObjectPtr<USplineComponent> splineComp = currInfo->SplineComponent;
 					if (!splineComp.IsValid()) continue;
 
-					AddLocationArray(splineComp.Get(), data, OutPositions);
+					AddLocationArray(splineComp.Get(), data, OutPositions, OutMeshIndices);
 				}
 
 				// 이미 마지막 지점에 도달한 뒤였다면
@@ -85,14 +86,15 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 			TWeakObjectPtr<USplineComponent> splineComp = currInfo->SplineComponent;
 			if (!splineComp.IsValid()) continue;
 
-			AddLocationArray(splineComp.Get(), data, OutPositions);
+			AddLocationArray(splineComp.Get(), data, OutPositions, OutMeshIndices);
 		}
 	}
 }
 
-void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations)
+void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices)
 {
 	FVector currLocation = InSplineComp->GetLocationAtDistanceAlongSpline(InProductData.CurrentDistance, ESplineCoordinateSpace::World);
 	currLocation.Z += 10.f;
 	InLocations.Add(currLocation);
+	InMeshIndices.Add(InProductData.ProcessStage);
 }

@@ -57,6 +57,6 @@ private:
 
 public:
 	void OnNiagaraCompActive(const bool InBool);
-	void OnNiagaraCompSetParameter(FName InParaName, const TArray<FVector>& InArrayData);
-
+	void OnNiagaraCompSetParticlePosition(FName InParaName, const TArray<FVector>& InArrayData);
+	void OnNiagaraCompSetMeshIndices(FName InParaName, const TArray<int32>& InArrayData);
 };
