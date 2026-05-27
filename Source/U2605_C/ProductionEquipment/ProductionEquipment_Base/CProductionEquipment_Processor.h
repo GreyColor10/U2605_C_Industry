@@ -16,7 +16,7 @@ protected:
 
 	// ItemID별 필요 수량 (BP에서 설정)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
-	TMap<int32, int32> RequiredProducts;
+	TMap<EProductType, int32> RequiredProducts;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Processor|Runtime")
 	EEquipmentState State = EEquipmentState::Idle;
@@ -32,5 +32,5 @@ private:
 	FTimerHandle ProcessingHandle;
 
 	// 현재 도착한 재료 보관 (ItemID별)
-	TMap<int32, TArray<FProductData>> ArrivedProducts;
+	TMap<EProductType, TArray<FProductData>> ArrivedProducts;
 };

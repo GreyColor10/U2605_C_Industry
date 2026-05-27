@@ -1,15 +1,16 @@
 ﻿#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Processor.h"
 #include "Global.h"
+
 #include "Communication/CCommunicationSubsystem_IO.h"
 
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
 	CheckFalse(State == EEquipmentState::Idle);
 
-	CheckFalse(RequiredProducts.Contains(InProductData.ItemID));
+	CheckFalse(RequiredProducts.Contains(InProductData.ProductType));
 
-	ArrivedProducts.FindOrAdd(InProductData.ItemID).Add(InProductData);
-	FLog::Log(FString::Printf(TEXT("Processor %s received ItemID %d"), *GetName(), InProductData.ItemID));
+	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
+	FLog::Log(FString::Printf(TEXT("Processor %s received ItemID %d"), *GetName(), *UEnum::GetValueAsString(InProductData.ProductType)));
 
 	if (!CanStartProcessing()) return;
 

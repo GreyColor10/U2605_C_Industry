@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Types/CFacilityType.h"
 #include "CStructDatas.generated.h" 
 
 USTRUCT(BlueprintType)
@@ -11,7 +12,7 @@ struct FProductData : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 ItemID = 0;
+	EProductType ProductType = EProductType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FString ItemName = TEXT("Default_Data");
