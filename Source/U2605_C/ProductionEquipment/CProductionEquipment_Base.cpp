@@ -43,6 +43,7 @@ ACProductionEquipment_Base::ACProductionEquipment_Base()
 
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
+	
 }
 
 void ACProductionEquipment_Base::BeginPlay()
@@ -55,7 +56,7 @@ void ACProductionEquipment_Base::BeginPlay()
 	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
 	CheckNotValid(instancingSubsystem);
 	CheckNull(InstancingMesh);
-	instancingSubsystem->RegisterFixedFacility(InstancingMesh, GetActorTransform());
+	HISMInstanceIndex = instancingSubsystem->RegisterFixedFacility(InstancingMesh, GetActorTransform());
 
 	// Conveyor Graph에 Sink로 등록 (입고 위치 매칭용)
 	UCConveyorSubsystem* conveyorSubsystem = world->GetSubsystem<UCConveyorSubsystem>();

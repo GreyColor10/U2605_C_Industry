@@ -2,6 +2,7 @@
 #include "Global.h"
 
 #include "Communication/CCommunicationSubsystem_IO.h"
+#include "MeshInstancing/CInstancedMeshSubsystem.h"
 
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
@@ -32,6 +33,11 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 		ProcessingTime,
 		false
 	);
+
+	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
+	CheckNotValid(instancingSubsystem);
+
+	instancingSubsystem->SetCustomData(InstancingMesh, HISMInstanceIndex, 0, 1.0f);
 }
 
 void ACProductionEquipment_Processor::OnProcessingComplete()
@@ -54,6 +60,10 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	processedProduct.ProcessStage++;
 
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
+
+	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
+	CheckNotValid(instancingSubsystem);
+	instancingSubsystem->SetCustomData(InstancingMesh, HISMInstanceIndex, 0, 0.0f);
 
 	FLog::Log(FString::Printf(TEXT("Processor %s completed. Shipped product."), *GetName()));
 }

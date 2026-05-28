@@ -17,9 +17,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<UStaticMesh> InstancingMesh;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Type")
-	EConveyorType ConveyorType = EConveyorType::Straight;
-
 public:	
 	ACConveyorBase();
 
@@ -28,14 +25,11 @@ protected:
 
 public:
 	FORCEINLINE USplineComponent* GetSplineComponent() const { return SplineComp; }
-	FORCEINLINE EConveyorType GetConveyorType() const { return ConveyorType; }
 
 private:
-	FVector GetExitDirection() const;
 	FVector GetExitTargetLocation() const;
+	TArray<FIntVector> SetupSplineFromGrid();
 
 private:
-	TArray<FIntPoint> GetGridPointsForType() const;
-	TArray<FIntVector> SetupSplineFromGrid();
 	FIntVector GetGridKey(const FVector& InLocation);
 };

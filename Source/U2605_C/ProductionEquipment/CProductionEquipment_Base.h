@@ -51,4 +51,7 @@ protected:
 
 public:
 	virtual void ReceiveProduct(const FProductData& InProductData) override {}
+
+protected:
+	int32 HISMInstanceIndex = -1;
 };

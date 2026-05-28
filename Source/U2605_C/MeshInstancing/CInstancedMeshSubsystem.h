@@ -20,10 +20,11 @@ private:
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Facility System")
-    void RegisterFixedFacility(UStaticMesh* Mesh, const FTransform& Transform);
+    int32 RegisterFixedFacility(UStaticMesh* Mesh, const FTransform& Transform);
 
 public:
     virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+    void SetCustomData(UStaticMesh* Mesh, int32 InstanceIndex, int32 DataIndex, float Value);
 
 private:
     UHierarchicalInstancedStaticMeshComponent* GetOrCreateHISMComponent(UStaticMesh* Mesh);

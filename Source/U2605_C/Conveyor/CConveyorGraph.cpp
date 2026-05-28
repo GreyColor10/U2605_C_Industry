@@ -12,7 +12,7 @@ void UCConveyorGraph::RegisterNode(AActor* InActor, USplineComponent* InSpline, 
 	newNode.SplineComponent = InSpline;
 	newNode.IntPosion[0] = InGridPoints[0];
 	newNode.IntPosion[1] = InGridPoints[InGridPoints.Num() - 1];
-	newNode.NodeDistance = (InSpline->GetNumberOfSplinePoints() - 1) * 50.0f;
+	newNode.NodeDistance = InSpline->GetSplineLength();
 	newNode.SinkPosition = InSinkPosition;
 
 	ConveyorMap.Add(InActor, newNode);
