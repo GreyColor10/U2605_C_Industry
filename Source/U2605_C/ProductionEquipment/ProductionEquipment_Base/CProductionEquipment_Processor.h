@@ -14,7 +14,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
 	float ProcessingTime = 1.0f;
 
-	// ItemID별 필요 수량 (BP에서 설정)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
 	TMap<EProductType, int32> RequiredProducts;
 
@@ -30,7 +29,5 @@ private:
 
 private:
 	FTimerHandle ProcessingHandle;
-
-	// 현재 도착한 재료 보관 (ItemID별)
 	TMap<EProductType, TArray<FProductData>> ArrivedProducts;
 };
