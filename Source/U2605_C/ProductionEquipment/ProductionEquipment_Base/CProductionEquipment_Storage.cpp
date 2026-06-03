@@ -2,6 +2,7 @@
 #include "Global.h"
 
 #include "ProductionStat/CProductionStatSubsystem.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
 void ACProductionEquipment_Storage::BeginPlay()
 {
@@ -28,4 +29,34 @@ void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 	CheckNotValid(proStatSubsystem);
 
 	proStatSubsystem->ReceiveFinalProduct();
+}
+
+void ACProductionEquipment_Storage::BroadcastStorageInfo()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	FStorageInfoData infoData;
+	infoData.StorageName = GetName();
+	infoData.ProductType = StoredProducts.IsEmpty() ? EProductType::None : StoredProducts[0].ProductType;
+	infoData.StoredCount = StoredProducts.Num();
+	infoData.MaxCapacity = MaxCapacity;
+
+	commuSubsystem_UI->BroadcastOnStorageInfoUpdated(infoData);
+}
+
+void ACProductionEquipment_Storage::OnClicked(const FHitResult& InHit)
+{
+	BroadcastStorageInfo();
+}
+
+void ACProductionEquipment_Storage::OnAfterShipProduct()
+{
+	BroadcastStorageInfo();
 }

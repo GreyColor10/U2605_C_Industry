@@ -28,6 +28,7 @@ bool ACProductionEquipment_Base::ShipProduct()
 	productToShip.bArrived = false;
 
 	ioSubsystem->BroadcastOnProductStarted(this, productToShip);
+	OnAfterShipProduct();
 	return true;
 }
 

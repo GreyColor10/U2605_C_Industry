@@ -19,4 +19,11 @@ protected:
 
 public:
 	void ReceiveProduct(const FProductData& InProductData) override;
+
+private:
+	void BroadcastStorageInfo();
+
+protected:
+	void OnClicked(const FHitResult& InHit) override;
+	void OnAfterShipProduct() override;
 };

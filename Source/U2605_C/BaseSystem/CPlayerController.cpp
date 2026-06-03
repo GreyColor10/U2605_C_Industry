@@ -3,7 +3,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-#include "Conveyor/CConveyorSubsystem.h"
+#include "Interface/IClickable.h"
+#include "BaseSystem/U2605_CGameModeBase.h"
+#include "Widget/InfoUI/CInfoUIActor.h"
 #include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
 
 void ACPlayerController::BeginPlay()
@@ -35,23 +37,36 @@ void ACPlayerController::SetupInputComponent()
 
 void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 {
-	FLog::Log("Click");
-	FHitResult HitResult;
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
 
+	FHitResult HitResult;
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ClickAbleChannel), true, HitResult);
 
 	if (bHit && HitResult.GetActor())
 	{
-		FLog::Log("Hit");
-		FLog::Log(HitResult.ImpactPoint);
+		AActor* hitActor = HitResult.GetActor();
+
+		IIClickable* clickable = Cast<IIClickable>(hitActor);
+		CheckNull(clickable);
+
+		clickable->OnClicked(HitResult);
+
+		AGameModeBase* gameMode = world->GetAuthGameMode();
+		CheckNotValid(gameMode);
+
+		AU2605_CGameModeBase* cGameMode = Cast<AU2605_CGameModeBase>(gameMode);
+		CheckNotValid(cGameMode);
+
+		ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
+		if(IsValid(infoUI)) infoUI->SetTarget(hitActor);
+		
+		return;
 	}
 
 	else
 	{
 		// 디버그: 비어있지 않은 첫 Storage 출고
-		UWorld* world = GetWorld();
-		CheckNotValid(world);
-
 		TArray<ACProductionEquipment_Storage*> storages;
 		FHelpers::FindActors<ACProductionEquipment_Storage>(world, storages);
 

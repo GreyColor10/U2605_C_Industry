@@ -1,0 +1,103 @@
+﻿#include "Widget/InfoUI/CInfoUIActor.h"
+#include "Global.h"
+#include "GameFramework/PlayerController.h"
+
+#include "Widget/InfoUI/CUserWidget_Info_Storage.h"
+#include "Widget/InfoUI/CUserWidget_Info_Processor.h"
+#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
+#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Processor.h"
+
+ACInfoUIActor::ACInfoUIActor()
+{
+    PrimaryActorTick.bCanEverTick = true;
+}
+
+void ACInfoUIActor::BeginPlay()
+{
+    Super::BeginPlay();
+
+    APlayerController* playerCon = GetWorld()->GetFirstPlayerController();
+    CheckNotValid(playerCon);
+
+    if (StorageWidgetClass)
+    {
+        StorageWidget = CreateWidget<UCUserWidget_Info_Storage>(playerCon, StorageWidgetClass);
+        if (StorageWidget)
+        {
+            StorageWidget->AddToViewport();
+            StorageWidget->SetVisibility(ESlateVisibility::Collapsed);
+        }
+            
+    }
+
+    if (ProcessorWidgetClass)
+    {
+        ProcessorWidget = CreateWidget<UCUserWidget_Info_Processor>(playerCon, ProcessorWidgetClass);
+        if (ProcessorWidget)
+        {
+            ProcessorWidget->AddToViewport();
+            ProcessorWidget->SetVisibility(ESlateVisibility::Collapsed);
+        }
+            
+    }
+    SetActorTickEnabled(false);
+}
+
+void ACInfoUIActor::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+    UpdateWidgetPosition();
+}
+
+void ACInfoUIActor::SetTarget(AActor* InActor)
+{
+    if (TargetActor == InActor)
+    {
+        Hide();
+        return;
+    }
+
+    Hide();
+    TargetActor = InActor;
+
+    if (Cast<ACProductionEquipment_Storage>(InActor))
+        ActiveWidget = StorageWidget;
+    else if (Cast<ACProductionEquipment_Processor>(InActor))
+        ActiveWidget = ProcessorWidget;
+    else
+        return;
+
+    CheckNotValid(ActiveWidget);
+    ActiveWidget->SetVisibility(ESlateVisibility::Visible);
+    SetActorTickEnabled(true);
+}
+
+void ACInfoUIActor::Hide()
+{
+    if (ActiveWidget)
+        ActiveWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+    TargetActor = nullptr;
+    ActiveWidget = nullptr;
+    SetActorTickEnabled(false);
+}
+
+void ACInfoUIActor::UpdateWidgetPosition()
+{
+    CheckNull(ActiveWidget);
+    CheckFalse(TargetActor.IsValid());
+
+    APlayerController* playerCon = GetWorld()->GetFirstPlayerController();
+    CheckNotValid(playerCon);
+
+    FVector worldPos = TargetActor->GetActorLocation() + FVector(0, 0, 150.f);
+    FVector2D screenPos;
+
+    bool bProjected = playerCon->ProjectWorldLocationToScreen(worldPos, screenPos);
+    CheckFalse(bProjected);
+
+    screenPos.X -= 90.0f;
+    screenPos.Y -= 100.0f;
+
+    ActiveWidget->SetPositionInViewport(screenPos, true);
+}

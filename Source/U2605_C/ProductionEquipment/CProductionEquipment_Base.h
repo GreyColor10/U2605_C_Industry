@@ -50,7 +50,11 @@ protected:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	virtual void ReceiveProduct(const FProductData& InProductData) override {}
+	virtual void OnClicked(const FHitResult& InHit) override {};
+	virtual void ReceiveProduct(const FProductData& InProductData) override {};
+
+protected:
+	virtual void OnAfterShipProduct() {};
 
 protected:
 	int32 HISMInstanceIndex = -1;

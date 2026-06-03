@@ -28,6 +28,22 @@ public:
 
 	UPROPERTY()
 	int32 ProcessStage = 0;
-	/*UPROPERTY(BlueprintReadOnly)
-	float value = 100.0f;*/
+};
+
+USTRUCT(BlueprintType)
+struct FStorageInfoData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FString StorageName = TEXT("");
+
+	UPROPERTY(BlueprintReadOnly)
+	EProductType ProductType = EProductType::None;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 StoredCount = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 MaxCapacity = 0;
 };

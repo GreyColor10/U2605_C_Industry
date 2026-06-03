@@ -6,3 +6,9 @@ void UCCommunicationSubsystem_UI::BroadcastOnTotalProductCountUpdated(int InTota
 	if (OnTotalProductCountUpdated.IsBound())
 		OnTotalProductCountUpdated.Broadcast(InTotalProductNum);
 }
+
+void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)
+{
+	if (OnStorageInfoUpdated.IsBound())
+		OnStorageInfoUpdated.Broadcast(InStorageInfoData);
+}

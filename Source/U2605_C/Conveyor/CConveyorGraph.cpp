@@ -92,7 +92,8 @@ void UCConveyorGraph::FindEntryNodesConnectedTo(const FVector& InLocation, TArra
 		FVector startWorld = node.SplineComponent->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
 		float dist = FVector::Dist(InLocation, startWorld);
 
-		if (FMath::IsNearlyEqual(dist, GridConstants::HalfGridSize, GridConstants::ConnectionTolerance))
+		if (dist < GridConstants::GridSize 
+			|| FMath::IsNearlyEqual(dist, GridConstants::GridSize, GridConstants::ConnectionTolerance))
 			OutNodes.Add(&node);
 	}
 }
@@ -105,7 +106,8 @@ void UCConveyorGraph::FindSinksConnectedTo(const FVector& InLocation, TArray<AAc
 		AActor* sink = weakSink.Get();
 
 		float dist = FVector::Dist(InLocation, sink->GetActorLocation());
-		if (FMath::IsNearlyZero(dist, GridConstants::ConnectionTolerance))
+		if(dist < GridConstants::HalfGridSize 
+			|| FMath::IsNearlyEqual(dist,50.0f, GridConstants::ConnectionTolerance))
 			OutSinks.Add(sink);
 	}
 }
