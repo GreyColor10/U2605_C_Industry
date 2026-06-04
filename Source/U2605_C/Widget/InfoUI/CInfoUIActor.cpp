@@ -96,8 +96,12 @@ void ACInfoUIActor::UpdateWidgetPosition()
     bool bProjected = playerCon->ProjectWorldLocationToScreen(worldPos, screenPos);
     CheckFalse(bProjected);
 
-    screenPos.X -= 90.0f;
-    screenPos.Y -= 100.0f;
+    float dpiScale = GetWorld()->GetGameViewport()->GetDPIScale();
+    screenPos /= dpiScale;
+
+    FVector2D widgetSize = ActiveWidget->GetDesiredSize();
+    screenPos.X -= widgetSize.X / 2.f;
+    screenPos.Y -= widgetSize.Y;
 
     ActiveWidget->SetPositionInViewport(screenPos, true);
 }
