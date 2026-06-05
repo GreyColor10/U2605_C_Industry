@@ -3,6 +3,7 @@
 
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
@@ -13,8 +14,12 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
 	FLog::Log(FString::Printf(TEXT("Processor %s received ItemID %d"), *GetName(), *UEnum::GetValueAsString(InProductData.ProductType)));
 
-	if (!CanStartProcessing()) return;
-
+	if (!CanStartProcessing())
+	{
+		BroadcastProcessorInfo();
+		return;
+	}
+		
 	for (auto& pair : RequiredProducts)
 	{
 		TArray<FProductData>& arrived = ArrivedProducts[pair.Key];
@@ -22,6 +27,8 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 	}
 
 	State = EEquipmentState::Processing;
+	ProcessingEndTime = GetWorld()->GetTimeSeconds() + ProcessingTime;
+	BroadcastProcessorInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -43,6 +50,8 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 void ACProductionEquipment_Processor::OnProcessingComplete()
 {
 	State = EEquipmentState::Idle;
+	ProcessingEndTime = 0.0f;
+	BroadcastProcessorInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -53,11 +62,11 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
-	// 처리 완료된 상품 출고 — 임시로 빈 FProductData (Day 5에서 ProcessStage 추가 예정)
 	FProductData processedProduct;
 	processedProduct.CurrentDistance = 0.0f;
 	processedProduct.bArrived = false;
-	processedProduct.ProcessStage++;
+	processedProduct.ProductType = ProducedProducts;
+	processedProduct.ProcessStage = (int)ProducedProducts - 1;
 
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 
@@ -77,4 +86,33 @@ bool ACProductionEquipment_Processor::CanStartProcessing() const
 		if (arrived->Num() < pair.Value) return false;
 	}
 	return true;
+}
+
+void ACProductionEquipment_Processor::BroadcastProcessorInfo()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	FProcessorInfoData infoData;
+	infoData.State = State;
+	infoData.ProcessingTime = ProcessingTime;
+	infoData.ProcessingEndTime = ProcessingEndTime;
+	infoData.RequiredProducts = RequiredProducts;
+	infoData.ProducedProduct = ProducedProducts;
+
+	for (const auto& pair : ArrivedProducts)
+		infoData.ArrivedCount.Add(pair.Key, pair.Value.Num());
+
+	commuSubsystem_UI->BroadcastOnProcessorInfoUpdated(infoData);
+}
+
+void ACProductionEquipment_Processor::OnClicked(const FHitResult& InHit)
+{
+	BroadcastProcessorInfo();
 }

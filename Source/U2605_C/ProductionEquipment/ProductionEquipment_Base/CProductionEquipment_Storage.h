@@ -22,6 +22,7 @@ public:
 
 private:
 	void BroadcastStorageInfo();
+	void UITargetBroadcastStorageInfo();
 
 protected:
 	void OnClicked(const FHitResult& InHit) override;

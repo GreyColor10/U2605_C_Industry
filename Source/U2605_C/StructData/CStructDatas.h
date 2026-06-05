@@ -36,9 +36,6 @@ struct FStorageInfoData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
-	FString StorageName = TEXT("");
-
-	UPROPERTY(BlueprintReadOnly)
 	EProductType ProductType = EProductType::None;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -46,4 +43,28 @@ struct FStorageInfoData
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 MaxCapacity = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FProcessorInfoData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	EEquipmentState State = EEquipmentState::Idle;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ProcessingTime = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ProcessingEndTime = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<EProductType, int32> RequiredProducts;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<EProductType, int32> ArrivedCount;
+
+	UPROPERTY(BlueprintReadOnly)
+	EProductType ProducedProduct = EProductType::None;
 };

@@ -17,6 +17,6 @@ enum class EProductType : uint8
     None        UMETA(DisplayName = "없음"),
     Flour       UMETA(DisplayName = "밀가루"),
     Dough       UMETA(DisplayName = "반죽"),
-    RawDumpling UMETA(DisplayName = "생만두"),
-    Dumpling    UMETA(DisplayName = "찐만두"),
+    Bread       UMETA(DisplayName = "구운빵"),
+    CreamBread  UMETA(DisplayName = "크림빵"),
 };

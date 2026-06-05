@@ -82,6 +82,12 @@ void ACInfoUIActor::Hide()
     SetActorTickEnabled(false);
 }
 
+const AActor* ACInfoUIActor::GetTarget() const
+{
+    CheckFalseResult(TargetActor.IsValid(), nullptr);
+    return TargetActor.Get();
+}
+
 void ACInfoUIActor::UpdateWidgetPosition()
 {
     CheckNull(ActiveWidget);
@@ -90,7 +96,11 @@ void ACInfoUIActor::UpdateWidgetPosition()
     APlayerController* playerCon = GetWorld()->GetFirstPlayerController();
     CheckNotValid(playerCon);
 
-    FVector worldPos = TargetActor->GetActorLocation() + FVector(0, 0, 150.f);
+    float zPosition = 0.0f;
+    if (ActiveWidget == StorageWidget) zPosition = 170.0f;
+    else if (ActiveWidget == ProcessorWidget) zPosition = 400.0f;
+
+    FVector worldPos = TargetActor->GetActorLocation() + FVector(0, 0, zPosition);
     FVector2D screenPos;
 
     bool bProjected = playerCon->ProjectWorldLocationToScreen(worldPos, screenPos);

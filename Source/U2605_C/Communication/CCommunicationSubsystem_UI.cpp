@@ -12,3 +12,9 @@ void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageIn
 	if (OnStorageInfoUpdated.IsBound())
 		OnStorageInfoUpdated.Broadcast(InStorageInfoData);
 }
+
+void UCCommunicationSubsystem_UI::BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData)
+{
+	if (OnProcessorInfoUpdated.IsBound())
+		OnProcessorInfoUpdated.Broadcast(InProcessorInfoData);
+}

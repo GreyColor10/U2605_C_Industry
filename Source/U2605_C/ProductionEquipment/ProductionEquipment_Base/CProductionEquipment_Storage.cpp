@@ -3,6 +3,8 @@
 
 #include "ProductionStat/CProductionStatSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
+#include "BaseSystem/U2605_CGameModeBase.h"
+#include "Widget/InfoUI/CInfoUIActor.h"
 
 void ACProductionEquipment_Storage::BeginPlay()
 {
@@ -21,6 +23,8 @@ void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 
 	StoredProducts.Add(InProductData);
 	FLog::Log(FString::Printf(TEXT("Storage %s received. Stored: %d"), *GetName(), StoredProducts.Num()));
+
+	UITargetBroadcastStorageInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -43,12 +47,29 @@ void ACProductionEquipment_Storage::BroadcastStorageInfo()
 	CheckNotValid(commuSubsystem_UI);
 
 	FStorageInfoData infoData;
-	infoData.StorageName = GetName();
 	infoData.ProductType = StoredProducts.IsEmpty() ? EProductType::None : StoredProducts[0].ProductType;
 	infoData.StoredCount = StoredProducts.Num();
 	infoData.MaxCapacity = MaxCapacity;
 
 	commuSubsystem_UI->BroadcastOnStorageInfoUpdated(infoData);
+}
+
+void ACProductionEquipment_Storage::UITargetBroadcastStorageInfo()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	AGameModeBase* gameMode = world->GetAuthGameMode();
+	CheckNotValid(gameMode);
+
+	AU2605_CGameModeBase* cGameMode = Cast<AU2605_CGameModeBase>(gameMode);
+	CheckNotValid(cGameMode);
+
+	ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
+	CheckNotValid(infoUI);
+
+	const AActor* uiTarget = infoUI->GetTarget();
+	if (uiTarget == this) BroadcastStorageInfo();
 }
 
 void ACProductionEquipment_Storage::OnClicked(const FHitResult& InHit)
@@ -58,5 +79,5 @@ void ACProductionEquipment_Storage::OnClicked(const FHitResult& InHit)
 
 void ACProductionEquipment_Storage::OnAfterShipProduct()
 {
-	BroadcastStorageInfo();
+	UITargetBroadcastStorageInfo();
 }

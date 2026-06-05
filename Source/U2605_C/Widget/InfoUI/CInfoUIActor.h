@@ -38,6 +38,7 @@ protected:
 public:
     void SetTarget(AActor* InActor);
     void Hide();
+    const AActor* GetTarget() const;
 
 private:
     void UpdateWidgetPosition();

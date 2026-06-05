@@ -17,6 +17,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
 	TMap<EProductType, int32> RequiredProducts;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
+	EProductType ProducedProducts;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Processor|Runtime")
 	EEquipmentState State = EEquipmentState::Idle;
 
@@ -26,8 +29,13 @@ public:
 private:
 	void OnProcessingComplete();
 	bool CanStartProcessing() const;
+	void BroadcastProcessorInfo();
+
+protected:
+	void OnClicked(const FHitResult& InHit) override;
 
 private:
 	FTimerHandle ProcessingHandle;
 	TMap<EProductType, TArray<FProductData>> ArrivedProducts;
+	float ProcessingEndTime = 0.0f;
 };

@@ -5,7 +5,7 @@
 #include "StructData/CStructDatas.h"
 #include "CUserWidget_Info_Storage.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class U2605_C_API UCUserWidget_Info_Storage : public UUserWidget
 {
 	GENERATED_BODY()

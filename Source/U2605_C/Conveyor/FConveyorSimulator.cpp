@@ -91,6 +91,25 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 	}
 }
 
+void FConveyorSimulator::SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices)
+{
+	CheckNotValid(InGraph);
+
+	OutPositions.Reserve(ProductsOnConveyer.Num());
+	OutMeshIndices.Reserve(ProductsOnConveyer.Num());
+
+	for (FProductOnConvoyor& item : ProductsOnConveyer)
+	{
+		if (!item.CurrentConveyor.IsValid()) continue;
+
+		FConveyorNodeInfo* info = InGraph->FindNode(item.CurrentConveyor.Get());
+		if (!info) continue;
+		if (!info->SplineComponent.IsValid()) continue;
+
+		AddLocationArray(info->SplineComponent.Get(), item.ProductData, OutPositions, OutMeshIndices);
+	}
+}
+
 void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices)
 {
 	FVector currLocation = InSplineComp->GetLocationAtDistanceAlongSpline(InProductData.CurrentDistance, ESplineCoordinateSpace::World);

@@ -23,6 +23,7 @@ class FConveyorSimulator
 public:
 	void AddProductAtEntry(AActor* InEntryConveyor, const FProductData& InProductData);
 	void Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices, TArray<FProductArrival>& OutArrived);
+	void SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices);
 
 	FORCEINLINE int32 Num() const { return ProductsOnConveyer.Num(); }
 	FORCEINLINE bool IsEmpty() const { return ProductsOnConveyer.IsEmpty(); }

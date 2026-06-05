@@ -77,9 +77,6 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 	FTimerDelegate del;
 	del.BindUObject(this, &UCConveyorSubsystem::UpdateProductItemsFlow);
 	manager.SetTimer(ConveyorHandle, del, 0.5f, true);
-
-	if (OnNiagaraCompActive.IsBound())
-		OnNiagaraCompActive.Broadcast(true);
 }
 
 void UCConveyorSubsystem::UpdateProductItemsFlow()
@@ -152,6 +149,19 @@ void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProdu
 		if (!entryNode->ConveyorActor.IsValid()) continue;
 		Simulator->AddProductAtEntry(entryNode->ConveyorActor.Get(), InProductData);
 	}
+
+	TArray<FVector> locationsArray;
+	TArray<int32> meshIndicesArray;
+	Simulator->SnapshotPositions(Graph, locationsArray, meshIndicesArray);
+
+	if (OnNiagaraCompActive.IsBound())
+		OnNiagaraCompActive.Broadcast(true);
+
+	if (OnNiagaraCompSetParticlePosition.IsBound())
+		OnNiagaraCompSetParticlePosition.Broadcast(TEXT("DataPositions"), locationsArray);
+
+	if (OnNiagaraCompSetMeshIndices.IsBound())
+		OnNiagaraCompSetMeshIndices.Broadcast(TEXT("MeshIndices"), meshIndicesArray);
 
 	StartSimulationIfNeeded();
 }
