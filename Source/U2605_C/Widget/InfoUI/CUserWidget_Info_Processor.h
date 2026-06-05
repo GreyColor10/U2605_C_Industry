@@ -10,10 +10,6 @@ class U2605_C_API UCUserWidget_Info_Processor : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	
 private:
 	UFUNCTION()
 	void OnProcessorInfoUpdatedInternal(const FProcessorInfoData& InProcessorInfoData);
@@ -21,4 +17,19 @@ private:
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnProgressUpdated(float InProgress);
+
+protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+public:
+	void ResetState();
+
+private:
+	FProcessorInfoData CachedInfo;
+	bool bIsProcessing = false;
 };

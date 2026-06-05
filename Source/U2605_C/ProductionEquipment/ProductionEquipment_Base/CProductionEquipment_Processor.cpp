@@ -16,19 +16,13 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 
 	if (!CanStartProcessing())
 	{
-		BroadcastProcessorInfo();
+		UITargetBroadcastInfo();
 		return;
 	}
-		
-	for (auto& pair : RequiredProducts)
-	{
-		TArray<FProductData>& arrived = ArrivedProducts[pair.Key];
-		arrived.RemoveAt(0, pair.Value, EAllowShrinking::No);
-	}
-
+	
 	State = EEquipmentState::Processing;
 	ProcessingEndTime = GetWorld()->GetTimeSeconds() + ProcessingTime;
-	BroadcastProcessorInfo();
+	UITargetBroadcastInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -51,7 +45,14 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 {
 	State = EEquipmentState::Idle;
 	ProcessingEndTime = 0.0f;
-	BroadcastProcessorInfo();
+
+	for (auto& pair : RequiredProducts)
+	{
+		TArray<FProductData>& arrived = ArrivedProducts[pair.Key];
+		arrived.RemoveAt(0, pair.Value, EAllowShrinking::No);
+	}
+
+	UITargetBroadcastInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -88,7 +89,7 @@ bool ACProductionEquipment_Processor::CanStartProcessing() const
 	return true;
 }
 
-void ACProductionEquipment_Processor::BroadcastProcessorInfo()
+void ACProductionEquipment_Processor::BroadcastInfo()
 {
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -110,9 +111,4 @@ void ACProductionEquipment_Processor::BroadcastProcessorInfo()
 		infoData.ArrivedCount.Add(pair.Key, pair.Value.Num());
 
 	commuSubsystem_UI->BroadcastOnProcessorInfoUpdated(infoData);
-}
-
-void ACProductionEquipment_Processor::OnClicked(const FHitResult& InHit)
-{
-	BroadcastProcessorInfo();
 }

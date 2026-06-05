@@ -14,6 +14,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
 	TArray<FProductData> InitialProducts;
 
+public:
+	UFUNCTION(BlueprintCallable, Category = "Storage")
+	bool ShipProduct();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -21,10 +25,5 @@ public:
 	void ReceiveProduct(const FProductData& InProductData) override;
 
 private:
-	void BroadcastStorageInfo();
-	void UITargetBroadcastStorageInfo();
-
-protected:
-	void OnClicked(const FHitResult& InHit) override;
-	void OnAfterShipProduct() override;
+	void BroadcastInfo() override;
 };

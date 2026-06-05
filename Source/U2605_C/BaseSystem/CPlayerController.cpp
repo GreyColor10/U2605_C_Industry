@@ -50,8 +50,6 @@ void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 		IIClickable* clickable = Cast<IIClickable>(hitActor);
 		CheckNull(clickable);
 
-		clickable->OnClicked(HitResult);
-
 		AGameModeBase* gameMode = world->GetAuthGameMode();
 		CheckNotValid(gameMode);
 
@@ -59,8 +57,11 @@ void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 		CheckNotValid(cGameMode);
 
 		ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
-		if(IsValid(infoUI)) infoUI->SetTarget(hitActor);
-		
+		if (IsValid(infoUI)) infoUI->SetTarget(hitActor);
+
+		//초기화 순서 문제가 있어, 나중에 호출함
+		clickable->OnClicked(HitResult);
+
 		return;
 	}
 

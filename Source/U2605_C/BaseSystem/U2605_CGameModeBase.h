@@ -17,7 +17,8 @@ protected:
     TObjectPtr<class ACInfoUIActor> InfoUIActor;
 
 public:
-    FORCEINLINE ACInfoUIActor* GetInfoUIActor() const { return InfoUIActor; }
+    UFUNCTION(BlueprintPure, Category = "UI")
+    ACInfoUIActor* GetInfoUIActor() const { return InfoUIActor; }
 
 protected:
     void BeginPlay() override;

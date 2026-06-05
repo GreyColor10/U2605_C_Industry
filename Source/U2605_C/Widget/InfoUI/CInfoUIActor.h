@@ -29,6 +29,10 @@ private:
     TObjectPtr<class UUserWidget> ActiveWidget = nullptr;
 
 public:
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void Hide();
+
+public:
     ACInfoUIActor();
 
 protected:
@@ -37,7 +41,7 @@ protected:
 
 public:
     void SetTarget(AActor* InActor);
-    void Hide();
+    
     const AActor* GetTarget() const;
 
 private:

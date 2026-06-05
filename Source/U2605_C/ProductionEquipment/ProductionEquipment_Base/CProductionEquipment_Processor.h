@@ -29,10 +29,9 @@ public:
 private:
 	void OnProcessingComplete();
 	bool CanStartProcessing() const;
-	void BroadcastProcessorInfo();
 
 protected:
-	void OnClicked(const FHitResult& InHit) override;
+	void BroadcastInfo() override;
 
 private:
 	FTimerHandle ProcessingHandle;

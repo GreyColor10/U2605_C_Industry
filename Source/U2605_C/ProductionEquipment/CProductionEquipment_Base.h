@@ -30,9 +30,6 @@ protected:
 	TArray<FProductData> StoredProducts;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Storage")
-	bool ShipProduct();
-
 	UFUNCTION(BlueprintPure, Category = "Storage")
 	bool IsFull() const;
 
@@ -49,12 +46,13 @@ protected:
 	virtual void BeginPlay() override;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:
-	virtual void OnClicked(const FHitResult& InHit) override {};
-	virtual void ReceiveProduct(const FProductData& InProductData) override {};
-
 protected:
-	virtual void OnAfterShipProduct() {};
+	virtual void BroadcastInfo() PURE_VIRTUAL(BroadcastInfo,);
+	void UITargetBroadcastInfo();
+
+public:
+	virtual void OnClicked(const FHitResult& InHit) override;
+	virtual void ReceiveProduct(const FProductData& InProductData) override {};
 
 protected:
 	int32 HISMInstanceIndex = -1;

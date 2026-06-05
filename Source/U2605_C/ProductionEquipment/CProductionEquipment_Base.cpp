@@ -4,33 +4,8 @@
 
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Conveyor/CConveyorSubsystem.h"
-#include "Communication/CCommunicationSubsystem_IO.h"
-
-bool ACProductionEquipment_Base::ShipProduct()
-{
-	CheckFalseResult(StoredProducts.Num() > 0, false);
-
-	UWorld* world = GetWorld();
-	CheckNotValidResult(world, false);
-
-	UGameInstance* game = world->GetGameInstance();
-	CheckNotValidResult(game, false);
-
-	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
-	CheckNotValidResult(ioSubsystem, false);
-
-	// FIFO 출고
-	FProductData productToShip = StoredProducts[0];
-	StoredProducts.RemoveAt(0, 1, EAllowShrinking::No);
-
-	// 시뮬레이션 상태 초기화 (재고에 들어있는 동안 변형되었을 수 있음)
-	productToShip.CurrentDistance = 0.0f;
-	productToShip.bArrived = false;
-
-	ioSubsystem->BroadcastOnProductStarted(this, productToShip);
-	OnAfterShipProduct();
-	return true;
-}
+#include "BaseSystem/U2605_CGameModeBase.h"
+#include "Widget/InfoUI/CInfoUIActor.h"
 
 bool ACProductionEquipment_Base::IsFull() const
 {
@@ -44,7 +19,6 @@ ACProductionEquipment_Base::ACProductionEquipment_Base()
 
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
-	
 }
 
 void ACProductionEquipment_Base::BeginPlay()
@@ -77,4 +51,27 @@ void ACProductionEquipment_Base::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	}
 
 	Super::EndPlay(EndPlayReason);
+}
+
+void ACProductionEquipment_Base::UITargetBroadcastInfo()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	AGameModeBase* gameMode = world->GetAuthGameMode();
+	CheckNotValid(gameMode);
+
+	AU2605_CGameModeBase* cGameMode = Cast<AU2605_CGameModeBase>(gameMode);
+	CheckNotValid(cGameMode);
+
+	ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
+	CheckNotValid(infoUI);
+
+	const AActor* uiTarget = infoUI->GetTarget();
+	if (uiTarget == this) BroadcastInfo();
+}
+
+void ACProductionEquipment_Base::OnClicked(const FHitResult& InHit)
+{
+	BroadcastInfo();
 }

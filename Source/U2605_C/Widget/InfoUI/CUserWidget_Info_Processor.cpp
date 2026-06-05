@@ -1,6 +1,18 @@
 ﻿#include "Widget/InfoUI/CUserWidget_Info_Processor.h"
 #include "Global.h"
+
 #include "Communication/CCommunicationSubsystem_UI.h"
+
+void UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal(const FProcessorInfoData& InProcessorInfoData)
+{
+    CachedInfo = InProcessorInfoData;
+    bIsProcessing = (InProcessorInfoData.State == EEquipmentState::Processing);
+
+    if (!bIsProcessing)
+        OnProgressUpdated(0.0f);
+
+    OnProcessorInfoUpdated(InProcessorInfoData);
+}
 
 void UCUserWidget_Info_Processor::NativeConstruct()
 {
@@ -28,7 +40,26 @@ void UCUserWidget_Info_Processor::NativeDestruct()
     Super::NativeDestruct();
 }
 
-void UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal(const FProcessorInfoData& InProcessorInfoData)
+void UCUserWidget_Info_Processor::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-    OnProcessorInfoUpdated(InProcessorInfoData);
+    Super::NativeTick(MyGeometry, InDeltaTime);
+
+    CheckFalse(bIsProcessing);
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    float now = world->GetTimeSeconds();
+    float remaining = CachedInfo.ProcessingEndTime - now;
+    float progress = 1.0f - (remaining / CachedInfo.ProcessingTime);
+    progress = FMath::Clamp(progress, 0.0f, 1.0f);
+
+    OnProgressUpdated(progress);
 }
+
+void UCUserWidget_Info_Processor::ResetState()
+{
+    bIsProcessing = false;
+    OnProgressUpdated(0.0f);
+}
+
