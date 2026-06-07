@@ -4,8 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Interface/IClickable.h"
-#include "BaseSystem/U2605_CGameModeBase.h"
-#include "Widget/InfoUI/CInfoUIActor.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
 
 void ACPlayerController::BeginPlay()
@@ -50,14 +49,13 @@ void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 		IIClickable* clickable = Cast<IIClickable>(hitActor);
 		CheckNull(clickable);
 
-		AGameModeBase* gameMode = world->GetAuthGameMode();
-		CheckNotValid(gameMode);
+		UGameInstance* game = world->GetGameInstance();
+		CheckNotValid(game);
 
-		AU2605_CGameModeBase* cGameMode = Cast<AU2605_CGameModeBase>(gameMode);
-		CheckNotValid(cGameMode);
+		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		CheckNotValid(commuSubsystem_UI);
 
-		ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
-		if (IsValid(infoUI)) infoUI->SetTarget(hitActor);
+		commuSubsystem_UI->BroadcastOnUITargetChanged(hitActor);
 
 		//초기화 순서 문제가 있어, 나중에 호출함
 		clickable->OnClicked(HitResult);

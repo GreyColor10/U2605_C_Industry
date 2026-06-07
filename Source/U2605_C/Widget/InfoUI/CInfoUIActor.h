@@ -39,9 +39,8 @@ protected:
     void BeginPlay() override;
     void Tick(float DeltaTime) override;
 
-public:
+private:
     void SetTarget(AActor* InActor);
-    
     const AActor* GetTarget() const;
 
 private:

@@ -5,6 +5,7 @@
 #include "Widget/InfoUI/CUserWidget_Info_Storage.h"
 #include "Widget/InfoUI/CUserWidget_Info_Processor.h"
 #include "Interface/IClickable.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
 ACInfoUIActor::ACInfoUIActor()
 {
@@ -37,7 +38,20 @@ void ACInfoUIActor::BeginPlay()
             ProcessorWidget->SetVisibility(ESlateVisibility::Collapsed);
         }
     }
+
     SetActorTickEnabled(false);
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    UGameInstance* game = world->GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(commuSubsystem_UI);
+
+    commuSubsystem_UI->GetOnUITargetChangedDel().BindUObject(this, &ACInfoUIActor::SetTarget);
+    commuSubsystem_UI->GetOnUITargetGotten().BindUObject(this, &ACInfoUIActor::GetTarget);
 }
 
 void ACInfoUIActor::Tick(float DeltaTime)

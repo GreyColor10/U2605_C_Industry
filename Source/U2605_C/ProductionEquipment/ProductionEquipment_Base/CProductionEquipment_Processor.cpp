@@ -1,8 +1,8 @@
 ﻿#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Processor.h"
 #include "Global.h"
 
-#include "Communication/CCommunicationSubsystem_IO.h"
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
+#include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()

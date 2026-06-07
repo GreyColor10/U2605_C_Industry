@@ -18,3 +18,16 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessorInfoUpdated(const FProcess
 	if (OnProcessorInfoUpdated.IsBound())
 		OnProcessorInfoUpdated.Broadcast(InProcessorInfoData);
 }
+
+void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)
+{
+	OnUITargetChanged.ExecuteIfBound(InTarget);
+}
+
+const AActor* UCCommunicationSubsystem_UI::BroadcastOnOnUITargetGotten()
+{
+	if (OnUITargetGotten.IsBound())
+		return OnUITargetGotten.Execute();
+
+	return nullptr;
+}

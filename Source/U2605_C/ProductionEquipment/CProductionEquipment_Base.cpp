@@ -4,8 +4,7 @@
 
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Conveyor/CConveyorSubsystem.h"
-#include "BaseSystem/U2605_CGameModeBase.h"
-#include "Widget/InfoUI/CInfoUIActor.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
 bool ACProductionEquipment_Base::IsFull() const
 {
@@ -58,16 +57,13 @@ void ACProductionEquipment_Base::UITargetBroadcastInfo()
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
 
-	AGameModeBase* gameMode = world->GetAuthGameMode();
-	CheckNotValid(gameMode);
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
 
-	AU2605_CGameModeBase* cGameMode = Cast<AU2605_CGameModeBase>(gameMode);
-	CheckNotValid(cGameMode);
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
 
-	ACInfoUIActor* infoUI = cGameMode->GetInfoUIActor();
-	CheckNotValid(infoUI);
-
-	const AActor* uiTarget = infoUI->GetTarget();
+	const AActor* uiTarget = commuSubsystem_UI->BroadcastOnOnUITargetGotten();
 	if (uiTarget == this) BroadcastInfo();
 }
 
