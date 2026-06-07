@@ -14,6 +14,20 @@ void UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal(const FProcesso
     OnProcessorInfoUpdated(InProcessorInfoData);
 }
 
+void UCUserWidget_Info_Processor::RequestProcessingTimeChange(float InProcessingTime)
+{
+    UGameInstance* game = GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(commuSubsystem_UI);
+
+    const AActor* target = commuSubsystem_UI->GetCurrentUITarget();
+    CheckNull(target);
+
+    commuSubsystem_UI->BroadcastOnProcessingTimeChangeRequested(target->GetClass(), InProcessingTime);
+}
+
 void UCUserWidget_Info_Processor::NativeConstruct()
 {
     Super::NativeConstruct();

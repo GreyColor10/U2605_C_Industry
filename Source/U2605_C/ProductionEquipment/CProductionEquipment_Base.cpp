@@ -63,7 +63,7 @@ void ACProductionEquipment_Base::UITargetBroadcastInfo()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	const AActor* uiTarget = commuSubsystem_UI->BroadcastOnOnUITargetGotten();
+	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
 	if (uiTarget == this) BroadcastInfo();
 }
 

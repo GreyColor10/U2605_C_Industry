@@ -5,9 +5,48 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
+void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
+{
+	if (GetClass() != InProcessorClass) return;
+
+	if (State == EEquipmentState::Processing)
+	{
+		PendingProcessingTime = InProcessingTime;
+		return;
+	}
+
+	ProcessingTime = InProcessingTime;
+}
+
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
 	InfoUIType = EInfoUIType::Processor;
+}
+
+void ACProductionEquipment_Processor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UGameInstance* game = GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
+}
+
+void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameInstance* game = GetGameInstance();
+	if (game)
+	{
+		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		if (commuSubsystem_UI)
+			commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
@@ -47,6 +86,12 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 
 void ACProductionEquipment_Processor::OnProcessingComplete()
 {
+	if (PendingProcessingTime > 0.0f)
+	{
+		ProcessingTime = PendingProcessingTime;
+		PendingProcessingTime = -1.0f;
+	}
+
 	State = EEquipmentState::Idle;
 	ProcessingEndTime = 0.0f;
 

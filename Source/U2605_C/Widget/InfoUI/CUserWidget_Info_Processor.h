@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnProgressUpdated(float InProgress);
 
+	UFUNCTION(BlueprintCallable)
+	void RequestProcessingTimeChange(float InProcessingTime);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

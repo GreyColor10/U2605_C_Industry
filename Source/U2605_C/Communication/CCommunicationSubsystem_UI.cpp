@@ -19,12 +19,18 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessorInfoUpdated(const FProcess
 		OnProcessorInfoUpdated.Broadcast(InProcessorInfoData);
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
+{
+	if (OnProcessingTimeChangeRequested.IsBound())
+		OnProcessingTimeChangeRequested.Broadcast(InProcessorClass, InProcessingTime);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)
 {
 	OnUITargetChanged.ExecuteIfBound(InTarget);
 }
 
-const AActor* UCCommunicationSubsystem_UI::BroadcastOnOnUITargetGotten()
+const AActor* UCCommunicationSubsystem_UI::GetCurrentUITarget()
 {
 	if (OnUITargetGotten.IsBound())
 		return OnUITargetGotten.Execute();

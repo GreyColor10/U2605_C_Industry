@@ -22,8 +22,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Processor|Runtime")
 	EEquipmentState State = EEquipmentState::Idle;
 
+private:
+	UFUNCTION()
+	void OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
+
 public:
 	ACProductionEquipment_Processor();
+
+protected:
+	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	void ReceiveProduct(const FProductData& InProductData) override;
@@ -39,4 +47,5 @@ private:
 	FTimerHandle ProcessingHandle;
 	TMap<EProductType, TArray<FProductData>> ArrivedProducts;
 	float ProcessingEndTime = 0.0f;
+	float PendingProcessingTime = -1.0f;
 };
