@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Types/CFacilityType.h"
 #include "IClickable.generated.h"
 
 UINTERFACE(MinimalAPI)
@@ -16,4 +17,6 @@ class U2605_C_API IIClickable
 
 public:
 	virtual void OnClicked(const FHitResult& InHit) = 0;
+	virtual EInfoUIType GetInfoUIType() = 0;
+	virtual float GetUIZOffset() = 0;
 };

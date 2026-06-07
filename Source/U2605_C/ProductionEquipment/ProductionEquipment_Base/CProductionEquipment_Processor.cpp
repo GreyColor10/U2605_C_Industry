@@ -5,6 +5,11 @@
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
+ACProductionEquipment_Processor::ACProductionEquipment_Processor()
+{
+	InfoUIType = EInfoUIType::Processor;
+}
+
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
 	CheckFalse(State == EEquipmentState::Idle);
@@ -12,7 +17,6 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 	CheckFalse(RequiredProducts.Contains(InProductData.ProductType));
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
-	FLog::Log(FString::Printf(TEXT("Processor %s received ItemID %d"), *GetName(), *UEnum::GetValueAsString(InProductData.ProductType)));
 
 	if (!CanStartProcessing())
 	{
@@ -74,8 +78,6 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
 	CheckNotValid(instancingSubsystem);
 	instancingSubsystem->SetCustomData(InstancingMesh, HISMInstanceIndex, 0, 0.0f);
-
-	FLog::Log(FString::Printf(TEXT("Processor %s completed. Shipped product."), *GetName()));
 }
 
 bool ACProductionEquipment_Processor::CanStartProcessing() const

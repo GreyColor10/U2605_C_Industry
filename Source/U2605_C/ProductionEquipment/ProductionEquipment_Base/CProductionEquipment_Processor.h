@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "ProductionEquipment/CProductionEquipment_Base.h"
-#include "Types/CFacilityType.h"
 #include "CProductionEquipment_Processor.generated.h"
 
 UCLASS(Blueprintable)
@@ -22,6 +21,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Processor|Runtime")
 	EEquipmentState State = EEquipmentState::Idle;
+
+public:
+	ACProductionEquipment_Processor();
 
 public:
 	void ReceiveProduct(const FProductData& InProductData) override;

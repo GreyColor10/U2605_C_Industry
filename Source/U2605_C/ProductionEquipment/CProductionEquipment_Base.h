@@ -14,10 +14,15 @@ class U2605_C_API ACProductionEquipment_Base
 {
 	GENERATED_BODY()
 	
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Capsule")
+
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Capsule")
 	TObjectPtr<class UCapsuleComponent> CapsuleComp;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	float UIZOffset = 170.0f;
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<UStaticMesh> InstancingMesh;
 
@@ -51,9 +56,13 @@ protected:
 	void UITargetBroadcastInfo();
 
 public:
-	virtual void OnClicked(const FHitResult& InHit) override;
+	void OnClicked(const FHitResult& InHit) override;
 	virtual void ReceiveProduct(const FProductData& InProductData) override {};
+
+	FORCEINLINE EInfoUIType GetInfoUIType() override { return InfoUIType; };
+	FORCEINLINE float GetUIZOffset() override { return UIZOffset; };
 
 protected:
 	int32 HISMInstanceIndex = -1;
+	EInfoUIType InfoUIType = EInfoUIType::None;
 };

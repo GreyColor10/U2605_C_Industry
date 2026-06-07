@@ -32,6 +32,11 @@ bool ACProductionEquipment_Storage::ShipProduct()
 	return true;
 }
 
+ACProductionEquipment_Storage::ACProductionEquipment_Storage()
+{
+	InfoUIType = EInfoUIType::Storage;
+}
+
 void ACProductionEquipment_Storage::BeginPlay()
 {
 	Super::BeginPlay();
@@ -43,12 +48,10 @@ void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 {
 	if (IsFull())
 	{
-		FLog::Log(FString::Printf(TEXT("Storage %s is FULL. Product dropped."), *GetName()));
 		return;
 	}
 
 	StoredProducts.Add(InProductData);
-	FLog::Log(FString::Printf(TEXT("Storage %s received. Stored: %d"), *GetName(), StoredProducts.Num()));
 
 	UITargetBroadcastInfo();
 

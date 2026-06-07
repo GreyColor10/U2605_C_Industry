@@ -33,9 +33,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveUpAction;
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Niagara")
-	TObjectPtr <class UNiagaraSystem> DataParticleSystem = nullptr;*/
-
 	UPROPERTY(EditDefaultsOnly, Category = "Niagara")
 	TObjectPtr<class UCNiagaraComponent> GlobalDataParticleComponent = nullptr;
 

@@ -20,3 +20,11 @@ enum class EProductType : uint8
     Bread       UMETA(DisplayName = "구운 빵"),
     CreamBread  UMETA(DisplayName = "크림 빵"),
 };
+
+UENUM()
+enum class EInfoUIType : uint8
+{
+    None,        
+    Storage,
+    Processor
+};

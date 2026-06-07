@@ -4,8 +4,7 @@
 
 #include "Widget/InfoUI/CUserWidget_Info_Storage.h"
 #include "Widget/InfoUI/CUserWidget_Info_Processor.h"
-#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
-#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Processor.h"
+#include "Interface/IClickable.h"
 
 ACInfoUIActor::ACInfoUIActor()
 {
@@ -26,8 +25,7 @@ void ACInfoUIActor::BeginPlay()
         {
             StorageWidget->AddToViewport();
             StorageWidget->SetVisibility(ESlateVisibility::Collapsed);
-        }
-            
+        }   
     }
 
     if (ProcessorWidgetClass)
@@ -38,7 +36,6 @@ void ACInfoUIActor::BeginPlay()
             ProcessorWidget->AddToViewport();
             ProcessorWidget->SetVisibility(ESlateVisibility::Collapsed);
         }
-            
     }
     SetActorTickEnabled(false);
 }
@@ -60,12 +57,24 @@ void ACInfoUIActor::SetTarget(AActor* InActor)
     Hide();
     TargetActor = InActor;
 
-    if (Cast<ACProductionEquipment_Storage>(InActor))
+    IIClickable* clickable = Cast<IIClickable>(TargetActor.Get());
+    CheckNull(clickable);
+
+    EInfoUIType uiType = clickable->GetInfoUIType();
+    switch (uiType)
+    {
+    case EInfoUIType::None:
+        ActiveWidget = nullptr;
+        break;
+
+    case EInfoUIType::Storage:
         ActiveWidget = StorageWidget;
-    else if (Cast<ACProductionEquipment_Processor>(InActor))
+        break;
+
+    case EInfoUIType::Processor:
         ActiveWidget = ProcessorWidget;
-    else
-        return;
+        break;
+    }
 
     CheckNotValid(ActiveWidget);
     ActiveWidget->SetVisibility(ESlateVisibility::Visible);
@@ -102,10 +111,11 @@ void ACInfoUIActor::UpdateWidgetPosition()
     APlayerController* playerCon = GetWorld()->GetFirstPlayerController();
     CheckNotValid(playerCon);
 
-    float zPosition = 0.0f;
-    if (ActiveWidget == StorageWidget) zPosition = 170.0f;
-    else if (ActiveWidget == ProcessorWidget) zPosition = 400.0f;
+    IIClickable* clickable = Cast<IIClickable>(TargetActor.Get());
+    CheckNull(clickable);
 
+    float zPosition = clickable->GetUIZOffset();
+    
     FVector worldPos = TargetActor->GetActorLocation() + FVector(0, 0, zPosition);
     FVector2D screenPos;
 
