@@ -4,6 +4,7 @@
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
+#include "ProductionStat/CProductionStatSubsystem.h"
 
 void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
 {
@@ -105,6 +106,10 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
+
+	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	if (IsValid(proStatSubsystem))
+		proStatSubsystem->ReceiveIntermediateProduct(ProducedProducts);
 
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);

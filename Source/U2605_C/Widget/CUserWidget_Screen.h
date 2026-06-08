@@ -12,5 +12,5 @@ class U2605_C_API UCUserWidget_Screen : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnTotalProductCountUpdated(int InTotalProductNum);
+	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
 };

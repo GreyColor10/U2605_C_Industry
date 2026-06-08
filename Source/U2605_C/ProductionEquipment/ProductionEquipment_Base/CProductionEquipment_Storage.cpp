@@ -18,11 +18,9 @@ bool ACProductionEquipment_Storage::ShipProduct()
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValidResult(ioSubsystem, false);
 
-	// FIFO 출고
 	FProductData productToShip = StoredProducts[0];
 	StoredProducts.RemoveAt(0, 1, EAllowShrinking::No);
 
-	// 시뮬레이션 상태 초기화 (재고에 들어있는 동안 변형되었을 수 있음)
 	productToShip.CurrentDistance = 0.0f;
 	productToShip.bArrived = false;
 
@@ -61,7 +59,8 @@ void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
 	CheckNotValid(proStatSubsystem);
 
-	proStatSubsystem->ReceiveFinalProduct();
+	if (InProductData.ProductType == EProductType::CreamBread)
+		proStatSubsystem->ReceiveFinalProduct();
 }
 
 void ACProductionEquipment_Storage::BroadcastInfo()

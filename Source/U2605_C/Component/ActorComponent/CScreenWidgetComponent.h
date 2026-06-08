@@ -19,7 +19,7 @@ private:
 
 private:
 	UFUNCTION()
-	void OnTotalProductCountUpdated(int TotalProductNum);
+	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
 
 public:	
 	UCScreenWidgetComponent();

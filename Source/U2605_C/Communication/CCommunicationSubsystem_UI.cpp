@@ -1,10 +1,10 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
-void UCCommunicationSubsystem_UI::BroadcastOnTotalProductCountUpdated(int InTotalProductNum)
+void UCCommunicationSubsystem_UI::BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum)
 {
-	if (OnTotalProductCountUpdated.IsBound())
-		OnTotalProductCountUpdated.Broadcast(InTotalProductNum);
+	if (OnStoredFinalProductUpdated.IsBound())
+		OnStoredFinalProductUpdated.Broadcast(InStoredFinalProductNum);
 }
 
 void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)

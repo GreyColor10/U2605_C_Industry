@@ -5,7 +5,7 @@
 #include "StructData/CStructDatas.h"
 #include "CCommunicationSubsystem_UI.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTotalProductCountUpdated, int, InTotalProductNum);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStoredFinalProductUpdated, int, InStoredFinalProductNum);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStorageInfoUpdated, const FStorageInfoData&, InStorageInfoData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorInfoUpdated, const FProcessorInfoData&, InProcessorInfoData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UClass*, InProcessorClass, float, InProcessingTime);
@@ -19,7 +19,7 @@ class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
 	
 private:
 	UPROPERTY()
-	FTotalProductCountUpdated OnTotalProductCountUpdated;
+	FStoredFinalProductUpdated OnStoredFinalProductUpdated;
 
 	UPROPERTY()
 	FStorageInfoUpdated OnStorageInfoUpdated;
@@ -31,7 +31,7 @@ private:
 	FProcessingTimeChangeRequested OnProcessingTimeChangeRequested;
 
 public:
-	void BroadcastOnTotalProductCountUpdated(int InTotalProductNum);
+	void BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum);
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
 	void BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
@@ -39,7 +39,7 @@ public:
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	const AActor* GetCurrentUITarget();
 
-	FORCEINLINE FTotalProductCountUpdated& GetOnTotalProductCountUpdatedDel() { return OnTotalProductCountUpdated; };
+	FORCEINLINE FStoredFinalProductUpdated& GetOnStoredFinalProductUpdatedDel() { return OnStoredFinalProductUpdated; };
 	FORCEINLINE FStorageInfoUpdated& GetOnStorageInfoUpdatedDel() { return OnStorageInfoUpdated; };
 	FORCEINLINE FProcessorInfoUpdated& GetOnProcessorInfoUpdatedDel() { return OnProcessorInfoUpdated; };
 	FORCEINLINE FProcessingTimeChangeRequested& GetOnProcessingTimeChangeRequestedDel() { return OnProcessingTimeChangeRequested; }

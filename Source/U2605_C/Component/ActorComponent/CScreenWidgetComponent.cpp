@@ -6,9 +6,9 @@
 #include "Widget/CUserWidget_Screen.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
-void UCScreenWidgetComponent::OnTotalProductCountUpdated(int TotalProductNum)
+void UCScreenWidgetComponent::OnStoredFinalProductUpdated(int InStoredFinalProductNum)
 {
-	UI_Player->OnTotalProductCountUpdated(TotalProductNum);
+	UI_Player->OnStoredFinalProductUpdated(InStoredFinalProductNum);
 }
 
 UCScreenWidgetComponent::UCScreenWidgetComponent()
@@ -42,7 +42,7 @@ void UCScreenWidgetComponent::BeginPlay()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetOnTotalProductCountUpdatedDel().AddDynamic(this, &UCScreenWidgetComponent::OnTotalProductCountUpdated);
+	commuSubsystem_UI->GetOnStoredFinalProductUpdatedDel().AddDynamic(this, &UCScreenWidgetComponent::OnStoredFinalProductUpdated);
 }
 
 void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -62,7 +62,7 @@ void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetOnTotalProductCountUpdatedDel().RemoveAll(this);
+	commuSubsystem_UI->GetOnStoredFinalProductUpdatedDel().RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
 }
