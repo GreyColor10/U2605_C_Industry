@@ -54,6 +54,33 @@ void UCProductionStatSubsystem::ExportToCsv()
 
     ExportIndex++;
 }
+void UCProductionStatSubsystem::StartSimulation()
+{
+    CheckTrue(bIsRunning);
+    bIsRunning = true;
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    SimulationStartTime = world->GetTimeSeconds() - PausedElapsedSeconds;
+
+    FTimerDelegate del;
+    del.BindUObject(this, &UCProductionStatSubsystem::OnDashboardTick);
+    world->GetTimerManager().SetTimer(DashboardHandle, del, 1.0f, true, 0.0f);
+}
+
+void UCProductionStatSubsystem::StopSimulation()
+{
+    CheckFalse(bIsRunning);
+    bIsRunning = false;
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    PausedElapsedSeconds = world->GetTimeSeconds() - SimulationStartTime;
+
+    world->GetTimerManager().PauseTimer(DashboardHandle);
+}
 
 void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -75,17 +102,40 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     }
 
     ExportIndex = maxIndex + 1;
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    UGameInstance* game = world->GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(commuSubsystem_UI);
+
+    commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
+}
+
+void UCProductionStatSubsystem::Deinitialize()
+{
+    UWorld* world = GetWorld();
+    if (IsValid(world))
+    {
+        if (UGameInstance* game = world->GetGameInstance())
+        {
+            if (UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>())
+                commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+        }
+    }
+
+    Super::Deinitialize();
 }
 
 void UCProductionStatSubsystem::ReceiveFinalProduct()
 {
+    StoredFinalProductNum++;
+
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
-
-	if (SimulationStartTime < 0.0f)
-		SimulationStartTime = world->GetTimeSeconds();
-
-	StoredFinalProductNum++;
 
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
@@ -101,4 +151,42 @@ void UCProductionStatSubsystem::ReceiveIntermediateProduct(EProductType InType)
 	ProductCountByType.FindOrAdd(InType)++;
 }
 
+void UCProductionStatSubsystem::OnDashboardTick()
+{
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
 
+    UGameInstance* game = world->GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(commuSubsystem_UI);
+
+    commuSubsystem_UI->BroadcastOnDashboardUpdated(BuildDashboardData());
+}
+
+FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
+{
+    FDashboardData data;
+    data.TotalCreamBread = StoredFinalProductNum;
+    data.ProductCountByType = ProductCountByType;
+
+    UWorld* world = GetWorld();
+    if (!IsValid(world)) return data;
+
+    float elapsed = world->GetTimeSeconds() - SimulationStartTime;
+    data.ElapsedSeconds = FMath::Max(elapsed, 0.0f);
+    data.ThroughputPerMinute = (elapsed > 0.0f)
+        ? (StoredFinalProductNum / elapsed) * 60.0f
+        : 0.0f;
+
+    data.OperatingRate = 0.0f;
+
+    return data;
+}
+
+void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)
+{
+    if (InIsRunning) StartSimulation();
+    else StopSimulation();
+}

@@ -27,18 +27,24 @@ public:
 	void RegisterSink(AActor* InSink);
 	void UnregisterSink(AActor* InSink);
 
+	void Pause();
+	void Resume();
+
 private:
 	void StartSimulationIfNeeded();
 	void UpdateProductItemsFlow();
 	void DeliverArrivedProducts(TArray<FProductArrival>& InArrived);
-	
+
 private:
 	void OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData);
+	void OnSimulationStateChanged(bool InIsRunning);
 
 public:
 	FORCEINLINE FNiagaraCompActive& GetOnNiagaraCompActive() { return OnNiagaraCompActive; };
 	FORCEINLINE FNiagaraCompSetParticlePosition& GetOnNiagaraCompSetParticlePosition() { return OnNiagaraCompSetParticlePosition; };
 	FORCEINLINE FNiagaraCompSetMeshIndices& GetOnNiagaraCompSetMeshIndices() { return OnNiagaraCompSetMeshIndices; }
+
+	FORCEINLINE bool IsPaused() const { return bIsPaused; }
 
 private:
 	TUniquePtr<class FConveyorSimulator> Simulator;
@@ -49,4 +55,6 @@ private:
 	FNiagaraCompActive OnNiagaraCompActive;
 	FNiagaraCompSetParticlePosition OnNiagaraCompSetParticlePosition;
 	FNiagaraCompSetMeshIndices OnNiagaraCompSetMeshIndices;
+
+	bool bIsPaused = false;
 };

@@ -6,12 +6,6 @@
 #include "Conveyor/CConveyorSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
-bool ACProductionEquipment_Base::IsFull() const
-{
-	if (MaxCapacity <= 0) return false;
-	return StoredProducts.Num() >= MaxCapacity;
-}
-
 ACProductionEquipment_Base::ACProductionEquipment_Base()
 {
 	PrimaryActorTick.bCanEverTick = false;

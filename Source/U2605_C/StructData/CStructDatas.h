@@ -14,12 +14,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EProductType ProductType = EProductType::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString ItemName = TEXT("Default_Data");
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float MoveSpeed = 50.0f;
-
 	UPROPERTY()
 	float CurrentDistance = 0.0f;
 
@@ -57,7 +51,7 @@ struct FProcessorInfoData
 	float ProcessingTime = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-	float ProcessingEndTime = 0.0f;
+	float Progress = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<EProductType, int32> RequiredProducts;
@@ -67,4 +61,48 @@ struct FProcessorInfoData
 
 	UPROPERTY(BlueprintReadOnly)
 	EProductType ProducedProduct = EProductType::None;
+};
+
+USTRUCT(BlueprintType)
+struct FDashboardData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 TotalCreamBread = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ThroughputPerMinute = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ElapsedSeconds = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<EProductType, int32> ProductCountByType;
+
+	UPROPERTY(BlueprintReadOnly)
+	float OperatingRate = 0.0f;
+};
+
+UENUM(BlueprintType)
+enum class ELogEventType : uint8
+{
+	Info    UMETA(DisplayName = "일반"),
+	Warning UMETA(DisplayName = "경고"),
+	Alert   UMETA(DisplayName = "알림"),
+};
+
+USTRUCT(BlueprintType)
+struct FLogEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	ELogEventType EventType = ELogEventType::Info;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString Message = TEXT("");
+
+	UPROPERTY(BlueprintReadOnly)
+	float Timestamp = 0.0f;
 };

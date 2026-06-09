@@ -14,7 +14,6 @@ class U2605_C_API ACProductionEquipment_Base
 {
 	GENERATED_BODY()
 	
-
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Capsule")
 	TObjectPtr<class UCapsuleComponent> CapsuleComp;
@@ -25,22 +24,11 @@ private:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<UStaticMesh> InstancingMesh;
-
-	// 최대 보관 수 (0 이하 = 무제한)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
-	int32 MaxCapacity = 0;
-
-	// 런타임 보관 목록
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Storage|Runtime")
 	TArray<FProductData> StoredProducts;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Storage")
-	bool IsFull() const;
-
-	UFUNCTION(BlueprintPure, Category = "Storage")
-	FORCEINLINE int32 GetStoredCount() const { return StoredProducts.Num(); }
-
 	UFUNCTION(BlueprintPure, Category = "Storage")
 	FORCEINLINE bool IsEmpty() const { return StoredProducts.IsEmpty(); }
 

@@ -9,8 +9,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStoredFinalProductUpdated, int, InS
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStorageInfoUpdated, const FStorageInfoData&, InStorageInfoData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorInfoUpdated, const FProcessorInfoData&, InProcessorInfoData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UClass*, InProcessorClass, float, InProcessingTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardData&, InDashboardData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
+
 DECLARE_DELEGATE_OneParam(FUITargetChanged, AActor*);
 DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
+DECLARE_MULTICAST_DELEGATE_OneParam(FSimulationStateChanged, bool);
 
 UCLASS()
 class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
@@ -30,24 +35,49 @@ private:
 	UPROPERTY()
 	FProcessingTimeChangeRequested OnProcessingTimeChangeRequested;
 
+	UPROPERTY()
+	FDashboardUpdated OnDashboardUpdated;
+
+	UPROPERTY()
+	FLogEntryAdded OnLogEntryAdded;
+
+	UPROPERTY()
+	FProcessorProgressUpdated OnProcessorProgressUpdated;
+
+private:
+	UFUNCTION(BlueprintCallable, Category = "Simulation")
+	void StartFactory();
+
+	UFUNCTION(BlueprintCallable, Category = "Simulation")
+	void StopFactory();
+
 public:
 	void BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum);
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
 	void BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
+	void BroadcastOnDashboardUpdated(const FDashboardData& InData);
+	void BroadcastOnLogEntryAdded(const FLogEntry& InEntry);
+	void BroadcastOnProcessorProgressUpdated(float InProgress);
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	const AActor* GetCurrentUITarget();
+	void BroadcastOnSimulationStateChanged(bool bIsRunning);
 
 	FORCEINLINE FStoredFinalProductUpdated& GetOnStoredFinalProductUpdatedDel() { return OnStoredFinalProductUpdated; };
 	FORCEINLINE FStorageInfoUpdated& GetOnStorageInfoUpdatedDel() { return OnStorageInfoUpdated; };
 	FORCEINLINE FProcessorInfoUpdated& GetOnProcessorInfoUpdatedDel() { return OnProcessorInfoUpdated; };
 	FORCEINLINE FProcessingTimeChangeRequested& GetOnProcessingTimeChangeRequestedDel() { return OnProcessingTimeChangeRequested; }
+	FORCEINLINE FDashboardUpdated& GetOnDashboardUpdatedDel() { return OnDashboardUpdated; }
+	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
+	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
 
 	FORCEINLINE FUITargetChanged& GetOnUITargetChangedDel() { return OnUITargetChanged; };
 	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
+	FORCEINLINE FSimulationStateChanged& GetOnSimulationStateChangedDel() { return OnSimulationStateChanged; }
 
 private:
 	FUITargetChanged OnUITargetChanged;
 	FUITargetGotten OnUITargetGotten;
+	FSimulationStateChanged OnSimulationStateChanged;
 };

@@ -10,9 +10,14 @@ class U2605_C_API ACProductionEquipment_Storage : public ACProductionEquipment_B
 	GENERATED_BODY()
 
 protected:
-	// 시작 시 보관되어 있을 초기 상품
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
 	TArray<FProductData> InitialProducts;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage|AutoShip")
+	float AutoShipInterval = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
+	int32 MaxCapacity = 0;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Storage")
@@ -22,11 +27,25 @@ public:
 	ACProductionEquipment_Storage();
 
 protected:
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	void ReceiveProduct(const FProductData& InProductData) override;
 
+	void StartAutoShip();
+	void PauseAutoShip();
+	void ResumeAutoShip();
+	void StopAutoShip();
+
 private:
+	bool IsFull() const;
 	void BroadcastInfo() override;
+
+private:
+	void OnAutoShipTick();
+	void OnSimulationStateChanged(bool InIsRunning);
+
+private:
+	FTimerHandle AutoShipHandle;
 };

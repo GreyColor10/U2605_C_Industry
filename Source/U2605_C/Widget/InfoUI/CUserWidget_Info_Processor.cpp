@@ -5,13 +5,13 @@
 
 void UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal(const FProcessorInfoData& InProcessorInfoData)
 {
-    CachedInfo = InProcessorInfoData;
-    bIsProcessing = (InProcessorInfoData.State == EEquipmentState::Processing);
-
-    if (!bIsProcessing)
-        OnProgressUpdated(0.0f);
-
+    OnProgressUpdated(InProcessorInfoData.Progress);
     OnProcessorInfoUpdated(InProcessorInfoData);
+}
+
+void UCUserWidget_Info_Processor::OnProcessorProgressUpdatedInternal(float InProgress)
+{
+    OnProgressUpdated(InProgress);
 }
 
 void UCUserWidget_Info_Processor::RequestProcessingTimeChange(float InProcessingTime)
@@ -39,6 +39,7 @@ void UCUserWidget_Info_Processor::NativeConstruct()
     CheckNotValid(commuSubsystem_UI);
 
     commuSubsystem_UI->GetOnProcessorInfoUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal);
+    commuSubsystem_UI->GetOnProcessorProgressUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorProgressUpdatedInternal);
 }
 
 void UCUserWidget_Info_Processor::NativeDestruct()
@@ -48,32 +49,11 @@ void UCUserWidget_Info_Processor::NativeDestruct()
     {
         UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
         if (commuSubsystem_UI)
+        {
             commuSubsystem_UI->GetOnProcessorInfoUpdatedDel().RemoveAll(this);
+            commuSubsystem_UI->GetOnProcessorProgressUpdatedDel().RemoveAll(this);
+        }
     }
 
     Super::NativeDestruct();
 }
-
-void UCUserWidget_Info_Processor::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-{
-    Super::NativeTick(MyGeometry, InDeltaTime);
-
-    CheckFalse(bIsProcessing);
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    float now = world->GetTimeSeconds();
-    float remaining = CachedInfo.ProcessingEndTime - now;
-    float progress = 1.0f - (remaining / CachedInfo.ProcessingTime);
-    progress = FMath::Clamp(progress, 0.0f, 1.0f);
-
-    OnProgressUpdated(progress);
-}
-
-void UCUserWidget_Info_Processor::ResetState()
-{
-    bIsProcessing = false;
-    OnProgressUpdated(0.0f);
-}
-

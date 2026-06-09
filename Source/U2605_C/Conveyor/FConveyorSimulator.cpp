@@ -31,7 +31,7 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 		FConveyorNodeInfo* currInfo = InGraph->FindNode(currConveyor.Get());
 		if (!currInfo) continue;
 
-		data.CurrentDistance += data.MoveSpeed * 1.0f;
+		data.CurrentDistance += 50.0f;
 		float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
 
 		//현재 컨베이어의 끝에 도달했을 경우

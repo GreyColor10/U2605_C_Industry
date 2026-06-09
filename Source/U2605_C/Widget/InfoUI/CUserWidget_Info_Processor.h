@@ -14,6 +14,9 @@ private:
 	UFUNCTION()
 	void OnProcessorInfoUpdatedInternal(const FProcessorInfoData& InProcessorInfoData);
 
+	UFUNCTION()
+	void OnProcessorProgressUpdatedInternal(float InProgress);
+
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
@@ -27,12 +30,10 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
 	void ResetState();
 
 private:
-	FProcessorInfoData CachedInfo;
 	bool bIsProcessing = false;
 };

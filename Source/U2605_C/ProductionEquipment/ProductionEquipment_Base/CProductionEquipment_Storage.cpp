@@ -39,7 +39,35 @@ void ACProductionEquipment_Storage::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StoredProducts.Append(InitialProducts);	
+	StoredProducts.Append(InitialProducts);
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Storage::OnSimulationStateChanged);
+}
+
+void ACProductionEquipment_Storage::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* world = GetWorld();
+	if (IsValid(world))
+	{
+		UGameInstance* game = world->GetGameInstance();
+		if (game)
+		{
+			UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+			if (commuSubsystem_UI)
+				commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProductData)
@@ -63,6 +91,48 @@ void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 		proStatSubsystem->ReceiveFinalProduct();
 }
 
+void ACProductionEquipment_Storage::StartAutoShip()
+{
+	CheckTrue(AutoShipInterval <= 0.0f);
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	FTimerDelegate del;
+	del.BindUObject(this, &ACProductionEquipment_Storage::OnAutoShipTick);
+	world->GetTimerManager().SetTimer(AutoShipHandle, del, AutoShipInterval, true, 0.0f);
+}
+
+void ACProductionEquipment_Storage::PauseAutoShip()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	world->GetTimerManager().PauseTimer(AutoShipHandle);
+}
+
+void ACProductionEquipment_Storage::ResumeAutoShip()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	world->GetTimerManager().UnPauseTimer(AutoShipHandle);
+}
+
+void ACProductionEquipment_Storage::StopAutoShip()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	world->GetTimerManager().ClearTimer(AutoShipHandle);
+}
+
+bool ACProductionEquipment_Storage::IsFull() const
+{
+	if (MaxCapacity <= 0) return false;
+	return StoredProducts.Num() >= MaxCapacity;
+}
+
 void ACProductionEquipment_Storage::BroadcastInfo()
 {
 	UWorld* world = GetWorld();
@@ -80,4 +150,49 @@ void ACProductionEquipment_Storage::BroadcastInfo()
 	infoData.MaxCapacity = MaxCapacity;
 
 	commuSubsystem_UI->BroadcastOnStorageInfoUpdated(infoData);
+}
+
+void ACProductionEquipment_Storage::OnAutoShipTick()
+{
+	if (IsEmpty())
+	{
+		UWorld* world = GetWorld();
+		CheckNotValid(world);
+
+		UGameInstance* game = world->GetGameInstance();
+		CheckNotValid(game);
+
+		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		CheckNotValid(commuSubsystem_UI);
+
+		UCProductionStatSubsystem* statSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+
+		FLogEntry entry;
+		entry.EventType = ELogEventType::Alert;
+		entry.Message = FString::Printf(TEXT("%s 재고 소진"), *GetName());
+		entry.Timestamp = IsValid(statSubsystem)
+			? world->GetTimeSeconds() - statSubsystem->GetSimulationStartTime()
+			: 0.0f;
+
+		commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+
+		StopAutoShip();
+		return;
+	}
+
+	ShipProduct();
+}
+
+void ACProductionEquipment_Storage::OnSimulationStateChanged(bool InIsRunning)
+{
+	if (InIsRunning)
+	{
+		UWorld* world = GetWorld();
+		CheckNotValid(world);
+
+		if (world->GetTimerManager().IsTimerPaused(AutoShipHandle)) ResumeAutoShip();
+		else StartAutoShip();
+	}
+
+	else PauseAutoShip();
 }

@@ -1,6 +1,16 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
+void UCCommunicationSubsystem_UI::StartFactory()
+{
+	BroadcastOnSimulationStateChanged(true);
+}
+
+void UCCommunicationSubsystem_UI::StopFactory()
+{
+	BroadcastOnSimulationStateChanged(false);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum)
 {
 	if (OnStoredFinalProductUpdated.IsBound())
@@ -25,6 +35,24 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessingTimeChangeRequested(UClas
 		OnProcessingTimeChangeRequested.Broadcast(InProcessorClass, InProcessingTime);
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnDashboardUpdated(const FDashboardData& InData)
+{
+	if (OnDashboardUpdated.IsBound())
+		OnDashboardUpdated.Broadcast(InData);
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnLogEntryAdded(const FLogEntry& InEntry)
+{
+	if (OnLogEntryAdded.IsBound())
+		OnLogEntryAdded.Broadcast(InEntry);
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnProcessorProgressUpdated(float InProgress)
+{
+	if (OnProcessorProgressUpdated.IsBound())
+		OnProcessorProgressUpdated.Broadcast(InProgress);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)
 {
 	OnUITargetChanged.ExecuteIfBound(InTarget);
@@ -36,4 +64,10 @@ const AActor* UCCommunicationSubsystem_UI::GetCurrentUITarget()
 		return OnUITargetGotten.Execute();
 
 	return nullptr;
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateChanged(bool bIsRunning)
+{
+	if (OnSimulationStateChanged.IsBound())
+		OnSimulationStateChanged.Broadcast(bIsRunning);
 }

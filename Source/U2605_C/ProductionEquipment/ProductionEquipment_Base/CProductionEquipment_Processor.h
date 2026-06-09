@@ -10,17 +10,11 @@ class U2605_C_API ACProductionEquipment_Processor : public ACProductionEquipment
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Capsule")
+	TObjectPtr<class UCProcessingComponent> ProcessingComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processing")
 	float ProcessingTime = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
-	TMap<EProductType, int32> RequiredProducts;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processor")
-	EProductType ProducedProducts;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Processor|Runtime")
-	EEquipmentState State = EEquipmentState::Idle;
 
 private:
 	UFUNCTION()
@@ -38,14 +32,21 @@ public:
 
 private:
 	void OnProcessingComplete();
-	bool CanStartProcessing() const;
+	void OnProgressTick();
+	
+private:
+	void OnSimulationStateChanged(bool InIsRunning);
 
 protected:
 	void BroadcastInfo() override;
 
 private:
 	FTimerHandle ProcessingHandle;
+	FTimerHandle ProgressHandle;
+
 	TMap<EProductType, TArray<FProductData>> ArrivedProducts;
-	float ProcessingEndTime = 0.0f;
+
 	float PendingProcessingTime = -1.0f;
+	float ProcessingStartTime = 0.0f;
+	float PausedProcessingTime = 0.0f;
 };

@@ -1,7 +1,7 @@
 ﻿#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Processor.h"
 #include "Global.h"
 
-#include "MeshInstancing/CInstancedMeshSubsystem.h"
+#include "Component/ActorComponent/CProcessingComponent.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
@@ -10,17 +10,40 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* In
 {
 	if (GetClass() != InProcessorClass) return;
 
-	if (State == EEquipmentState::Processing)
+	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
 	{
 		PendingProcessingTime = InProcessingTime;
 		return;
 	}
 
 	ProcessingTime = InProcessingTime;
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	UCProductionStatSubsystem* statSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	CheckNotValid(statSubsystem);
+
+	FLogEntry entry;
+	entry.EventType = ELogEventType::Warning;
+	entry.Message = FString::Printf(TEXT("%s 작동 시간 %.1f초로 변경"), *GetName(), InProcessingTime);
+	entry.Timestamp = IsValid(statSubsystem)
+		? world->GetTimeSeconds() - statSubsystem->GetSimulationStartTime()
+		: 0.0f;
+
+	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 }
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
+	ProcessingComponent = CreateDefaultSubobject<UCProcessingComponent>(TEXT("ProcessingComponent"));
+
 	InfoUIType = EInfoUIType::Processor;
 }
 
@@ -35,6 +58,7 @@ void ACProductionEquipment_Processor::BeginPlay()
 	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
 }
 
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -44,7 +68,10 @@ void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlay
 	{
 		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 		if (commuSubsystem_UI)
+		{
 			commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
+			commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+		}
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -52,24 +79,23 @@ void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlay
 
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
-	CheckFalse(State == EEquipmentState::Idle);
-
-	CheckFalse(RequiredProducts.Contains(InProductData.ProductType));
+	CheckNotValid(ProcessingComponent);
+	CheckFalse(ProcessingComponent->GetEquipmentState() == EEquipmentState::Idle);
+	CheckFalse(ProcessingComponent->GetRequiredProducts().Contains(InProductData.ProductType));
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
 
-	if (!CanStartProcessing())
+	if (!ProcessingComponent->StartProcessing(ArrivedProducts, InstancingMesh, HISMInstanceIndex))
 	{
 		UITargetBroadcastInfo();
 		return;
 	}
-	
-	State = EEquipmentState::Processing;
-	ProcessingEndTime = GetWorld()->GetTimeSeconds() + ProcessingTime;
-	UITargetBroadcastInfo();
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
+
+	ProcessingStartTime = world->GetTimeSeconds();
+	UITargetBroadcastInfo();
 
 	world->GetTimerManager().SetTimer(
 		ProcessingHandle,
@@ -79,10 +105,14 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 		false
 	);
 
-	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
-	CheckNotValid(instancingSubsystem);
-
-	instancingSubsystem->SetCustomData(InstancingMesh, HISMInstanceIndex, 0, 1.0f);
+	world->GetTimerManager().SetTimer(
+		ProgressHandle,
+		this,
+		&ACProductionEquipment_Processor::OnProgressTick,
+		0.1f,
+		true,
+		0.1f
+	);
 }
 
 void ACProductionEquipment_Processor::OnProcessingComplete()
@@ -93,23 +123,9 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 		PendingProcessingTime = -1.0f;
 	}
 
-	State = EEquipmentState::Idle;
-	ProcessingEndTime = 0.0f;
-
-	for (auto& pair : RequiredProducts)
-	{
-		TArray<FProductData>& arrived = ArrivedProducts[pair.Key];
-		arrived.RemoveAt(0, pair.Value, EAllowShrinking::No);
-	}
-
-	UITargetBroadcastInfo();
-
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
-
-	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
-	if (IsValid(proStatSubsystem))
-		proStatSubsystem->ReceiveIntermediateProduct(ProducedProducts);
+	world->GetTimerManager().ClearTimer(ProgressHandle);
 
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
@@ -117,31 +133,13 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
-	FProductData processedProduct;
-	processedProduct.CurrentDistance = 0.0f;
-	processedProduct.bArrived = false;
-	processedProduct.ProductType = ProducedProducts;
-	processedProduct.ProcessStage = (int)ProducedProducts - 1;
-
+	FProductData processedProduct = ProcessingComponent->CompleteProcessing(ArrivedProducts, InstancingMesh, HISMInstanceIndex);
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 
-	UCInstancedMeshSubsystem* instancingSubsystem = world->GetSubsystem<UCInstancedMeshSubsystem>();
-	CheckNotValid(instancingSubsystem);
-	instancingSubsystem->SetCustomData(InstancingMesh, HISMInstanceIndex, 0, 0.0f);
+	UITargetBroadcastInfo();
 }
 
-bool ACProductionEquipment_Processor::CanStartProcessing() const
-{
-	for (const auto& pair : RequiredProducts)
-	{
-		const TArray<FProductData>* arrived = ArrivedProducts.Find(pair.Key);
-		if (!arrived) return false;
-		if (arrived->Num() < pair.Value) return false;
-	}
-	return true;
-}
-
-void ACProductionEquipment_Processor::BroadcastInfo()
+void ACProductionEquipment_Processor::OnProgressTick()
 {
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -152,15 +150,70 @@ void ACProductionEquipment_Processor::BroadcastInfo()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	FProcessorInfoData infoData;
-	infoData.State = State;
-	infoData.ProcessingTime = ProcessingTime;
-	infoData.ProcessingEndTime = ProcessingEndTime;
-	infoData.RequiredProducts = RequiredProducts;
-	infoData.ProducedProduct = ProducedProducts;
+	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
+	CheckFalse(uiTarget == this);
 
+	float elapsed = world->GetTimeSeconds() - ProcessingStartTime;
+	float progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
+	commuSubsystem_UI->BroadcastOnProcessorProgressUpdated(progress);
+}
+
+void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	FTimerManager& manager = world->GetTimerManager();
+
+	if (InIsRunning)
+	{
+		float pausedElapsed = PausedProcessingTime;
+		ProcessingStartTime = world->GetTimeSeconds() - pausedElapsed;
+
+		if (manager.IsTimerPaused(ProcessingHandle))
+			manager.UnPauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerPaused(ProgressHandle))
+			manager.UnPauseTimer(ProgressHandle);
+	}
+
+	else
+	{
+		PausedProcessingTime = world->GetTimeSeconds() - ProcessingStartTime;
+
+		if (manager.IsTimerActive(ProcessingHandle))
+			manager.PauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerActive(ProgressHandle))
+			manager.PauseTimer(ProgressHandle);
+	}
+
+	UITargetBroadcastInfo();
+}
+
+void ACProductionEquipment_Processor::BroadcastInfo()
+{
+	FProcessorInfoData infoData = ProcessingComponent->GetProcessorInfoData();
+	infoData.ProcessingTime = ProcessingTime;
+	
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
+	{
+		float elapsed = world->GetTimeSeconds() - ProcessingStartTime;
+		infoData.Progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
+	}
+	else infoData.Progress = 0.0f;
+	
 	for (const auto& pair : ArrivedProducts)
 		infoData.ArrivedCount.Add(pair.Key, pair.Value.Num());
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->BroadcastOnProcessorInfoUpdated(infoData);
 }

@@ -97,12 +97,6 @@ void ACInfoUIActor::SetTarget(AActor* InActor)
 
 void ACInfoUIActor::Hide()
 {
-    UCUserWidget_Info_Processor* processorWidget = 
-        Cast<UCUserWidget_Info_Processor>(ActiveWidget);
-
-    if (processorWidget)
-        processorWidget->ResetState();
-
     if (ActiveWidget)
         ActiveWidget->SetVisibility(ESlateVisibility::Collapsed);
 

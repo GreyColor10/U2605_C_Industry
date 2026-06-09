@@ -3,6 +3,7 @@
 
 #include "Conveyor/CConveyorGraph.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
+#include "Communication/CCommunicationSubsystem_UI.h"
 
 void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -23,6 +24,11 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	CheckNotValid(ioSubsystem);
 
 	ioSubsystem->GetProductStartedDel().AddUObject(this, &UCConveyorSubsystem::OnProductStarted);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
 }
 
 void UCConveyorSubsystem::Deinitialize()
@@ -34,6 +40,9 @@ void UCConveyorSubsystem::Deinitialize()
 		{
 			if (UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>())
 				ioSubsystem->GetProductStartedDel().RemoveAll(this);
+
+			if (UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>())
+				commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
 		}
 	}
 	Super::Deinitialize();
@@ -63,6 +72,48 @@ void UCConveyorSubsystem::UnregisterSink(AActor* InSink)
 	Graph->UnregisterSink(InSink);
 }
 
+void UCConveyorSubsystem::Pause()
+{
+	CheckTrue(bIsPaused);
+	bIsPaused = true;
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	world->GetTimerManager().PauseTimer(ConveyorHandle);
+
+	if (OnNiagaraCompActive.IsBound())
+		OnNiagaraCompActive.Broadcast(false);
+}
+
+void UCConveyorSubsystem::Resume()
+{
+	CheckFalse(bIsPaused);
+	bIsPaused = false;
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	world->GetTimerManager().UnPauseTimer(ConveyorHandle);
+
+	CheckNull(Simulator);
+	if (!Simulator->IsEmpty())
+	{
+		TArray<FVector> locationsArray;
+		TArray<int32> meshIndicesArray;
+		Simulator->SnapshotPositions(Graph, locationsArray, meshIndicesArray);
+
+		if (OnNiagaraCompActive.IsBound())
+			OnNiagaraCompActive.Broadcast(true);
+
+		if (OnNiagaraCompSetParticlePosition.IsBound())
+			OnNiagaraCompSetParticlePosition.Broadcast(TEXT("DataPositions"), locationsArray);
+
+		if (OnNiagaraCompSetMeshIndices.IsBound())
+			OnNiagaraCompSetMeshIndices.Broadcast(TEXT("MeshIndices"), meshIndicesArray);
+	}
+}
+
 void UCConveyorSubsystem::StartSimulationIfNeeded()
 {
 	CheckNull(Simulator);
@@ -73,7 +124,6 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 	FTimerManager& manager = world->GetTimerManager();
 	CheckTrue(manager.TimerExists(ConveyorHandle));
 
-	//타이머가 시작할 때 나이아가라 컴포넌트도 같이 킴
 	FTimerDelegate del;
 	del.BindUObject(this, &UCConveyorSubsystem::UpdateProductItemsFlow);
 	manager.SetTimer(ConveyorHandle, del, 0.5f, true);
@@ -164,4 +214,10 @@ void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProdu
 		OnNiagaraCompSetMeshIndices.Broadcast(TEXT("MeshIndices"), meshIndicesArray);
 
 	StartSimulationIfNeeded();
+}
+
+void UCConveyorSubsystem::OnSimulationStateChanged(bool InIsRunning)
+{
+	if (InIsRunning) Resume();
+	else Pause();
 }
