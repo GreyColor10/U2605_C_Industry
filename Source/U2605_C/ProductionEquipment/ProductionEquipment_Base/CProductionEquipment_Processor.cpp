@@ -4,7 +4,7 @@
 #include "Component/ActorComponent/CProcessingComponent.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
-#include "ProductionStat/CProductionStatSubsystem.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
 {
@@ -20,6 +20,15 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* In
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
+	
+	UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+	CheckNotValid(simTimeSubsystem);
+
+	FLogEntry entry;
+	entry.EventType = ELogEventType::Warning;
+	entry.Message = FString::Printf(TEXT("%s 작동 시간 %.1f초로 변경"), *GetName(), InProcessingTime);
+	entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
+	entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
 
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
@@ -27,17 +36,38 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* In
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	UCProductionStatSubsystem* statSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
-	CheckNotValid(statSubsystem);
-
-	FLogEntry entry;
-	entry.EventType = ELogEventType::Warning;
-	entry.Message = FString::Printf(TEXT("%s 작동 시간 %.1f초로 변경"), *GetName(), InProcessingTime);
-	entry.Timestamp = IsValid(statSubsystem)
-		? world->GetTimeSeconds() - statSubsystem->GetSimulationStartTime()
-		: 0.0f;
-
 	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+}
+
+void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	FTimerManager& manager = world->GetTimerManager();
+
+	if (InIsRunning)
+	{
+		float pausedElapsed = PausedProcessingTime;
+		ProcessingStartTime = world->GetTimeSeconds() - pausedElapsed;
+
+		if (manager.IsTimerPaused(ProcessingHandle))
+			manager.UnPauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerPaused(ProgressHandle))
+			manager.UnPauseTimer(ProgressHandle);
+	}
+
+	else
+	{
+		PausedProcessingTime = world->GetTimeSeconds() - ProcessingStartTime;
+
+		if (manager.IsTimerActive(ProcessingHandle))
+			manager.PauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerActive(ProgressHandle))
+			manager.PauseTimer(ProgressHandle);
+	}
 }
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
@@ -58,7 +88,7 @@ void ACProductionEquipment_Processor::BeginPlay()
 	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
 }
 
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -156,39 +186,6 @@ void ACProductionEquipment_Processor::OnProgressTick()
 	float elapsed = world->GetTimeSeconds() - ProcessingStartTime;
 	float progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
 	commuSubsystem_UI->BroadcastOnProcessorProgressUpdated(progress);
-}
-
-void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
-{
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	FTimerManager& manager = world->GetTimerManager();
-
-	if (InIsRunning)
-	{
-		float pausedElapsed = PausedProcessingTime;
-		ProcessingStartTime = world->GetTimeSeconds() - pausedElapsed;
-
-		if (manager.IsTimerPaused(ProcessingHandle))
-			manager.UnPauseTimer(ProcessingHandle);
-
-		if (manager.IsTimerPaused(ProgressHandle))
-			manager.UnPauseTimer(ProgressHandle);
-	}
-
-	else
-	{
-		PausedProcessingTime = world->GetTimeSeconds() - ProcessingStartTime;
-
-		if (manager.IsTimerActive(ProcessingHandle))
-			manager.PauseTimer(ProcessingHandle);
-
-		if (manager.IsTimerActive(ProgressHandle))
-			manager.PauseTimer(ProgressHandle);
-	}
-
-	UITargetBroadcastInfo();
 }
 
 void ACProductionEquipment_Processor::BroadcastInfo()

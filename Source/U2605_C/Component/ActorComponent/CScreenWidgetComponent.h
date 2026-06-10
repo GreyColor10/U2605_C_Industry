@@ -21,6 +21,9 @@ private:
 	UFUNCTION()
 	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
 
+	UFUNCTION()
+	void OnSimulationStateChanged(bool InIsRunning);
+
 public:	
 	UCScreenWidgetComponent();
 

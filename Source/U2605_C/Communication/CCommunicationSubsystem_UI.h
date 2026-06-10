@@ -12,10 +12,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UCl
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardData&, InDashboardData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSimulationStateChanged, bool, InIsRunning);
 
 DECLARE_DELEGATE_OneParam(FUITargetChanged, AActor*);
 DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
-DECLARE_MULTICAST_DELEGATE_OneParam(FSimulationStateChanged, bool);
 
 UCLASS()
 class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
@@ -44,6 +44,9 @@ private:
 	UPROPERTY()
 	FProcessorProgressUpdated OnProcessorProgressUpdated;
 
+	UPROPERTY()
+	FSimulationStateChanged OnSimulationStateChanged;
+
 private:
 	UFUNCTION(BlueprintCallable, Category = "Simulation")
 	void StartFactory();
@@ -59,10 +62,11 @@ public:
 	void BroadcastOnDashboardUpdated(const FDashboardData& InData);
 	void BroadcastOnLogEntryAdded(const FLogEntry& InEntry);
 	void BroadcastOnProcessorProgressUpdated(float InProgress);
+	void BroadcastOnSimulationStateChanged(bool InIsRunning);
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	const AActor* GetCurrentUITarget();
-	void BroadcastOnSimulationStateChanged(bool bIsRunning);
+	
 
 	FORCEINLINE FStoredFinalProductUpdated& GetOnStoredFinalProductUpdatedDel() { return OnStoredFinalProductUpdated; };
 	FORCEINLINE FStorageInfoUpdated& GetOnStorageInfoUpdatedDel() { return OnStorageInfoUpdated; };
@@ -71,13 +75,13 @@ public:
 	FORCEINLINE FDashboardUpdated& GetOnDashboardUpdatedDel() { return OnDashboardUpdated; }
 	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
+	FORCEINLINE FSimulationStateChanged& GetOnSimulationStateChangedDel() { return OnSimulationStateChanged; }
 
 	FORCEINLINE FUITargetChanged& GetOnUITargetChangedDel() { return OnUITargetChanged; };
 	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
-	FORCEINLINE FSimulationStateChanged& GetOnSimulationStateChangedDel() { return OnSimulationStateChanged; }
+	
 
 private:
 	FUITargetChanged OnUITargetChanged;
 	FUITargetGotten OnUITargetGotten;
-	FSimulationStateChanged OnSimulationStateChanged;
 };

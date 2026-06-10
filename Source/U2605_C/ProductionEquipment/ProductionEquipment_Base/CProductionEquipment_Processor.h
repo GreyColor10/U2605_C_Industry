@@ -20,6 +20,9 @@ private:
 	UFUNCTION()
 	void OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
 
+	UFUNCTION()
+	void OnSimulationStateChanged(bool InIsRunning);
+
 public:
 	ACProductionEquipment_Processor();
 
@@ -33,9 +36,6 @@ public:
 private:
 	void OnProcessingComplete();
 	void OnProgressTick();
-	
-private:
-	void OnSimulationStateChanged(bool InIsRunning);
 
 protected:
 	void BroadcastInfo() override;

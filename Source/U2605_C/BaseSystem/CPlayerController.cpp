@@ -5,7 +5,6 @@
 
 #include "Interface/IClickable.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
-#include "ProductionEquipment/ProductionEquipment_Base/CProductionEquipment_Storage.h"
 
 void ACPlayerController::BeginPlay()
 {
@@ -59,23 +58,5 @@ void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 
 		//초기화 순서 문제가 있어, 나중에 호출함
 		clickable->OnClicked(HitResult);
-
-		return;
-	}
-
-	else
-	{
-		// 디버그: 비어있지 않은 첫 Storage 출고
-		TArray<ACProductionEquipment_Storage*> storages;
-		FHelpers::FindActors<ACProductionEquipment_Storage>(world, storages);
-
-		for (ACProductionEquipment_Storage* storage : storages)
-		{
-			if (!IsValid(storage)) continue;
-			if (storage->IsEmpty()) continue;
-			if (storage->ShipProduct()) return;
-		}
-
-		FLog::Log(TEXT("Click: No storage has products to ship."));
 	}
 }

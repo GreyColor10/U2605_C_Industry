@@ -13,4 +13,7 @@ class U2605_C_API UCUserWidget_Screen : public UUserWidget
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSimulationStateChanged(bool InIsRunning);
 };

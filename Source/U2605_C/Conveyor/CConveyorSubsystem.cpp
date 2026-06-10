@@ -5,6 +5,12 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 
+void UCConveyorSubsystem::OnSimulationStateChanged(bool InIsRunning)
+{
+	if (InIsRunning) Resume();
+	else Pause();
+}
+
 void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -28,7 +34,7 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddDynamic(this, &UCConveyorSubsystem::OnSimulationStateChanged);
 }
 
 void UCConveyorSubsystem::Deinitialize()
@@ -214,10 +220,4 @@ void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProdu
 		OnNiagaraCompSetMeshIndices.Broadcast(TEXT("MeshIndices"), meshIndicesArray);
 
 	StartSimulationIfNeeded();
-}
-
-void UCConveyorSubsystem::OnSimulationStateChanged(bool InIsRunning)
-{
-	if (InIsRunning) Resume();
-	else Pause();
 }

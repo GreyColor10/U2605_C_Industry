@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
+//#include "Engine/DataTable.h"
 #include "Types/CFacilityType.h"
 #include "CStructDatas.generated.h" 
 
 USTRUCT(BlueprintType)
-struct FProductData : public FTableRowBase
+struct FProductData
 {
 	GENERATED_BODY()
 
@@ -105,4 +105,14 @@ struct FLogEntry
 
 	UPROPERTY(BlueprintReadOnly)
 	float Timestamp = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString TimestampText = TEXT("");
+
+	static FString FormatTimestamp(float InTimestamp)
+	{
+		int32 minutes = (int32)InTimestamp / 60;
+		int32 seconds = (int32)InTimestamp % 60;
+		return FString::Printf(TEXT("%02d:%02d"), minutes, seconds);
+	}
 };

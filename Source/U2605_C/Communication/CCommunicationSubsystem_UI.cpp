@@ -53,6 +53,12 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessorProgressUpdated(float InPr
 		OnProcessorProgressUpdated.Broadcast(InProgress);
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateChanged(bool InIsRunning)
+{
+	if (OnSimulationStateChanged.IsBound())
+		OnSimulationStateChanged.Broadcast(InIsRunning);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)
 {
 	OnUITargetChanged.ExecuteIfBound(InTarget);
@@ -64,10 +70,4 @@ const AActor* UCCommunicationSubsystem_UI::GetCurrentUITarget()
 		return OnUITargetGotten.Execute();
 
 	return nullptr;
-}
-
-void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateChanged(bool bIsRunning)
-{
-	if (OnSimulationStateChanged.IsBound())
-		OnSimulationStateChanged.Broadcast(bIsRunning);
 }

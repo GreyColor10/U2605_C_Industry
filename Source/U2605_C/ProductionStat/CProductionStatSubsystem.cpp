@@ -5,15 +5,20 @@
 #include "HAL/FileManager.h"
 
 #include "Communication/CCommunicationSubsystem_UI.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 void UCProductionStatSubsystem::ExportToCsv()
 {
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
-    float elapsedSeconds = SimulationStartTime < 0.0f
+    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+    CheckNotValid(simTimeSubsystem);
+
+    float simStartTime = simTimeSubsystem->GetSimulationStartTime();
+    float elapsedSeconds = simStartTime < 0.0f
         ? 0.0f
-        : world->GetTimeSeconds() - SimulationStartTime;
+        : world->GetTimeSeconds() - simStartTime;
 
     float throughputPerMinute = (elapsedSeconds > 0.0f)
         ? (StoredFinalProductNum / elapsedSeconds) * 60.0f
@@ -54,33 +59,6 @@ void UCProductionStatSubsystem::ExportToCsv()
 
     ExportIndex++;
 }
-void UCProductionStatSubsystem::StartSimulation()
-{
-    CheckTrue(bIsRunning);
-    bIsRunning = true;
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    SimulationStartTime = world->GetTimeSeconds() - PausedElapsedSeconds;
-
-    FTimerDelegate del;
-    del.BindUObject(this, &UCProductionStatSubsystem::OnDashboardTick);
-    world->GetTimerManager().SetTimer(DashboardHandle, del, 1.0f, true, 0.0f);
-}
-
-void UCProductionStatSubsystem::StopSimulation()
-{
-    CheckFalse(bIsRunning);
-    bIsRunning = false;
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    PausedElapsedSeconds = world->GetTimeSeconds() - SimulationStartTime;
-
-    world->GetTimerManager().PauseTimer(DashboardHandle);
-}
 
 void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -102,32 +80,6 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     }
 
     ExportIndex = maxIndex + 1;
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
-
-    commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
-}
-
-void UCProductionStatSubsystem::Deinitialize()
-{
-    UWorld* world = GetWorld();
-    if (IsValid(world))
-    {
-        if (UGameInstance* game = world->GetGameInstance())
-        {
-            if (UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>())
-                commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
-        }
-    }
-
-    Super::Deinitialize();
 }
 
 void UCProductionStatSubsystem::ReceiveFinalProduct()
@@ -151,6 +103,26 @@ void UCProductionStatSubsystem::ReceiveIntermediateProduct(EProductType InType)
 	ProductCountByType.FindOrAdd(InType)++;
 }
 
+//void UCProductionStatSubsystem::StartSimulation()
+//{
+//    
+//
+//    FTimerDelegate del;
+//    del.BindUObject(this, &UCProductionStatSubsystem::OnDashboardTick);
+//    world->GetTimerManager().SetTimer(DashboardHandle, del, 1.0f, true, 0.0f);
+//
+//    
+//}
+
+//void UCProductionStatSubsystem::StopSimulation()
+//{
+//    
+//
+//    world->GetTimerManager().PauseTimer(DashboardHandle);
+//
+//    
+//}
+
 void UCProductionStatSubsystem::OnDashboardTick()
 {
     UWorld* world = GetWorld();
@@ -172,9 +144,12 @@ FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
     data.ProductCountByType = ProductCountByType;
 
     UWorld* world = GetWorld();
-    if (!IsValid(world)) return data;
+    CheckNotValidResult(world, data);
 
-    float elapsed = world->GetTimeSeconds() - SimulationStartTime;
+    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+    CheckNotValidResult(simTimeSubsystem, data);
+
+    float elapsed = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
     data.ElapsedSeconds = FMath::Max(elapsed, 0.0f);
     data.ThroughputPerMinute = (elapsed > 0.0f)
         ? (StoredFinalProductNum / elapsed) * 60.0f
@@ -183,10 +158,4 @@ FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
     data.OperatingRate = 0.0f;
 
     return data;
-}
-
-void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)
-{
-    if (InIsRunning) StartSimulation();
-    else StopSimulation();
 }

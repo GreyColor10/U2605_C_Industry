@@ -19,9 +19,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
 	int32 MaxCapacity = 0;
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "Storage")
-	bool ShipProduct();
+private:
+	UFUNCTION()
+	void OnSimulationStateChanged(bool InIsRunning);
 
 public:
 	ACProductionEquipment_Storage();
@@ -31,8 +31,10 @@ protected:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+	bool ShipProduct();
 	void ReceiveProduct(const FProductData& InProductData) override;
 
+public:
 	void StartAutoShip();
 	void PauseAutoShip();
 	void ResumeAutoShip();
@@ -44,7 +46,6 @@ private:
 
 private:
 	void OnAutoShipTick();
-	void OnSimulationStateChanged(bool InIsRunning);
 
 private:
 	FTimerHandle AutoShipHandle;
