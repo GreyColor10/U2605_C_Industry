@@ -21,13 +21,13 @@ private:
 	UFUNCTION()
 	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
 
-	UFUNCTION()
-	void OnSimulationStateChanged(bool InIsRunning);
-
 public:	
 	UCScreenWidgetComponent();
 
 public:
 	void BeginPlay() override;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+private:
+	void OnSimulationStateChanged(bool InIsRunning);
 };

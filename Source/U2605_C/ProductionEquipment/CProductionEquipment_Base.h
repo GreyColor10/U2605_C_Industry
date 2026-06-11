@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Storage|Runtime")
 	TArray<FProductData> StoredProducts;
 
+	UPROPERTY(EditAnywhere, Category = "Equipment")
+	FString EquipmentID = TEXT("EQUIP-01");
+
 public:
 	UFUNCTION(BlueprintPure, Category = "Storage")
 	FORCEINLINE bool IsEmpty() const { return StoredProducts.IsEmpty(); }

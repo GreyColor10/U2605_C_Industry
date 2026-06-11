@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestProcessingTimeChange(float InProcessingTime);
 
+	UFUNCTION(BlueprintCallable)
+	void RequestProcessingTimeChangeEnd();
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

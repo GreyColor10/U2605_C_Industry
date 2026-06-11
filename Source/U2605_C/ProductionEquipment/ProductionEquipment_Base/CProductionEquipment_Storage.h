@@ -18,11 +18,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
 	int32 MaxCapacity = 0;
-
-private:
-	UFUNCTION()
-	void OnSimulationStateChanged(bool InIsRunning);
-
 public:
 	ACProductionEquipment_Storage();
 
@@ -47,6 +42,7 @@ private:
 private:
 	void OnAutoShipTick();
 
+	void OnSimulationStateChanged(bool InIsRunning);
 private:
 	FTimerHandle AutoShipHandle;
 };

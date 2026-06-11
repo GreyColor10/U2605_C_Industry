@@ -18,10 +18,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UCConveyorGraph> Graph;
 
-private:
-	UFUNCTION()
-	void OnSimulationStateChanged(bool InIsRunning);
-
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -41,6 +37,8 @@ private:
 
 private:
 	void OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData);
+
+	void OnSimulationStateChanged(bool InIsRunning);
 
 public:
 	FORCEINLINE FNiagaraCompActive& GetOnNiagaraCompActive() { return OnNiagaraCompActive; };

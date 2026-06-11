@@ -6,20 +6,6 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 
-void ACProductionEquipment_Storage::OnSimulationStateChanged(bool InIsRunning)
-{
-	if (InIsRunning)
-	{
-		UWorld* world = GetWorld();
-		CheckNotValid(world);
-
-		if (world->GetTimerManager().IsTimerPaused(AutoShipHandle)) ResumeAutoShip();
-		else StartAutoShip();
-	}
-
-	else PauseAutoShip();
-}
-
 ACProductionEquipment_Storage::ACProductionEquipment_Storage()
 {
 	InfoUIType = EInfoUIType::Storage;
@@ -40,7 +26,7 @@ void ACProductionEquipment_Storage::BeginPlay()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddDynamic(this, &ACProductionEquipment_Storage::OnSimulationStateChanged);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Storage::OnSimulationStateChanged);
 }
 
 void ACProductionEquipment_Storage::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -178,8 +164,8 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 		CheckNotValid(simTimeSubsystem);
 
 		FLogEntry entry;
-		entry.EventType = ELogEventType::Alert;
-		entry.Message = FString::Printf(TEXT("%s 재고 소진"), *GetName());
+		entry.EventType = ELogEventType::Warning;
+		entry.Message = FString::Printf(TEXT("[WARN] %s 재고 소진"), *EquipmentID);
 		entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
 		entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
 
@@ -196,4 +182,18 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 	}
 
 	ShipProduct();
+}
+
+void ACProductionEquipment_Storage::OnSimulationStateChanged(bool InIsRunning)
+{
+	if (InIsRunning)
+	{
+		UWorld* world = GetWorld();
+		CheckNotValid(world);
+
+		if (world->GetTimerManager().IsTimerPaused(AutoShipHandle)) ResumeAutoShip();
+		else StartAutoShip();
+	}
+
+	else PauseAutoShip();
 }

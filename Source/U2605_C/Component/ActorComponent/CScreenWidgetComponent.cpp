@@ -11,11 +11,6 @@ void UCScreenWidgetComponent::OnStoredFinalProductUpdated(int InStoredFinalProdu
 	UI_Player->OnStoredFinalProductUpdated(InStoredFinalProductNum);
 }
 
-void UCScreenWidgetComponent::OnSimulationStateChanged(bool InIsRunning)
-{
-	UI_Player->OnSimulationStateChanged(InIsRunning);
-}
-
 UCScreenWidgetComponent::UCScreenWidgetComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -48,7 +43,7 @@ void UCScreenWidgetComponent::BeginPlay()
 	CheckNotValid(commuSubsystem_UI);
 
 	commuSubsystem_UI->GetOnStoredFinalProductUpdatedDel().AddDynamic(this, &UCScreenWidgetComponent::OnStoredFinalProductUpdated);
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddDynamic(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
 }
 
 void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -72,4 +67,9 @@ void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
+}
+
+void UCScreenWidgetComponent::OnSimulationStateChanged(bool InIsRunning)
+{
+	UI_Player->OnSimulationStateChanged(InIsRunning);
 }

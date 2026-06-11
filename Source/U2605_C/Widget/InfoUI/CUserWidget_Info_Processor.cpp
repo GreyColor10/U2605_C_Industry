@@ -28,6 +28,17 @@ void UCUserWidget_Info_Processor::RequestProcessingTimeChange(float InProcessing
     commuSubsystem_UI->BroadcastOnProcessingTimeChangeRequested(target->GetClass(), InProcessingTime);
 }
 
+void UCUserWidget_Info_Processor::RequestProcessingTimeChangeEnd()
+{
+    UGameInstance* game = GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(commuSubsystem_UI);
+
+    commuSubsystem_UI->BroadcastOnProcessingTimeChangeEnded();
+}
+
 void UCUserWidget_Info_Processor::NativeConstruct()
 {
     Super::NativeConstruct();

@@ -113,6 +113,6 @@ struct FLogEntry
 	{
 		int32 minutes = (int32)InTimestamp / 60;
 		int32 seconds = (int32)InTimestamp % 60;
-		return FString::Printf(TEXT("%02d:%02d"), minutes, seconds);
+		return FString::Printf(TEXT("[%02d:%02d]"), minutes, seconds);
 	}
 };

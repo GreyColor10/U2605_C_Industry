@@ -16,13 +16,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processing")
 	float ProcessingTime = 1.0f;
 
-private:
-	UFUNCTION()
-	void OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
-
-	UFUNCTION()
-	void OnSimulationStateChanged(bool InIsRunning);
-
 public:
 	ACProductionEquipment_Processor();
 
@@ -37,6 +30,10 @@ private:
 	void OnProcessingComplete();
 	void OnProgressTick();
 
+	void OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
+	void OnProcessingTimeChangeEnded();
+	void OnSimulationStateChanged(bool InIsRunning);
+
 protected:
 	void BroadcastInfo() override;
 
@@ -49,4 +46,6 @@ private:
 	float PendingProcessingTime = -1.0f;
 	float ProcessingStartTime = 0.0f;
 	float PausedProcessingTime = 0.0f;
+
+	float PrevProcessingTime = 0.0f;
 };

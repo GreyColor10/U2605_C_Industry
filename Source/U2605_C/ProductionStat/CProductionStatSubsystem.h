@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "StructData/CStructDatas.h"
+#include "Templates/PimplPtr.h"
 #include "CProductionStatSubsystem.generated.h"
 
 UCLASS()
@@ -16,20 +17,29 @@ private:
 
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
-	/*void Deinitialize() override;*/
+	void Deinitialize() override;
 
 public:
 	void ReceiveFinalProduct();
 	void ReceiveIntermediateProduct(EProductType InType);
 
 private:
+	void StartDashboardTick();
+	void ResumeDashboardTick();
+	void PauseDashboardTick();
+
+private:
 	void OnDashboardTick();
 	FDashboardData BuildDashboardData() const;
+
+	void OnSimulationStateChanged(bool InIsRunning);
+
+private:
+	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;
 
 private:
 	int StoredFinalProductNum = 0;
 	TMap<EProductType, int32> ProductCountByType;        
-	int32 ExportIndex = 1;
 
 	FTimerHandle DashboardHandle;
 };

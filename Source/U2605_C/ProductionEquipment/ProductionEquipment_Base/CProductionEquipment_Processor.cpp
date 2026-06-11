@@ -6,70 +6,6 @@
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 
-void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
-{
-	if (GetClass() != InProcessorClass) return;
-
-	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
-	{
-		PendingProcessingTime = InProcessingTime;
-		return;
-	}
-
-	ProcessingTime = InProcessingTime;
-
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-	
-	UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-	CheckNotValid(simTimeSubsystem);
-
-	FLogEntry entry;
-	entry.EventType = ELogEventType::Warning;
-	entry.Message = FString::Printf(TEXT("%s 작동 시간 %.1f초로 변경"), *GetName(), InProcessingTime);
-	entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
-	entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
-
-	UGameInstance* game = world->GetGameInstance();
-	CheckNotValid(game);
-
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
-
-	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
-}
-
-void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
-{
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	FTimerManager& manager = world->GetTimerManager();
-
-	if (InIsRunning)
-	{
-		float pausedElapsed = PausedProcessingTime;
-		ProcessingStartTime = world->GetTimeSeconds() - pausedElapsed;
-
-		if (manager.IsTimerPaused(ProcessingHandle))
-			manager.UnPauseTimer(ProcessingHandle);
-
-		if (manager.IsTimerPaused(ProgressHandle))
-			manager.UnPauseTimer(ProgressHandle);
-	}
-
-	else
-	{
-		PausedProcessingTime = world->GetTimeSeconds() - ProcessingStartTime;
-
-		if (manager.IsTimerActive(ProcessingHandle))
-			manager.PauseTimer(ProcessingHandle);
-
-		if (manager.IsTimerActive(ProgressHandle))
-			manager.PauseTimer(ProgressHandle);
-	}
-}
-
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
 	ProcessingComponent = CreateDefaultSubobject<UCProcessingComponent>(TEXT("ProcessingComponent"));
@@ -87,8 +23,11 @@ void ACProductionEquipment_Processor::BeginPlay()
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
 	CheckNotValid(commuSubsystem_UI);
 
-	commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddDynamic(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
+	commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
+	commuSubsystem_UI->GetOnProcessingTimeChangeEnded().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeEnded);
+	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
+
+	PrevProcessingTime = ProcessingTime;
 }
 
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -100,6 +39,7 @@ void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlay
 		if (commuSubsystem_UI)
 		{
 			commuSubsystem_UI->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
+			commuSubsystem_UI->GetOnProcessingTimeChangeEnded().RemoveAll(this);
 			commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
 		}
 	}
@@ -188,6 +128,82 @@ void ACProductionEquipment_Processor::OnProgressTick()
 	commuSubsystem_UI->BroadcastOnProcessorProgressUpdated(progress);
 }
 
+void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
+{
+	if (GetClass() != InProcessorClass) return;
+
+	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
+	{
+		PendingProcessingTime = InProcessingTime;
+		return;
+	}
+
+	ProcessingTime = InProcessingTime;
+}
+
+void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(commuSubsystem_UI);
+
+	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
+
+	if (uiTarget != this) return;
+	if (PrevProcessingTime == ProcessingTime) return;
+
+	UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+	CheckNotValid(simTimeSubsystem);
+
+	FLogEntry entry;
+	entry.EventType = ELogEventType::Alert;
+	entry.Message = FString::Printf(TEXT("[ALRT] %s 가공 시간 %.1fs → %.1fs"), *EquipmentID, PrevProcessingTime, ProcessingTime);
+	entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
+	entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+
+	PrevProcessingTime = ProcessingTime;
+
+	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+}
+
+void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
+{
+	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Processing) return;
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	FTimerManager& manager = world->GetTimerManager();
+
+	if (InIsRunning)
+	{
+		ProcessingStartTime = world->GetTimeSeconds() - PausedProcessingTime;
+		PausedProcessingTime = 0.0f;
+
+		if (manager.IsTimerPaused(ProcessingHandle))
+			manager.UnPauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerPaused(ProgressHandle))
+			manager.UnPauseTimer(ProgressHandle);
+	}
+
+	else
+	{
+		PausedProcessingTime = world->GetTimeSeconds() - ProcessingStartTime;
+
+		if (manager.IsTimerActive(ProcessingHandle))
+			manager.PauseTimer(ProcessingHandle);
+
+		if (manager.IsTimerActive(ProgressHandle))
+			manager.PauseTimer(ProgressHandle);
+	}
+}
+
 void ACProductionEquipment_Processor::BroadcastInfo()
 {
 	FProcessorInfoData infoData = ProcessingComponent->GetProcessorInfoData();
@@ -198,7 +214,11 @@ void ACProductionEquipment_Processor::BroadcastInfo()
 
 	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
 	{
-		float elapsed = world->GetTimeSeconds() - ProcessingStartTime;
+		float elapsed;
+		if (FMath::IsNearlyZero(PausedProcessingTime))
+			elapsed = world->GetTimeSeconds() - ProcessingStartTime;
+		else elapsed = PausedProcessingTime;
+			
 		infoData.Progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
 	}
 	else infoData.Progress = 0.0f;
