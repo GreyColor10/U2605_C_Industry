@@ -1,12 +1,6 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
-void UCCommunicationSubsystem_UI::BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum)
-{
-	if (OnStoredFinalProductUpdated.IsBound())
-		OnStoredFinalProductUpdated.Broadcast(InStoredFinalProductNum);
-}
-
 void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)
 {
 	if (OnStorageInfoUpdated.IsBound())

@@ -9,12 +9,15 @@ class U2605_C_API ACInfoUIActor : public AActor
 {
 	GENERATED_BODY()
 	
-protected:
+private:
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<class UCUserWidget_Info_Storage> StorageWidgetClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<class UCUserWidget_Info_Processor> ProcessorWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Outline")
+    TObjectPtr<UMaterialInterface> OutlineMaterial;
 
 private:
     UPROPERTY()
@@ -27,6 +30,9 @@ private:
 
     UPROPERTY()
     TObjectPtr<class UUserWidget> ActiveWidget = nullptr;
+
+    UPROPERTY()
+    TObjectPtr<class AStaticMeshActor> OutlineActor = nullptr;
 
 public:
     UFUNCTION(BlueprintCallable, Category = "UI")
@@ -42,6 +48,8 @@ protected:
 private:
     void SetTarget(AActor* InActor);
     const AActor* GetTarget() const;
+    void SpawnOutlineActor(AActor* InActor);
+    void DestroyOutlineActor();
 
 private:
     void UpdateWidgetPosition();

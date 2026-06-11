@@ -24,12 +24,12 @@ public:
 	void ReceiveIntermediateProduct(EProductType InType);
 
 private:
-	void StartDashboardTick();
-	void ResumeDashboardTick();
-	void PauseDashboardTick();
+	void StartSendingDashboardData();
+	void ResumeSendingDashboardData();
+	void PauseSendingDashboardData();
 
 private:
-	void OnDashboardTick();
+	void SendDashboardData();
 	FDashboardData BuildDashboardData() const;
 
 	void OnSimulationStateChanged(bool InIsRunning);

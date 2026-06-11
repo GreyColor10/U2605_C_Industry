@@ -19,4 +19,5 @@ public:
 	virtual void OnClicked(const FHitResult& InHit) = 0;
 	virtual EInfoUIType GetInfoUIType() = 0;
 	virtual float GetUIZOffset() = 0;
+	virtual UStaticMesh* GetInstancingMesh() = 0;
 };

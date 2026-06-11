@@ -1,6 +1,8 @@
 ﻿#include "Widget/InfoUI/CInfoUIActor.h"
 #include "Global.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/StaticMeshActor.h"
+#include "Components/StaticMeshComponent.h"
 
 #include "Widget/InfoUI/CUserWidget_Info_Storage.h"
 #include "Widget/InfoUI/CUserWidget_Info_Processor.h"
@@ -57,6 +59,7 @@ void ACInfoUIActor::BeginPlay()
 void ACInfoUIActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
     UpdateWidgetPosition();
 }
 
@@ -93,6 +96,7 @@ void ACInfoUIActor::SetTarget(AActor* InActor)
     CheckNotValid(ActiveWidget);
     ActiveWidget->SetVisibility(ESlateVisibility::Visible);
     SetActorTickEnabled(true);
+    SpawnOutlineActor(InActor);
 }
 
 void ACInfoUIActor::Hide()
@@ -103,12 +107,55 @@ void ACInfoUIActor::Hide()
     TargetActor = nullptr;
     ActiveWidget = nullptr;
     SetActorTickEnabled(false);
+    DestroyOutlineActor();
 }
 
 const AActor* ACInfoUIActor::GetTarget() const
 {
     CheckFalseResult(TargetActor.IsValid(), nullptr);
     return TargetActor.Get();
+}
+
+void ACInfoUIActor::SpawnOutlineActor(AActor* InActor)
+{
+    CheckNotValid(InActor);
+
+    IIClickable* clickable = Cast<IIClickable>(InActor);
+    CheckNull(clickable);
+
+    UStaticMesh* mesh = clickable->GetInstancingMesh();
+    CheckNull(mesh);
+
+    FTransform spawnTransform = InActor->GetActorTransform();
+    FVector scale = spawnTransform.GetScale3D();
+    spawnTransform.SetScale3D(scale);
+
+    FActorSpawnParameters params;
+    params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    OutlineActor = world->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), spawnTransform, params);
+    CheckNotValid(OutlineActor);
+
+    UStaticMeshComponent* outlineMeshComp = OutlineActor->GetStaticMeshComponent();
+    CheckNull(outlineMeshComp);
+
+    outlineMeshComp->SetMobility(EComponentMobility::Movable);
+    outlineMeshComp->SetStaticMesh(mesh);
+    outlineMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    if (OutlineMaterial)
+        outlineMeshComp->SetMaterial(0, OutlineMaterial);
+}
+
+void ACInfoUIActor::DestroyOutlineActor()
+{
+    CheckNotValid(OutlineActor);
+
+    OutlineActor->Destroy();
+    OutlineActor = nullptr;
 }
 
 void ACInfoUIActor::UpdateWidgetPosition()

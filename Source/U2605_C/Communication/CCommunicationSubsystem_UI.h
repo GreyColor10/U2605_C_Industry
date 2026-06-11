@@ -25,9 +25,6 @@ class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
 	
 private:
 	UPROPERTY()
-	FStoredFinalProductUpdated OnStoredFinalProductUpdated;
-
-	UPROPERTY()
 	FStorageInfoUpdated OnStorageInfoUpdated;
 
 	UPROPERTY()
@@ -43,7 +40,6 @@ private:
 	FProcessorProgressUpdated OnProcessorProgressUpdated;
 
 public:
-	void BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum);
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
 	void BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
 	void BroadcastOnDashboardUpdated(const FDashboardData& InData);
@@ -56,7 +52,6 @@ public:
 	void BroadcastOnProcessingTimeChangeEnded();
 	void BroadcastOnSimulationStateChanged(bool InIsRunning);
 
-	FORCEINLINE FStoredFinalProductUpdated& GetOnStoredFinalProductUpdatedDel() { return OnStoredFinalProductUpdated; };
 	FORCEINLINE FStorageInfoUpdated& GetOnStorageInfoUpdatedDel() { return OnStorageInfoUpdated; };
 	FORCEINLINE FProcessorInfoUpdated& GetOnProcessorInfoUpdatedDel() { return OnProcessorInfoUpdated; };
 	FORCEINLINE FDashboardUpdated& GetOnDashboardUpdatedDel() { return OnDashboardUpdated; }

@@ -49,9 +49,10 @@ protected:
 public:
 	void OnClicked(const FHitResult& InHit) override;
 	virtual void ReceiveProduct(const FProductData& InProductData) override {};
-
+	
 	FORCEINLINE EInfoUIType GetInfoUIType() override { return InfoUIType; };
 	FORCEINLINE float GetUIZOffset() override { return UIZOffset; };
+	FORCEINLINE UStaticMesh* GetInstancingMesh() override { return InstancingMesh; };
 
 protected:
 	int32 HISMInstanceIndex = -1;

@@ -74,17 +74,7 @@ void UCProductionStatSubsystem::Deinitialize()
 void UCProductionStatSubsystem::ReceiveFinalProduct()
 {
     StoredFinalProductNum++;
-
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
-	CheckNotValid(game);
-
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
-
-	commuSubsystem_UI->BroadcastOnStoredFinalProductUpdated(StoredFinalProductNum);
+    SendDashboardData();
 }
 
 void UCProductionStatSubsystem::ReceiveIntermediateProduct(EProductType InType)
@@ -92,17 +82,17 @@ void UCProductionStatSubsystem::ReceiveIntermediateProduct(EProductType InType)
 	ProductCountByType.FindOrAdd(InType)++;
 }
 
-void UCProductionStatSubsystem::StartDashboardTick()
+void UCProductionStatSubsystem::StartSendingDashboardData()
 {
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
     FTimerDelegate del;
-    del.BindUObject(this, &UCProductionStatSubsystem::OnDashboardTick);
+    del.BindUObject(this, &UCProductionStatSubsystem::SendDashboardData);
     world->GetTimerManager().SetTimer(DashboardHandle, del, 1.0f, true, 0.0f);
 }
 
-void UCProductionStatSubsystem::ResumeDashboardTick()
+void UCProductionStatSubsystem::ResumeSendingDashboardData()
 {
     UWorld* world = GetWorld();
     CheckNotValid(world);
@@ -110,7 +100,7 @@ void UCProductionStatSubsystem::ResumeDashboardTick()
     world->GetTimerManager().UnPauseTimer(DashboardHandle);
 }
 
-void UCProductionStatSubsystem::PauseDashboardTick()
+void UCProductionStatSubsystem::PauseSendingDashboardData()
 {
     UWorld* world = GetWorld();
     CheckNotValid(world);
@@ -118,7 +108,7 @@ void UCProductionStatSubsystem::PauseDashboardTick()
     world->GetTimerManager().PauseTimer(DashboardHandle);
 }
 
-void UCProductionStatSubsystem::OnDashboardTick()
+void UCProductionStatSubsystem::SendDashboardData()
 {
     UWorld* world = GetWorld();
     CheckNotValid(world);
@@ -162,9 +152,9 @@ void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)
         UWorld* world = GetWorld();
         CheckNotValid(world);
 
-        if (world->GetTimerManager().IsTimerPaused(DashboardHandle)) ResumeDashboardTick();
-        else StartDashboardTick();
+        if (world->GetTimerManager().IsTimerPaused(DashboardHandle)) ResumeSendingDashboardData();
+        else StartSendingDashboardData();
     }
 
-    else PauseDashboardTick();
+    else PauseSendingDashboardData();
 }
