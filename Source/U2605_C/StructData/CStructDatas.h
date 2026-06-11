@@ -111,8 +111,8 @@ struct FLogEntry
 
 	static FString FormatTimestamp(float InTimestamp)
 	{
-		int32 minutes = (int32)InTimestamp / 60;
-		int32 seconds = (int32)InTimestamp % 60;
-		return FString::Printf(TEXT("[%02d:%02d]"), minutes, seconds);
+		FDateTime now = FDateTime::Now();
+		return FString::Printf(TEXT("[%02d:%02d:%02d]"),
+			now.GetHour(), now.GetMinute(), now.GetSecond());
 	}
 };

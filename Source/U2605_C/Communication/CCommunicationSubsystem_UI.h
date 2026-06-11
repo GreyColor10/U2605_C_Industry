@@ -42,13 +42,6 @@ private:
 	UPROPERTY()
 	FProcessorProgressUpdated OnProcessorProgressUpdated;
 
-private:
-	UFUNCTION(BlueprintCallable, Category = "Simulation")
-	void StartFactory();
-
-	UFUNCTION(BlueprintCallable, Category = "Simulation")
-	void StopFactory();
-
 public:
 	void BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum);
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);

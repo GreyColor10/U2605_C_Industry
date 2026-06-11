@@ -10,33 +10,12 @@ void ACInfoBoard::OnDashboardUpdated(const FDashboardData& InDashboardData)
 	UCUserWidget_InfoBoard* widget = Cast<UCUserWidget_InfoBoard>(WidgetComponent->GetUserWidgetObject());
 	CheckNull(widget);
 
-	switch (BoardType)
-	{
-	case EInfoBoardType::TotalCreamBread:
-		widget->UpdateValue(FString::FromInt(InDashboardData.TotalCreamBread));
-		break;
-
-	case EInfoBoardType::ThroughputPerMinute:
-		widget->UpdateValue(FString::Printf(TEXT("%.1f /min"), InDashboardData.ThroughputPerMinute));
-		break;
-
-	case EInfoBoardType::ElapsedTime:
-	{
-		int32 minutes = (int32)InDashboardData.ElapsedSeconds / 60;
-		int32 seconds = (int32)InDashboardData.ElapsedSeconds % 60;
-		widget->UpdateValue(FString::Printf(TEXT("%02d:%02d"), minutes, seconds));
-		break;
-	}
-
-	case EInfoBoardType::OperatingRate:
-		widget->UpdateValue(FString::Printf(TEXT("%.0f%%"), InDashboardData.OperatingRate * 100.f));
-		break;
-	}
+	widget->UpdateDashboard(InDashboardData);
 }
 
 ACInfoBoard::ACInfoBoard()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	SetRootComponent(MeshComponent);
@@ -44,9 +23,7 @@ ACInfoBoard::ACInfoBoard()
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	WidgetComponent->SetupAttachment(MeshComponent);
 	WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
-	WidgetComponent->SetDrawSize(FVector2D(400.f, 200.f));
-
-	WidgetComponent->SetRelativeLocation(FVector(1.f, 0.f, 0.f));
+	WidgetComponent->SetDrawSize(FVector2D(800.f, 400.f));
 }
 
 void ACInfoBoard::BeginPlay()

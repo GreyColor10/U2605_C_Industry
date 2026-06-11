@@ -1,16 +1,6 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
-void UCCommunicationSubsystem_UI::StartFactory()
-{
-	BroadcastOnSimulationStateChanged(true);
-}
-
-void UCCommunicationSubsystem_UI::StopFactory()
-{
-	BroadcastOnSimulationStateChanged(false);
-}
-
 void UCCommunicationSubsystem_UI::BroadcastOnStoredFinalProductUpdated(int InStoredFinalProductNum)
 {
 	if (OnStoredFinalProductUpdated.IsBound())

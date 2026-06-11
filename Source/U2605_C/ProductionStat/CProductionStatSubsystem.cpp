@@ -19,19 +19,19 @@ void UCProductionStatSubsystem::ExportToCsv()
         : world->GetTimeSeconds() - simStartTime;
 
     ProductionStatExporter->ExportToCsv(elapsedSeconds, StoredFinalProductNum, ProductCountByType);
-    
-    FLogEntry entry;
-    entry.EventType = ELogEventType::Info;
-    entry.Message = FString::Printf(TEXT("[INFO] ProductionStat_%d.csv 저장 완료"), 
-        ProductionStatExporter->GetExportIndex());
-    entry.Timestamp = elapsedSeconds;
-    entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
 
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
     UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(commuSubsystem_UI);
+
+    FLogEntry entry;
+    entry.EventType = ELogEventType::Info;
+    entry.Message = FString::Printf(TEXT("[INFO] ProductionStat_%d.csv 저장 완료"), 
+        ProductionStatExporter->GetExportIndex());
+    entry.Timestamp = elapsedSeconds;
+    entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
 
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 
