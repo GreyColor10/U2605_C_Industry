@@ -110,7 +110,7 @@ Source/U2605_C/
 
 - **Unreal Engine 5.5** (DX12, SM6)
 - Windows 10/11
-- 프로젝트 클론 후 `.uproject` 우클릭 → *Generate Visual Studio project files* → 빌드 → 에디터에서 `Level_Basic3` 실행
+- 프로젝트 클론 후 `.uproject` 우클릭 → *Generate Visual Studio project files* → 빌드 → 에디터에서 `Demonstration1` 실행
 
 <br>
 
