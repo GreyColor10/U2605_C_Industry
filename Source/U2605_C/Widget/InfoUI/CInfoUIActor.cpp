@@ -46,6 +46,27 @@ void ACInfoUIActor::BeginPlay()
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
+    FActorSpawnParameters params;
+    params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    OutlineActor = world->SpawnActor<AStaticMeshActor>(
+        AStaticMeshActor::StaticClass(),
+        FVector::ZeroVector,
+        FRotator::ZeroRotator,
+        params
+    );
+
+    if (IsValid(OutlineActor))
+    {
+        UStaticMeshComponent* outlineMeshComp = OutlineActor->GetStaticMeshComponent();
+        if (outlineMeshComp)
+        {
+            outlineMeshComp->SetMobility(EComponentMobility::Movable);
+            outlineMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        }
+        OutlineActor->SetActorHiddenInGame(true);
+    }
+
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
@@ -96,7 +117,7 @@ void ACInfoUIActor::SetTarget(AActor* InActor)
     CheckNotValid(ActiveWidget);
     ActiveWidget->SetVisibility(ESlateVisibility::Visible);
     SetActorTickEnabled(true);
-    SpawnOutlineActor(InActor);
+    UpdateOutlineActor(InActor);
 }
 
 void ACInfoUIActor::Hide()
@@ -107,7 +128,7 @@ void ACInfoUIActor::Hide()
     TargetActor = nullptr;
     ActiveWidget = nullptr;
     SetActorTickEnabled(false);
-    DestroyOutlineActor();
+    HideOutlineActor();
 }
 
 const AActor* ACInfoUIActor::GetTarget() const
@@ -116,9 +137,10 @@ const AActor* ACInfoUIActor::GetTarget() const
     return TargetActor.Get();
 }
 
-void ACInfoUIActor::SpawnOutlineActor(AActor* InActor)
+void ACInfoUIActor::UpdateOutlineActor(AActor* InActor)
 {
     CheckNotValid(InActor);
+    CheckNotValid(OutlineActor);
 
     IIClickable* clickable = Cast<IIClickable>(InActor);
     CheckNull(clickable);
@@ -126,36 +148,23 @@ void ACInfoUIActor::SpawnOutlineActor(AActor* InActor)
     UStaticMesh* mesh = clickable->GetInstancingMesh();
     CheckNull(mesh);
 
-    FTransform spawnTransform = InActor->GetActorTransform();
-    FVector scale = spawnTransform.GetScale3D();
-    spawnTransform.SetScale3D(scale);
-
-    FActorSpawnParameters params;
-    params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    OutlineActor = world->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), spawnTransform, params);
-    CheckNotValid(OutlineActor);
+    OutlineActor->SetActorTransform(InActor->GetActorTransform());
 
     UStaticMeshComponent* outlineMeshComp = OutlineActor->GetStaticMeshComponent();
     CheckNull(outlineMeshComp);
 
-    outlineMeshComp->SetMobility(EComponentMobility::Movable);
     outlineMeshComp->SetStaticMesh(mesh);
-    outlineMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     if (OutlineMaterial)
         outlineMeshComp->SetMaterial(0, OutlineMaterial);
+
+    OutlineActor->SetActorHiddenInGame(false);
 }
 
-void ACInfoUIActor::DestroyOutlineActor()
+void ACInfoUIActor::HideOutlineActor()
 {
     CheckNotValid(OutlineActor);
-
-    OutlineActor->Destroy();
-    OutlineActor = nullptr;
+    OutlineActor->SetActorHiddenInGame(true);
 }
 
 void ACInfoUIActor::UpdateWidgetPosition()

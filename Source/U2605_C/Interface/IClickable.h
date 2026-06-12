@@ -17,7 +17,7 @@ class U2605_C_API IIClickable
 
 public:
 	virtual void OnClicked(const FHitResult& InHit) = 0;
-	virtual EInfoUIType GetInfoUIType() = 0;
-	virtual float GetUIZOffset() = 0;
-	virtual UStaticMesh* GetInstancingMesh() = 0;
+	virtual const EInfoUIType GetInfoUIType() const = 0;
+	virtual const float GetUIZOffset() const = 0;
+	virtual UStaticMesh* GetInstancingMesh() const = 0;
 };

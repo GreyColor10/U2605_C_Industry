@@ -48,8 +48,8 @@ protected:
 private:
     void SetTarget(AActor* InActor);
     const AActor* GetTarget() const;
-    void SpawnOutlineActor(AActor* InActor);
-    void DestroyOutlineActor();
+    void UpdateOutlineActor(AActor* InActor);
+    void HideOutlineActor();
 
 private:
     void UpdateWidgetPosition();

@@ -55,7 +55,7 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
 
-	if (!ProcessingComponent->StartProcessing(ArrivedProducts, InstancingMesh, HISMInstanceIndex))
+	if (!ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex))
 	{
 		UITargetBroadcastInfo();
 		return;
@@ -103,7 +103,7 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
-	FProductData processedProduct = ProcessingComponent->CompleteProcessing(ArrivedProducts, InstancingMesh, HISMInstanceIndex);
+	FProductData processedProduct = ProcessingComponent->CompleteProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex);
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 
 	UITargetBroadcastInfo();

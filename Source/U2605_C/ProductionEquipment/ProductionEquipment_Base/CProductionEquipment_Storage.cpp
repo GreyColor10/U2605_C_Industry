@@ -15,7 +15,12 @@ void ACProductionEquipment_Storage::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StoredProducts.Append(InitialProducts);
+	for (int i = 0; i < InitialProducts.Count; i++)
+	{
+		FProductData data;
+		data.ProductType = InitialProducts.ProductType;
+		StoredProducts.Add(data);
+	}
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -155,7 +160,7 @@ void ACProductionEquipment_Storage::BroadcastInfo()
 
 void ACProductionEquipment_Storage::OnAutoShipTick()
 {
-	if (IsEmpty())
+	if (StoredProducts.IsEmpty())
 	{
 		UWorld* world = GetWorld();
 		CheckNotValid(world);

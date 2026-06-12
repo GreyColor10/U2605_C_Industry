@@ -21,19 +21,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	float UIZOffset = 170.0f;
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
+	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
 	TObjectPtr<UStaticMesh> InstancingMesh;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Storage|Runtime")
-	TArray<FProductData> StoredProducts;
 
+protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 	FString EquipmentID = TEXT("EQUIP-01");
-
-public:
-	UFUNCTION(BlueprintPure, Category = "Storage")
-	FORCEINLINE bool IsEmpty() const { return StoredProducts.IsEmpty(); }
 
 public:	
 	ACProductionEquipment_Base();
@@ -50,9 +43,9 @@ public:
 	void OnClicked(const FHitResult& InHit) override;
 	virtual void ReceiveProduct(const FProductData& InProductData) override {};
 	
-	FORCEINLINE EInfoUIType GetInfoUIType() override { return InfoUIType; };
-	FORCEINLINE float GetUIZOffset() override { return UIZOffset; };
-	FORCEINLINE UStaticMesh* GetInstancingMesh() override { return InstancingMesh; };
+	FORCEINLINE const EInfoUIType GetInfoUIType() const override { return InfoUIType; };
+	FORCEINLINE const float GetUIZOffset() const override { return UIZOffset; };
+	FORCEINLINE UStaticMesh* GetInstancingMesh() const override { return InstancingMesh; };
 
 protected:
 	int32 HISMInstanceIndex = -1;

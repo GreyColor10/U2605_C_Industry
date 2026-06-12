@@ -4,20 +4,34 @@
 #include "ProductionEquipment/CProductionEquipment_Base.h"
 #include "CProductionEquipment_Storage.generated.h"
 
+USTRUCT(BlueprintType)
+struct FInitialProductSetting
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EProductType ProductType = EProductType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 Count = 0;
+};
+
+
 UCLASS(Blueprintable)
 class U2605_C_API ACProductionEquipment_Storage : public ACProductionEquipment_Base
 {
 	GENERATED_BODY()
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
-	TArray<FProductData> InitialProducts;
+private:
+	UPROPERTY(EditAnywhere, Category = "Storage")
+	FInitialProductSetting InitialProducts;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage|AutoShip")
+	UPROPERTY(EditAnywhere, Category = "Storage|AutoShip")
 	float AutoShipInterval = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Storage")
+	UPROPERTY(EditAnywhere, Category = "Storage")
 	int32 MaxCapacity = 0;
+
 public:
 	ACProductionEquipment_Storage();
 
@@ -43,6 +57,8 @@ private:
 	void OnAutoShipTick();
 
 	void OnSimulationStateChanged(bool InIsRunning);
+
 private:
 	FTimerHandle AutoShipHandle;
+	TArray<FProductData> StoredProducts;
 };
