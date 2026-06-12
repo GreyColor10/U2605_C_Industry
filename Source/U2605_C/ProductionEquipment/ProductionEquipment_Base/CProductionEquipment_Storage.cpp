@@ -56,7 +56,7 @@ bool ACProductionEquipment_Storage::ShipProduct()
 	FProductData productToShip = StoredProducts[0];
 	StoredProducts.RemoveAt(0, 1, EAllowShrinking::No);
 
-	productToShip.CurrentDistance = 0.0f;
+	productToShip.CurrentDistance = -GridConstants::HalfGridSize;
 	productToShip.bArrived = false;
 
 	ioSubsystem->BroadcastOnProductStarted(this, productToShip);

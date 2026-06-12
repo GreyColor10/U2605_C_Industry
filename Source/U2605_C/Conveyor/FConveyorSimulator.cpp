@@ -32,6 +32,7 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 		if (!currInfo) continue;
 
 		data.CurrentDistance += GridConstants::HalfGridSize;
+		if (FMath::IsNearlyZero(data.CurrentDistance)) data.CurrentDistance = 0.0f;
 		float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
 
 		//현재 컨베이어의 끝에 도달했을 경우
