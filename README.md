@@ -75,7 +75,7 @@
 
 ## 🏗 아키텍처
 
-![Architecture](Docs/Images/architecture.png)
+![Architecture](Docs/Images/Architecture.png)
 
 1. **Storage → IO** — `OnProductStarted` broadcast
 2. **IO → ConveyorSubsystem** — product enters graph simulation  
