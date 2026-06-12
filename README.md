@@ -77,12 +77,12 @@
 
 ![Architecture](Docs/Images/Architecture.png)
 
-1. **Storage → IO** — `OnProductStarted` broadcast
-2. **IO → ConveyorSubsystem** — product enters graph simulation  
-3. **Conveyor → Niagara** — position / mesh-index array pushed every 0.5s
-4. **Conveyor → IO** — arrival detected, `DeliverProductTo` called
-5. **IO → Processor** — `ReceiveProduct` via `IProductReceiver` interface
-6. **Processor → IO** — processing complete, product re-shipped (→ back to ②)
+1. **Storage → CommunicationSubsystem_IO** — `OnProductStarted` broadcast
+2. **CommunicationSubsystem_IO → ConveyorSubsystem** — product enters graph simulation  
+3. **ConveyorSubsystem → Niagara** — position / mesh-index array pushed every 0.5s
+4. **ConveyorSubsystem → CommunicationSubsystem_IO** — arrival detected, `DeliverProductTo` called
+5. **CommunicationSubsystem_IO → Processor** — `ReceiveProduct` via `IProductReceiver` interface
+6. **Processor → CommunicationSubsystem_IO** — processing complete, product re-shipped (→ back to ②)
 
 <br>
 
