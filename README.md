@@ -1,4 +1,4 @@
-# 🏭 제빵 공장 디지털 트윈 시뮬레이션
+# 제빵 공장 디지털 트윈 시뮬레이션
 
 > **Unreal Engine 5.5 / C++** — 산업 공정의 물류 흐름을 실시간으로 시각화하는 관제형 시뮬레이션
 
@@ -75,45 +75,14 @@
 
 ## 🏗 아키텍처
 
-```mermaid
-flowchart LR
-    subgraph Actors["설비 (Actor)"]
-        ST[Storage<br/>창고]
-        PR[Processor<br/>가공 설비]
-    end
+![Architecture](Docs/Images/architecture.png)
 
-    subgraph GI["GameInstance Subsystems"]
-        IO[CommunicationSubsystem_IO<br/>상품 데이터 흐름]
-        UI[CommunicationSubsystem_UI<br/>UI 이벤트 허브]
-    end
-
-    subgraph World["World Subsystems"]
-        CV[ConveyorSubsystem<br/>그래프 + 시뮬레이터]
-        HISM[InstancedMeshSubsystem<br/>HISM 통합]
-        STAT[ProductionStatSubsystem<br/>생산 통계]
-        TIME[SimulationTimeSubsystem<br/>경과 시간]
-    end
-
-    subgraph View["시각화"]
-        NG[Niagara<br/>상품 파티클]
-        WG[Widgets<br/>정보 UI / 대시보드 / 로그]
-    end
-
-    ST -- ProductStarted --> IO
-    IO --> CV
-    CV -- 위치/메시 인덱스 배열 --> NG
-    CV -- 도착 시 DeliverProductTo --> IO
-    IO -- ReceiveProduct --> PR
-    PR -- 가공 완료 → ProductStarted --> IO
-    ST & PR -- 상태 브로드캐스트 --> UI
-    STAT -- 대시보드 데이터 --> UI
-    UI --> WG
-    ST & PR -- 메시 등록/CustomData --> HISM
-    STAT -- 경과 시간 조회 --> TIME
-```
-
-**데이터 흐름 한 줄 요약:**
-창고 출고 → `IO` 브로드캐스트 → `ConveyorSubsystem`이 그래프 위에서 상품 이동 → Niagara 배열 갱신 → 도착 시 `IO`를 통해 설비에 전달 → 가공 후 다시 출고. UI는 이 흐름을 `UI` Subsystem을 통해서만 구독합니다.
+1. **Storage → IO** — `OnProductStarted` broadcast
+2. **IO → ConveyorSubsystem** — product enters graph simulation  
+3. **Conveyor → Niagara** — position / mesh-index array pushed every 0.5s
+4. **Conveyor → IO** — arrival detected, `DeliverProductTo` called
+5. **IO → Processor** — `ReceiveProduct` via `IProductReceiver` interface
+6. **Processor → IO** — processing complete, product re-shipped (→ back to ②)
 
 <br>
 
