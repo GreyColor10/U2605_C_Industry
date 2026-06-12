@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-//#include "Engine/DataTable.h"
 #include "Types/CFacilityType.h"
 #include "CStructDatas.generated.h" 
 
@@ -78,9 +77,6 @@ struct FDashboardData
 	float ElapsedSeconds = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<EProductType, int32> ProductCountByType;
-
-	UPROPERTY(BlueprintReadOnly)
 	float OperatingRate = 0.0f;
 };
 
@@ -104,12 +100,9 @@ struct FLogEntry
 	FString Message = TEXT("");
 
 	UPROPERTY(BlueprintReadOnly)
-	float Timestamp = 0.0f;
-
-	UPROPERTY(BlueprintReadOnly)
 	FString TimestampText = TEXT("");
 
-	static FString FormatTimestamp(float InTimestamp)
+	static FString FormatTimestamp()
 	{
 		FDateTime now = FDateTime::Now();
 		return FString::Printf(TEXT("[%02d:%02d:%02d]"),

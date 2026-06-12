@@ -14,8 +14,9 @@ private:
 	void ChangeSimulationState();
 
 public:
-	FORCEINLINE const bool IsRunning() const { return bIsRunning; }
-	FORCEINLINE const float GetSimulationStartTime() const { return SimulationStartTime; }
+	float GetElapsedSeconds() const;
+
+	/*FORCEINLINE const bool IsRunning() const { return bIsRunning; }*/
 
 private:
 	void StartSimulation();

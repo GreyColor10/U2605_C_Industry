@@ -9,6 +9,16 @@ void UCSimulationTimeSubsystem::ChangeSimulationState()
     else StartSimulation();
 }
 
+float UCSimulationTimeSubsystem::GetElapsedSeconds() const
+{
+    CheckFalseResult(bIsRunning, PausedElapsedSeconds);
+
+    UWorld* world = GetWorld();
+    CheckNotValidResult(world, PausedElapsedSeconds);
+
+    return world->GetTimeSeconds() - SimulationStartTime;
+}
+
 void UCSimulationTimeSubsystem::StartSimulation()
 {
     CheckTrue(bIsRunning);
@@ -28,8 +38,7 @@ void UCSimulationTimeSubsystem::StartSimulation()
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
     entry.Message = TEXT("[INFO] 시뮬레이션 시작");
-    entry.Timestamp = world->GetTimeSeconds() - SimulationStartTime;
-    entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+    entry.TimestampText = FLogEntry::FormatTimestamp();
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 
     commuSubsystem_UI->BroadcastOnSimulationStateChanged(true);
@@ -54,8 +63,7 @@ void UCSimulationTimeSubsystem::StopSimulation()
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
     entry.Message = TEXT("[INFO] 시뮬레이션 정지");
-    entry.Timestamp = PausedElapsedSeconds;
-    entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+    entry.TimestampText = FLogEntry::FormatTimestamp();
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 
     commuSubsystem_UI->BroadcastOnSimulationStateChanged(false);

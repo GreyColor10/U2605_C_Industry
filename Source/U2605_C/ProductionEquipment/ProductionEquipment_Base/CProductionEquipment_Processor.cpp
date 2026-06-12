@@ -4,7 +4,7 @@
 #include "Component/ActorComponent/CProcessingComponent.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
-#include "SimulationTime/CSimulationTimeSubsystem.h"
+#include "ProductionStat/CProductionStatSubsystem.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
@@ -28,6 +28,13 @@ void ACProductionEquipment_Processor::BeginPlay()
 	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Processor::OnSimulationStateChanged);
 
 	PrevProcessingTime = ProcessingTime;
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	if (IsValid(proStatSubsystem))
+		proStatSubsystem->RegisterEquipment(this);
 }
 
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -66,6 +73,10 @@ void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 
 	ProcessingStartTime = world->GetTimeSeconds();
 	UITargetBroadcastInfo();
+
+	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	if (IsValid(proStatSubsystem))
+		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, true);
 
 	world->GetTimerManager().SetTimer(
 		ProcessingHandle,
@@ -107,14 +118,15 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 
 	UITargetBroadcastInfo();
+
+	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	if (IsValid(proStatSubsystem))
+		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
 }
 
 void ACProductionEquipment_Processor::OnProgressTick()
 {
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
+	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
@@ -122,6 +134,9 @@ void ACProductionEquipment_Processor::OnProgressTick()
 
 	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
 	CheckFalse(uiTarget == this);
+
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
 
 	float elapsed = world->GetTimeSeconds() - ProcessingStartTime;
 	float progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
@@ -143,10 +158,7 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* In
 
 void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
 {
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
+	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
@@ -157,14 +169,10 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
 	if (uiTarget != this) return;
 	if (PrevProcessingTime == ProcessingTime) return;
 
-	UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-	CheckNotValid(simTimeSubsystem);
-
 	FLogEntry entry;
 	entry.EventType = ELogEventType::Alert;
 	entry.Message = FString::Printf(TEXT("[ALRT] %s 가공 시간 %.1fs → %.1fs"), *EquipmentID, PrevProcessingTime, ProcessingTime);
-	entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
-	entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+	entry.TimestampText = FLogEntry::FormatTimestamp();
 
 	PrevProcessingTime = ProcessingTime;
 

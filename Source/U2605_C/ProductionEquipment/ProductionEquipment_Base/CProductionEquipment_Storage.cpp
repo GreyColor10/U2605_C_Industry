@@ -4,7 +4,6 @@
 #include "ProductionStat/CProductionStatSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
-#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 ACProductionEquipment_Storage::ACProductionEquipment_Storage()
 {
@@ -22,10 +21,7 @@ void ACProductionEquipment_Storage::BeginPlay()
 		StoredProducts.Add(data);
 	}
 
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
+	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
@@ -36,16 +32,12 @@ void ACProductionEquipment_Storage::BeginPlay()
 
 void ACProductionEquipment_Storage::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UWorld* world = GetWorld();
-	if (IsValid(world))
+	UGameInstance* game = GetGameInstance();
+	if (game)
 	{
-		UGameInstance* game = world->GetGameInstance();
-		if (game)
-		{
-			UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-			if (commuSubsystem_UI)
-				commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
-		}
+		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		if (commuSubsystem_UI)
+			commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -55,10 +47,7 @@ bool ACProductionEquipment_Storage::ShipProduct()
 {
 	CheckFalseResult(StoredProducts.Num() > 0, false);
 
-	UWorld* world = GetWorld();
-	CheckNotValidResult(world, false);
-
-	UGameInstance* game = world->GetGameInstance();
+	UGameInstance* game = GetGameInstance();
 	CheckNotValidResult(game, false);
 
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
@@ -141,10 +130,7 @@ bool ACProductionEquipment_Storage::IsFull() const
 
 void ACProductionEquipment_Storage::BroadcastInfo()
 {
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
+	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
 	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
@@ -162,19 +148,12 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 {
 	if (StoredProducts.IsEmpty())
 	{
-		UWorld* world = GetWorld();
-		CheckNotValid(world);
-
-		UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-		CheckNotValid(simTimeSubsystem);
-
 		FLogEntry entry;
 		entry.EventType = ELogEventType::Warning;
 		entry.Message = FString::Printf(TEXT("[WARN] %s 재고 소진"), *EquipmentID);
-		entry.Timestamp = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
-		entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+		entry.TimestampText = FLogEntry::FormatTimestamp();
 
-		UGameInstance* game = world->GetGameInstance();
+		UGameInstance* game = GetGameInstance();
 		CheckNotValid(game);
 
 		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();

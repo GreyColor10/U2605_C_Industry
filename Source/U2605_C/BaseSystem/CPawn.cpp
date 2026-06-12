@@ -5,7 +5,6 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 
 #include "Conveyor/CConveyorSubsystem.h"
 #include "Component/ActorComponent/CScreenWidgetComponent.h"
@@ -41,15 +40,6 @@ ACPawn::ACPawn()
 void ACPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (APlayerController* playerCon = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCon->GetLocalPlayer()))
-		{
-			if (DefaultMappingContext)
-				Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);

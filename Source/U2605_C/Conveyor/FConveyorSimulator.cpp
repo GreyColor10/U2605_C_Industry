@@ -31,11 +31,11 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 		FConveyorNodeInfo* currInfo = InGraph->FindNode(currConveyor.Get());
 		if (!currInfo) continue;
 
-		data.CurrentDistance += 50.0f;
+		data.CurrentDistance += GridConstants::HalfGridSize;
 		float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
 
 		//현재 컨베이어의 끝에 도달했을 경우
-		if (remainingDistance < 0 || FMath::IsNearlyZero(remainingDistance))
+		if (remainingDistance < 0.0f || FMath::IsNearlyZero(remainingDistance))
 		{
 			// 이어진 컨베이어가 있을 때
 			if (currInfo->NextConveyor.IsValid())
@@ -43,9 +43,9 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPosi
 				FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
 				if (!nextInfo) continue;
 
-				data.CurrentDistance = 0.0f;
-				if (remainingDistance < 0) data.CurrentDistance = abs(remainingDistance);
-
+				if(FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
+				else data.CurrentDistance = FMath::Abs(remainingDistance);
+				
 				TWeakObjectPtr<class USplineComponent> nextSplineComp = nextInfo->SplineComponent;
 				if (!nextSplineComp.IsValid()) continue;
 

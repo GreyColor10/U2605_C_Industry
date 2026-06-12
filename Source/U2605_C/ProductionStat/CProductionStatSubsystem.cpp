@@ -13,12 +13,7 @@ void UCProductionStatSubsystem::ExportToCsv()
     UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
     CheckNotValid(simTimeSubsystem);
 
-    float simStartTime = simTimeSubsystem->GetSimulationStartTime();
-    float elapsedSeconds = simStartTime < 0.0f
-        ? 0.0f
-        : world->GetTimeSeconds() - simStartTime;
-
-    ProductionStatExporter->ExportToCsv(elapsedSeconds, StoredFinalProductNum, ProductCountByType);
+    ProductionStatExporter->ExportToCsv(simTimeSubsystem->GetElapsedSeconds(), StoredFinalProductNum, ProductCountByType);
 
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
@@ -30,8 +25,7 @@ void UCProductionStatSubsystem::ExportToCsv()
     entry.EventType = ELogEventType::Info;
     entry.Message = FString::Printf(TEXT("[INFO] ProductionStat_%d.csv 저장 완료"), 
         ProductionStatExporter->GetExportIndex());
-    entry.Timestamp = elapsedSeconds;
-    entry.TimestampText = FLogEntry::FormatTimestamp(entry.Timestamp);
+    entry.TimestampText = FLogEntry::FormatTimestamp();
 
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 
@@ -82,6 +76,37 @@ void UCProductionStatSubsystem::ReceiveIntermediateProduct(EProductType InType)
 	ProductCountByType.FindOrAdd(InType)++;
 }
 
+void UCProductionStatSubsystem::RegisterEquipment(AActor* InEquipment)
+{
+    CheckNotValid(InEquipment);
+    OperatingRecords.FindOrAdd(InEquipment);
+}
+
+void UCProductionStatSubsystem::NotifyEquipmentProcessingStateChanged(AActor* InEquipment, bool InIsProcessing)
+{
+    CheckNotValid(InEquipment);
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+    CheckNotValid(simTimeSubsystem);
+
+    float now = simTimeSubsystem->GetElapsedSeconds();
+    FEquipmentOperatingRecord& record = OperatingRecords.FindOrAdd(InEquipment);
+
+    if (InIsProcessing)
+    {
+        record.CurrentStartTime = now;
+        return;
+    }
+
+    CheckTrue(record.CurrentStartTime < 0.0f);
+
+    record.AccumulatedSeconds += now - record.CurrentStartTime;
+    record.CurrentStartTime = -1.0f;
+}
+
 void UCProductionStatSubsystem::StartSendingDashboardData()
 {
     UWorld* world = GetWorld();
@@ -126,7 +151,6 @@ FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
 {
     FDashboardData data;
     data.TotalCreamBread = StoredFinalProductNum;
-    data.ProductCountByType = ProductCountByType;
 
     UWorld* world = GetWorld();
     CheckNotValidResult(world, data);
@@ -134,15 +158,31 @@ FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
     UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
     CheckNotValidResult(simTimeSubsystem, data);
 
-    float elapsed = world->GetTimeSeconds() - simTimeSubsystem->GetSimulationStartTime();
+    float elapsed = simTimeSubsystem->GetElapsedSeconds();
     data.ElapsedSeconds = FMath::Max(elapsed, 0.0f);
     data.ThroughputPerMinute = (elapsed > 0.0f)
         ? (StoredFinalProductNum / elapsed) * 60.0f
         : 0.0f;
 
-    data.OperatingRate = 0.0f;
+    float rateSum = 0.0f;
+    int32 equipCount = 0;
 
-    return data;
+    for (const auto& pair : OperatingRecords)
+    {
+        if (!pair.Key.IsValid()) continue;
+
+        float operatingSeconds = pair.Value.AccumulatedSeconds;
+
+        if (pair.Value.CurrentStartTime >= 0.0f)
+            operatingSeconds += elapsed - pair.Value.CurrentStartTime;
+
+        rateSum += (elapsed > 0.0f) ? (operatingSeconds / elapsed) : 0.0f;
+        equipCount++;
+    }
+
+    data.OperatingRate = (equipCount > 0) ? (rateSum / equipCount) : 0.0f;
+
+    return data; 
 }
 
 void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)

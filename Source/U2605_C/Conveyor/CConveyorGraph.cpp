@@ -107,7 +107,7 @@ void UCConveyorGraph::FindSinksConnectedTo(const FVector& InLocation, TArray<AAc
 
 		float dist = FVector::Dist(InLocation, sink->GetActorLocation());
 		if(dist < GridConstants::HalfGridSize 
-			|| FMath::IsNearlyEqual(dist,50.0f, GridConstants::ConnectionTolerance))
+			|| FMath::IsNearlyEqual(dist, GridConstants::HalfGridSize, GridConstants::ConnectionTolerance))
 			OutSinks.Add(sink);
 	}
 }
