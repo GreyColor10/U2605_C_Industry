@@ -5,6 +5,7 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
@@ -57,11 +58,11 @@ void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlay
 void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
 	CheckNotValid(ProcessingComponent);
-	CheckFalse(ProcessingComponent->GetEquipmentState() == EEquipmentState::Idle);
+	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return;
 	CheckFalse(ProcessingComponent->GetRequiredProducts().Contains(InProductData.ProductType));
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
-
+	
 	if (!ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex))
 	{
 		UITargetBroadcastInfo();
