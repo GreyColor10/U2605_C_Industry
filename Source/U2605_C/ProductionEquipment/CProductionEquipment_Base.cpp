@@ -5,6 +5,7 @@
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Conveyor/CConveyorSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
+#include "Component/ActorComponent/CLogComponent.h"
 
 ACProductionEquipment_Base::ACProductionEquipment_Base()
 {
@@ -12,6 +13,8 @@ ACProductionEquipment_Base::ACProductionEquipment_Base()
 
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
+
+	LogComponent = CreateDefaultSubobject<UCLogComponent>(TEXT("LogComponent"));
 }
 
 void ACProductionEquipment_Base::BeginPlay()
@@ -59,6 +62,11 @@ void ACProductionEquipment_Base::UITargetBroadcastInfo()
 
 	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
 	if (uiTarget == this) BroadcastInfo();
+}
+
+void ACProductionEquipment_Base::SendLogMessage(ELogEventType InEventType, FString InLogMessage)
+{
+	LogComponent->SendLogMessage(InEventType, InLogMessage);
 }
 
 void ACProductionEquipment_Base::OnClicked(const FHitResult& InHit)

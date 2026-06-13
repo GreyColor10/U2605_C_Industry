@@ -37,7 +37,7 @@ void UCSimulationTimeSubsystem::StartSimulation()
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
-    entry.Message = TEXT("[INFO] 시뮬레이션 시작");
+    entry.Message = TEXT("시뮬레이션 시작");
     entry.TimestampText = FLogEntry::FormatTimestamp();
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 
@@ -62,7 +62,7 @@ void UCSimulationTimeSubsystem::StopSimulation()
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
-    entry.Message = TEXT("[INFO] 시뮬레이션 정지");
+    entry.Message = TEXT("시뮬레이션 정지");
     entry.TimestampText = FLogEntry::FormatTimestamp();
     commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 

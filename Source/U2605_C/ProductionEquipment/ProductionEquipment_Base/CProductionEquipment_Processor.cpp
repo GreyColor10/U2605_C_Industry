@@ -102,6 +102,15 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	{
 		ProcessingTime = PendingProcessingTime;
 		PendingProcessingTime = -1.0f;
+
+		if (PrevProcessingTime != ProcessingTime)
+		{
+			FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"), 
+				*EquipmentID, PrevProcessingTime, ProcessingTime);
+			SendLogMessage(ELogEventType::Alert, logText);
+			
+			PrevProcessingTime = ProcessingTime;
+		}
 	}
 
 	UWorld* world = GetWorld();
@@ -169,14 +178,11 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
 	if (uiTarget != this) return;
 	if (PrevProcessingTime == ProcessingTime) return;
 
-	FLogEntry entry;
-	entry.EventType = ELogEventType::Alert;
-	entry.Message = FString::Printf(TEXT("[ALRT] %s 가공 시간 %.1fs → %.1fs"), *EquipmentID, PrevProcessingTime, ProcessingTime);
-	entry.TimestampText = FLogEntry::FormatTimestamp();
+	FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"),
+		*EquipmentID, PrevProcessingTime, ProcessingTime);
+	SendLogMessage(ELogEventType::Alert, logText);
 
 	PrevProcessingTime = ProcessingTime;
-
-	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
 }
 
 void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)

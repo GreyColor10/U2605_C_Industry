@@ -25,6 +25,9 @@ private:
 	TObjectPtr<UStaticMesh> InstancingMesh;
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "Log")
+	TObjectPtr<class UCLogComponent> LogComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 	FString EquipmentID = TEXT("EQUIP-01");
 
@@ -38,6 +41,8 @@ protected:
 protected:
 	virtual void BroadcastInfo() PURE_VIRTUAL(BroadcastInfo,);
 	void UITargetBroadcastInfo();
+
+	void SendLogMessage(ELogEventType InEventType, FString InLogMessage);
 
 public:
 	void OnClicked(const FHitResult& InHit) override;

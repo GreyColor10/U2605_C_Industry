@@ -23,7 +23,7 @@ void UCProductionStatSubsystem::ExportToCsv()
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
-    entry.Message = FString::Printf(TEXT("[INFO] ProductionStat_%d.csv 저장 완료"), 
+    entry.Message = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"), 
         ProductionStatExporter->GetExportIndex());
     entry.TimestampText = FLogEntry::FormatTimestamp();
 

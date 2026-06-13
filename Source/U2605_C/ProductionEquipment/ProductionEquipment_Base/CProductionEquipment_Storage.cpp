@@ -148,19 +148,9 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 {
 	if (StoredProducts.IsEmpty())
 	{
-		FLogEntry entry;
-		entry.EventType = ELogEventType::Warning;
-		entry.Message = FString::Printf(TEXT("[WARN] %s 재고 소진"), *EquipmentID);
-		entry.TimestampText = FLogEntry::FormatTimestamp();
-
-		UGameInstance* game = GetGameInstance();
-		CheckNotValid(game);
-
-		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		CheckNotValid(commuSubsystem_UI);
-
-		commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
-
+		FString logText = FString::Printf(TEXT("%s 재고 소진"), *EquipmentID);
+		SendLogMessage(ELogEventType::Warning, logText);
+		
 		StopAutoShip();
 		return;
 	}

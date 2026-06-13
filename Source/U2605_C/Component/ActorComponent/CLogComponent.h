@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StructData/CStructDatas.h"
 #include "CLogComponent.generated.h"
 
 
@@ -13,6 +14,5 @@ class U2605_C_API UCLogComponent : public UActorComponent
 public:	
 	UCLogComponent();
 
-protected:
-	virtual void BeginPlay() override;
+	void SendLogMessage(ELogEventType InEventType, FString InLogMessage);
 };
