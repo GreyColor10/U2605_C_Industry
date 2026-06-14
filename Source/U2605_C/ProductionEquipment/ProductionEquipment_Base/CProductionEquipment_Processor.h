@@ -9,12 +9,15 @@ class U2605_C_API ACProductionEquipment_Processor : public ACProductionEquipment
 {
 	GENERATED_BODY()
 	
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Capsule")
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Capsule")
 	TObjectPtr<class UCProcessingComponent> ProcessingComponent = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Processing")
+	UPROPERTY(EditAnywhere, Category = "Processing")
 	float ProcessingTime = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Processing")
+	int32 BufferMultiplier = 3;
 
 public:
 	ACProductionEquipment_Processor();
@@ -24,7 +27,10 @@ protected:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	void ReceiveProduct(const FProductData& InProductData) override;
+	bool ReceiveProduct(const FProductData& InProductData) override;
+
+private:
+	void TryStartProcessing();
 
 private:
 	void OnProcessingComplete();

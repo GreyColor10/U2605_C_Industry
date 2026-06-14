@@ -46,7 +46,7 @@ protected:
 
 public:
 	void OnClicked(const FHitResult& InHit) override;
-	virtual void ReceiveProduct(const FProductData& InProductData) override {};
+	virtual bool ReceiveProduct(const FProductData& InProductData) override PURE_VIRTUAL(ReceiveProduct, return false;);
 	
 	FORCEINLINE const EInfoUIType GetInfoUIType() const override { return InfoUIType; };
 	FORCEINLINE const float GetUIZOffset() const override { return UIZOffset; };

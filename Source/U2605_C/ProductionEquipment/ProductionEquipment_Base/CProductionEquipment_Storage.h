@@ -41,7 +41,7 @@ protected:
 
 public:
 	bool ShipProduct();
-	void ReceiveProduct(const FProductData& InProductData) override;
+	bool ReceiveProduct(const FProductData& InProductData) override;
 
 public:
 	void StartAutoShip();

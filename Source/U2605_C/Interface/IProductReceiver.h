@@ -16,5 +16,5 @@ class U2605_C_API IIProductReceiver
 	GENERATED_BODY()
 
 public:
-	virtual void ReceiveProduct(const FProductData& InProductData) = 0;
+	virtual bool ReceiveProduct(const FProductData& InProductData) = 0;
 };

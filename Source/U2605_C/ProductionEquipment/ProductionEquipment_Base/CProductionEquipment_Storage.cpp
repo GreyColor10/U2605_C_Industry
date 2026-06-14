@@ -65,25 +65,25 @@ bool ACProductionEquipment_Storage::ShipProduct()
 	return true;
 }
 
-void ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProductData)
+bool ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProductData)
 {
 	if (IsFull())
-	{
-		return;
-	}
+		return false;
 
 	StoredProducts.Add(InProductData);
 
 	UITargetBroadcastInfo();
 
 	UWorld* world = GetWorld();
-	CheckNotValid(world);
+	CheckNotValidResult(world, false);
 	
 	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
-	CheckNotValid(proStatSubsystem);
+	CheckNotValidResult(proStatSubsystem, false);
 
 	if (InProductData.ProductType == EProductType::CreamBread)
 		proStatSubsystem->ReceiveFinalProduct();
+
+	return true;
 }
 
 void ACProductionEquipment_Storage::StartAutoShip()

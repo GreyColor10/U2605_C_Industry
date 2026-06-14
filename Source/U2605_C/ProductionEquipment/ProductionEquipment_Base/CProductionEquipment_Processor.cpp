@@ -55,19 +55,37 @@ void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlay
 	Super::EndPlay(EndPlayReason);
 }
 
-void ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
+bool ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProductData)
 {
-	CheckNotValid(ProcessingComponent);
-	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return;
-	CheckFalse(ProcessingComponent->GetRequiredProducts().Contains(InProductData.ProductType));
+	CheckNotValidResult(ProcessingComponent, false);
+
+	const TMap<EProductType, int32>& required = ProcessingComponent->GetRequiredProducts();
+	CheckFalseResult(required.Contains(InProductData.ProductType), false);
+	
+	int32 requiredCount = required[InProductData.ProductType];
+	int32 currentCount = ArrivedProducts.Contains(InProductData.ProductType)
+		? ArrivedProducts[InProductData.ProductType].Num()
+		: 0;
+
+	if (currentCount >= requiredCount * BufferMultiplier)
+		return false;
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
 	
+	UITargetBroadcastInfo();
+	TryStartProcessing();
+	
+	return true;
+}
+
+void ACProductionEquipment_Processor::TryStartProcessing()
+{
+	CheckNotValid(ProcessingComponent);
+
+	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return;
+
 	if (!ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex))
-	{
-		UITargetBroadcastInfo();
 		return;
-	}
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -132,6 +150,8 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
 	if (IsValid(proStatSubsystem))
 		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
+
+	TryStartProcessing();
 }
 
 void ACProductionEquipment_Processor::OnProgressTick()
