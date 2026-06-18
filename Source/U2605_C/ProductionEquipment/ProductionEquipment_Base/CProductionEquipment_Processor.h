@@ -17,7 +17,7 @@ private:
 	float ProcessingTime = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Processing")
-	int32 BufferMultiplier = 3;
+	int32 BufferMultiplier = 2;
 
 public:
 	ACProductionEquipment_Processor();

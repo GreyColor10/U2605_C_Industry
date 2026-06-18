@@ -11,12 +11,12 @@ void UCCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEqu
 		OnProductStarted.Broadcast(InStartedEquip, InProductData);
 }
 
-void UCCommunicationSubsystem_IO::DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData)
+bool UCCommunicationSubsystem_IO::DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData)
 {
-	CheckNotValid(InTargetActor);
+	CheckNotValidResult(InTargetActor, false);
 
 	IIProductReceiver* receiver = Cast<IIProductReceiver>(InTargetActor);
-	CheckNull(receiver);
+	CheckNullResult(receiver, false);
 
-	receiver->ReceiveProduct(InProductData);
+	return receiver->ReceiveProduct(InProductData);
 }

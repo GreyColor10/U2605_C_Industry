@@ -131,14 +131,16 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 
 void UCConveyorSubsystem::UpdateProductItemsFlow()
 {
-	TArray<FVector> locationsArray;
-	TArray<int32> meshIndicesArray;
 	TArray<FProductArrival> arrivedProducts;
 
 	CheckNull(Simulator);
-	Simulator->Step(Graph, locationsArray, meshIndicesArray, arrivedProducts);
+	Simulator->Step(Graph, arrivedProducts);
 
 	DeliverArrivedProducts(arrivedProducts);
+
+	TArray<FVector> locationsArray;
+	TArray<int32> meshIndicesArray;
+	Simulator->SnapshotPositions(Graph, locationsArray, meshIndicesArray);
 
 	if (OnNiagaraCompSetParticlePosition.IsBound())
 		OnNiagaraCompSetParticlePosition.Broadcast(TEXT("DataPositions"), locationsArray);
@@ -174,14 +176,27 @@ void UCConveyorSubsystem::DeliverArrivedProducts(TArray<FProductArrival>& InArri
 	CheckNotValid(ioSubsystem);
 	CheckNotValid(Graph);
 
+	TArray<int32> acceptedIndices;
+
 	for (FProductArrival& arrival : InArrived)
 	{
 		TArray<AActor*> sinks;
 		Graph->FindSinksConnectedTo(arrival.ArrivalLocation, sinks);
 
+		bool bAccepted = false;
 		for (AActor* sink : sinks)
-			ioSubsystem->DeliverProductTo(sink, arrival.ProductData);
+			if (ioSubsystem->DeliverProductTo(sink, arrival.ProductData))
+			{
+				bAccepted = true;
+				break;
+			}
+
+		if (bAccepted)
+			acceptedIndices.Add(arrival.SimulatorIndex);
 	}
+
+	if(!acceptedIndices.IsEmpty())
+		Simulator->RemoveProducts(acceptedIndices, Graph);
 }
 
 void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData)

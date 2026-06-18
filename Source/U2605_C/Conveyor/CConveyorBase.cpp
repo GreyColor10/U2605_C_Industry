@@ -34,8 +34,6 @@ void ACConveyorBase::BeginPlay()
 	CheckNotValid(conveyorSystem);
 
 	conveyorSystem->RegisterConveyor(this, SplineComp, intVectorsArray, targetSinkLocation);
-
-	/*DrawDebugSphere(GetWorld(), GetExitTargetLocation(), 30.0f, 12, FColor::Red, true, 30.0f);*/
 }
 
 FVector ACConveyorBase::GetExitTargetLocation() const
@@ -48,7 +46,6 @@ TArray<FIntVector> ACConveyorBase::SetupSplineFromGrid()
 {
 	CheckNotValidResult(SplineComp,{});
 	TArray<FIntPoint> gridPoints = TArray<FIntPoint>{ FIntPoint(0, 0), FIntPoint(4, 0) };
-	CheckFalseResult(gridPoints.Num() > 0, {});
 	SplineComp->ClearSplinePoints(false);
 
 	TArray<FIntVector> intVectors;

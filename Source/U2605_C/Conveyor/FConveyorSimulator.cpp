@@ -11,83 +11,104 @@ void FConveyorSimulator::AddProductAtEntry(AActor* InEntryConveyor, const FProdu
 	FProductOnConvoyor newProduct;
 	newProduct.ProductData = InProductData;
 	newProduct.CurrentConveyor = InEntryConveyor;
+	newProduct.EntryConveyor = InEntryConveyor;
 
 	ProductsOnConveyer.Add(newProduct);
 }
 
-void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices, TArray<FProductArrival>& OutArrived)
+void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FProductArrival>& OutArrived)
 {
 	CheckNotValid(InGraph);
 
-	OutPositions.Reserve(ProductsOnConveyer.Num());
-	OutMeshIndices.Reserve(ProductsOnConveyer.Num());
-
-	for (int32 i = ProductsOnConveyer.Num() - 1; i >= 0; --i)
+	TMap<AActor*, TArray<int32>> lineGroups;
+	for (int32 i = 0; i < ProductsOnConveyer.Num(); i++)
 	{
-		FProductData& data = ProductsOnConveyer[i].ProductData;
-		TWeakObjectPtr<AActor> currConveyor = ProductsOnConveyer[i].CurrentConveyor;
-		if (!currConveyor.IsValid()) continue;
+		AActor* entry = ProductsOnConveyer[i].EntryConveyor.Get();
+		if (!entry) continue;
+		lineGroups.FindOrAdd(entry).Add(i);
+	}
 
-		FConveyorNodeInfo* currInfo = InGraph->FindNode(currConveyor.Get());
-		if (!currInfo) continue;
+	for (auto& groupPair : lineGroups)
+	{
+		TArray<int32>& indices = groupPair.Value;
 
-		data.CurrentDistance += GridConstants::HalfGridSize;
-		if (FMath::IsNearlyZero(data.CurrentDistance)) data.CurrentDistance = 0.0f;
-		float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
-
-		//현재 컨베이어의 끝에 도달했을 경우
-		if (remainingDistance < 0.0f || FMath::IsNearlyZero(remainingDistance))
-		{
-			// 이어진 컨베이어가 있을 때
-			if (currInfo->NextConveyor.IsValid())
+		// 라인 내 GlobalDistance 내림차순 정렬 (Sink에 가까운 순)
+		indices.Sort([&](int32 A, int32 B)
 			{
-				FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
-				if (!nextInfo) continue;
+				const FProductOnConvoyor& pa = ProductsOnConveyer[A];
+				const FProductOnConvoyor& pb = ProductsOnConveyer[B];
+				FConveyorNodeInfo* infoA = InGraph->FindNode(pa.CurrentConveyor.Get());
+				FConveyorNodeInfo* infoB = InGraph->FindNode(pb.CurrentConveyor.Get());
+				float globalA = infoA ? infoA->BaseDistance + pa.ProductData.CurrentDistance : 0.0f;
+				float globalB = infoB ? infoB->BaseDistance + pb.ProductData.CurrentDistance : 0.0f;
+				return globalA > globalB;
+			});
 
-				if(FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
-				else data.CurrentDistance = FMath::Abs(remainingDistance);
-				
-				TWeakObjectPtr<class USplineComponent> nextSplineComp = nextInfo->SplineComponent;
-				if (!nextSplineComp.IsValid()) continue;
+		float prevGlobalDistance = FLT_MAX;
 
-				AddLocationArray(nextSplineComp.Get(), data, OutPositions, OutMeshIndices);
-				ProductsOnConveyer[i].CurrentConveyor = currInfo->NextConveyor;
+		for (int32 idx : indices)
+		{
+			FProductOnConvoyor& item = ProductsOnConveyer[idx];
+			FProductData& data = item.ProductData;
+
+			if (!item.CurrentConveyor.IsValid()) continue;
+			FConveyorNodeInfo* currInfo = InGraph->FindNode(item.CurrentConveyor.Get());
+			if (!currInfo) continue;
+
+			float currentGlobal = currInfo->BaseDistance + data.CurrentDistance;
+
+			// 정체 체크
+			if (FMath::IsNearlyEqual(prevGlobalDistance - currentGlobal, GridConstants::HalfGridSize) 
+				|| prevGlobalDistance - currentGlobal < GridConstants::HalfGridSize)
+			{
+				prevGlobalDistance = currentGlobal;
+				data.bBlocked = true;
 				continue;
 			}
 
-			// 이어진 컨베이어가 없이 끝에 도달했을 때
-			else
+			// 전진
+			data.bBlocked = false;
+			if(!data.bArrived) data.CurrentDistance += GridConstants::HalfGridSize;
+			if (FMath::IsNearlyZero(data.CurrentDistance)) data.CurrentDistance = 0.0f;
+			float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
+
+			if (FMath::IsNearlyZero(remainingDistance) || remainingDistance < 0.0f)
 			{
-				// 처음 마지막 지점에 도착함.
-				if (!data.bArrived)
+				if (currInfo->NextConveyor.IsValid())
 				{
-					data.bArrived = true;
-					TWeakObjectPtr<USplineComponent> splineComp = currInfo->SplineComponent;
-					if (!splineComp.IsValid()) continue;
+					FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
+					if (!nextInfo) continue;
 
-					AddLocationArray(splineComp.Get(), data, OutPositions, OutMeshIndices);
+					if (FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
+					else data.CurrentDistance = FMath::Abs(remainingDistance);
+
+					item.CurrentConveyor = currInfo->NextConveyor;
+					prevGlobalDistance = nextInfo->BaseDistance + data.CurrentDistance;
 				}
-
-				// 이미 마지막 지점에 도달한 뒤였다면
 				else
 				{
-					FProductArrival arrival;
-					arrival.ProductData = data;
-					arrival.ArrivalLocation = currInfo->SinkPosition;
-					
-					OutArrived.Add(arrival);
-					ProductsOnConveyer.RemoveAt(i);
-					continue;
+					if (!data.bArrived)
+					{
+						data.bArrived = true;
+						prevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
+					}
+
+					else
+					{
+						FProductArrival arrival;
+						arrival.ProductData = data;
+						arrival.ArrivalLocation = currInfo->SinkPosition;
+						arrival.SimulatorIndex = idx;
+						OutArrived.Add(arrival);
+						prevGlobalDistance = currentGlobal;
+					}
 				}
 			}
-		}
-		// 현재 컨테이너의 경로가 남아있을 경우
-		else
-		{
-			TWeakObjectPtr<USplineComponent> splineComp = currInfo->SplineComponent;
-			if (!splineComp.IsValid()) continue;
 
-			AddLocationArray(splineComp.Get(), data, OutPositions, OutMeshIndices);
+			else
+			{
+				prevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
+			}
 		}
 	}
 }
@@ -105,16 +126,70 @@ void FConveyorSimulator::SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVec
 
 		FConveyorNodeInfo* info = InGraph->FindNode(item.CurrentConveyor.Get());
 		if (!info) continue;
-		if (!info->SplineComponent.IsValid()) continue;
 
 		AddLocationArray(info->SplineComponent.Get(), item.ProductData, OutPositions, OutMeshIndices);
 	}
 }
 
+void FConveyorSimulator::RemoveProducts(const TArray<int32>& InIndices, UCConveyorGraph* InGraph)
+{
+	MoveBlockedProduct(InIndices, InGraph);
+	TArray<int32> sorted = InIndices;
+	sorted.Sort([](int32 A, int32 B) { return A > B; });
+	for (int32 idx : sorted)
+		ProductsOnConveyer.RemoveAt(idx);
+}
+
 void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices)
 {
+	CheckNotValid(InSplineComp);
+
 	FVector currLocation = InSplineComp->GetLocationAtDistanceAlongSpline(InProductData.CurrentDistance, ESplineCoordinateSpace::World);
 	currLocation.Z += 150.f;
 	InLocations.Add(currLocation);
 	InMeshIndices.Add(InProductData.ProcessStage);
+}
+
+void FConveyorSimulator::MoveBlockedProduct(const TArray<int32>& InIndices, UCConveyorGraph* InGraph )
+{
+	TSet<AActor*> acceptedLines;
+	for (int32 idx : InIndices)
+	{
+		AActor* entry = ProductsOnConveyer[idx].EntryConveyor.Get();
+		if (!entry) continue;
+		
+		acceptedLines.Add(entry);
+	}
+
+	CheckNotValid(InGraph);
+
+	for (FProductOnConvoyor& productOnCon : ProductsOnConveyer)
+	{
+		if(!acceptedLines.Contains(productOnCon.EntryConveyor.Get())) continue;
+
+		FProductData& data = productOnCon.ProductData;
+		if (!data.bBlocked) continue;
+
+		if (!productOnCon.CurrentConveyor.IsValid()) continue;
+		FConveyorNodeInfo* currInfo = InGraph->FindNode(productOnCon.CurrentConveyor.Get());
+
+		data.CurrentDistance += GridConstants::HalfGridSize;
+		float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
+
+		if (FMath::IsNearlyZero(remainingDistance) || remainingDistance < 0.0f)
+		{
+			if (currInfo->NextConveyor.IsValid())
+			{
+				FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
+				if (!nextInfo) continue;
+
+				if (FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
+				else data.CurrentDistance = FMath::Abs(remainingDistance);
+
+				productOnCon.CurrentConveyor = currInfo->NextConveyor;
+			}
+
+			else data.bArrived = true;
+		}
+	}
 }

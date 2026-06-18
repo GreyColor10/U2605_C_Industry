@@ -17,7 +17,7 @@ private:
 
 public:
 	void BroadcastOnProductStarted(AActor* InStartedEquip, const FProductData& InProductData);
-	void DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData);
+	bool DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData);
 
 	FORCEINLINE FProductStarted& GetProductStartedDel() { return OnProductStarted; };
 

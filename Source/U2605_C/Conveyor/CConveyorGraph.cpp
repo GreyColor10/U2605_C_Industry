@@ -46,6 +46,24 @@ void UCConveyorGraph::Build()
 		if (!nextNode) continue;
 		nextNode->bIsEntryNode = false;
 	}
+
+	for (auto& pair : ConveyorMap)
+	{
+		if (!pair.Value.bIsEntryNode) continue;
+
+		float accumulated = 0.0f;
+		AActor* current = pair.Key;
+
+		while (current)
+		{
+			FConveyorNodeInfo* node = ConveyorMap.Find(current);
+			if (!node) break;
+
+			node->BaseDistance = accumulated;
+			accumulated += node->NodeDistance;
+			current = node->NextConveyor.IsValid() ? node->NextConveyor.Get() : nullptr;
+		}
+	}
 }
 
 FConveyorNodeInfo* UCConveyorGraph::FindNode(AActor* InActor)

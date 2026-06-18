@@ -10,7 +10,7 @@ struct FProductData
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY()
 	EProductType ProductType = EProductType::None;
 
 	UPROPERTY()
@@ -21,6 +21,9 @@ public:
 
 	UPROPERTY()
 	int32 ProcessStage = 0;
+
+	UPROPERTY()
+	bool  bBlocked = false;
 };
 
 USTRUCT(BlueprintType)

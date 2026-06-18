@@ -10,13 +10,14 @@ struct FConveyorNodeInfo
 
 	TWeakObjectPtr<AActor> ConveyorActor;
 	TWeakObjectPtr<class USplineComponent> SplineComponent;
-	//컨베이어의 이동 지점의 시작과 끝을 담는 배열
+	
 	FIntVector IntPosion[2];
 	FVector SinkPosition;
 
 	TWeakObjectPtr<AActor> NextConveyor;
 	bool bIsEntryNode = true;
-	float NodeDistance = 0;
+	float NodeDistance = 0.0f;
+	float BaseDistance = 0.0f;
 };
 
 UCLASS()
