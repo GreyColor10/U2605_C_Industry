@@ -124,6 +124,9 @@ void UCConveyorSubsystem::StartSimulationIfNeeded()
 	FTimerManager& manager = world->GetTimerManager();
 	CheckTrue(manager.TimerExists(ConveyorHandle));
 
+	if (OnNiagaraCompActive.IsBound())
+		OnNiagaraCompActive.Broadcast(true);
+
 	FTimerDelegate del;
 	del.BindUObject(this, &UCConveyorSubsystem::UpdateProductItemsFlow);
 	manager.SetTimer(ConveyorHandle, del, 0.5f, true, 0.0f);

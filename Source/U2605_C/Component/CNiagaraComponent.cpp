@@ -4,8 +4,6 @@
 
 void UCNiagaraComponent::SetVectorArrayUserParameter(FName InParaName, const TArray<FVector>& InArrayData)
 {
-	ResetSystem();
-
 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
 		this,
 		InParaName,
@@ -23,5 +21,11 @@ void UCNiagaraComponent::SetIntArrayUserParameter(FName InParaName, const TArray
 		InArrayData
 	);
 
+	MarkRenderStateDirty();
+}
+
+void UCNiagaraComponent::SetIntUserParameter(FName InParaName, int32 InValue)
+{
+	SetVariableInt(InParaName, InValue);
 	MarkRenderStateDirty();
 }

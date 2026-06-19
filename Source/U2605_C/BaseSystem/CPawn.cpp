@@ -31,7 +31,6 @@ ACPawn::ACPawn()
 
 	GlobalDataParticleComponent = CreateDefaultSubobject<UCNiagaraComponent>(TEXT("GlobalDataParticleComponent"));
 	GlobalDataParticleComponent->SetupAttachment(RootComponent);
-	GlobalDataParticleComponent->SetAutoDestroy(false);
 	GlobalDataParticleComponent->SetAutoActivate(false);
 
 	ScreenWidgetComponent = CreateDefaultSubobject<UCScreenWidgetComponent>(TEXT("ScreenWidgetComponent"));
@@ -104,6 +103,7 @@ void ACPawn::OnNiagaraCompSetParticlePosition(FName InParaName, const TArray<FVe
 {
 	CheckNotValid(GlobalDataParticleComponent);
 	GlobalDataParticleComponent->SetVectorArrayUserParameter(InParaName, InArrayData);
+	GlobalDataParticleComponent->SetIntUserParameter(TEXT("ParticleCount"), InArrayData.Num());
 }
 
 void ACPawn::OnNiagaraCompSetMeshIndices(FName InParaName, const TArray<int32>& InArrayData)
