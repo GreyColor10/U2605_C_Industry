@@ -19,13 +19,13 @@ void UCUserWidget_Info_Processor::RequestProcessingTimeChange(float InProcessing
     UGameInstance* game = GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    const AActor* target = commuSubsystem_UI->GetCurrentUITarget();
+    const AActor* target = uiSubsystem->GetCurrentUITarget();
     CheckNull(target);
 
-    commuSubsystem_UI->BroadcastOnProcessingTimeChangeRequested(target->GetClass(), InProcessingTime);
+    uiSubsystem->BroadcastOnProcessingTimeChangeRequested(target->GetClass(), InProcessingTime);
 }
 
 void UCUserWidget_Info_Processor::RequestProcessingTimeChangeEnd()
@@ -33,10 +33,10 @@ void UCUserWidget_Info_Processor::RequestProcessingTimeChangeEnd()
     UGameInstance* game = GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->BroadcastOnProcessingTimeChangeEnded();
+    uiSubsystem->BroadcastOnProcessingTimeChangeEnded();
 }
 
 void UCUserWidget_Info_Processor::NativeConstruct()
@@ -46,11 +46,11 @@ void UCUserWidget_Info_Processor::NativeConstruct()
     UGameInstance* game = GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->GetOnProcessorInfoUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal);
-    commuSubsystem_UI->GetOnProcessorProgressUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorProgressUpdatedInternal);
+    uiSubsystem->GetOnProcessorInfoUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorInfoUpdatedInternal);
+    uiSubsystem->GetOnProcessorProgressUpdatedDel().AddDynamic(this, &UCUserWidget_Info_Processor::OnProcessorProgressUpdatedInternal);
 }
 
 void UCUserWidget_Info_Processor::NativeDestruct()
@@ -58,11 +58,11 @@ void UCUserWidget_Info_Processor::NativeDestruct()
     UGameInstance* game = GetGameInstance();
     if (game)
     {
-        UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-        if (commuSubsystem_UI)
+        UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+        if (uiSubsystem)
         {
-            commuSubsystem_UI->GetOnProcessorInfoUpdatedDel().RemoveAll(this);
-            commuSubsystem_UI->GetOnProcessorProgressUpdatedDel().RemoveAll(this);
+            uiSubsystem->GetOnProcessorInfoUpdatedDel().RemoveAll(this);
+            uiSubsystem->GetOnProcessorProgressUpdatedDel().RemoveAll(this);
         }
     }
 

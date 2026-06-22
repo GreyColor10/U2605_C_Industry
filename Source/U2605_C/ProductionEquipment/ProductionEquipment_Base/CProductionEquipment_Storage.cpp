@@ -19,50 +19,7 @@ void ACProductionEquipment_Storage::BeginPlay()
 		FProductData data;
 		data.ProductType = InitialProducts.ProductType;
 		StoredProducts.Add(data);
-	}
-
-	UGameInstance* game = GetGameInstance();
-	CheckNotValid(game);
-
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
-
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Storage::OnSimulationStateChanged);
-}
-
-void ACProductionEquipment_Storage::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	UGameInstance* game = GetGameInstance();
-	if (game)
-	{
-		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (commuSubsystem_UI)
-			commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
-	}
-
-	Super::EndPlay(EndPlayReason);
-}
-
-bool ACProductionEquipment_Storage::ShipProduct()
-{
-	CheckFalseResult(StoredProducts.Num() > 0, false);
-
-	UGameInstance* game = GetGameInstance();
-	CheckNotValidResult(game, false);
-
-	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
-	CheckNotValidResult(ioSubsystem, false);
-
-	FProductData productToShip = StoredProducts[0];
-	StoredProducts.RemoveAt(0, 1, EAllowShrinking::No);
-
-	productToShip.CurrentDistance = -GridConstants::HalfGridSize;
-	productToShip.bArrived = false;
-
-	ioSubsystem->BroadcastOnProductStarted(this, productToShip);
-	UITargetBroadcastInfo();
-
-	return true;
+	}	
 }
 
 bool ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProductData)
@@ -84,6 +41,58 @@ bool ACProductionEquipment_Storage::ReceiveProduct(const FProductData& InProduct
 		proStatSubsystem->ReceiveFinalProduct();
 
 	return true;
+}
+
+bool ACProductionEquipment_Storage::IsFull() const
+{
+	if (MaxCapacity <= 0) return false;
+	return StoredProducts.Num() >= MaxCapacity;
+}
+
+void ACProductionEquipment_Storage::ShipProduct()
+{
+	CheckTrue(StoredProducts.IsEmpty());
+
+	UGameInstance* game = GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
+	CheckNotValid(ioSubsystem);
+
+	FProductData productToShip = StoredProducts[0];
+	StoredProducts.RemoveAt(0, 1, EAllowShrinking::No);
+
+	productToShip.CurrentDistance = -GridConstants::HalfGridSize;
+	productToShip.bArrived = false;
+
+	ioSubsystem->BroadcastOnProductStarted(this, productToShip);
+	UITargetBroadcastInfo();
+}
+
+void ACProductionEquipment_Storage::OnAutoShipTick()
+{
+	if (StoredProducts.IsEmpty())
+	{
+		FString logText = FString::Printf(TEXT("%s 재고 소진"), *EquipmentID);
+		SendLogMessage(ELogEventType::Warning, logText);
+		
+		StopAutoShip();
+		return;
+	}
+
+	if (IsShipBlocked())
+	{
+		if (!IsBlockLogSended)
+		{
+			FString logText = FString::Printf(TEXT("%s 입구 정체"), *EquipmentID);
+			SendLogMessage(ELogEventType::Warning, logText);
+			IsBlockLogSended = true;
+		}
+		
+		return;
+	}
+
+	ShipProduct();
 }
 
 void ACProductionEquipment_Storage::StartAutoShip()
@@ -122,40 +131,20 @@ void ACProductionEquipment_Storage::StopAutoShip()
 	world->GetTimerManager().ClearTimer(AutoShipHandle);
 }
 
-bool ACProductionEquipment_Storage::IsFull() const
-{
-	if (MaxCapacity <= 0) return false;
-	return StoredProducts.Num() >= MaxCapacity;
-}
-
 void ACProductionEquipment_Storage::BroadcastInfo()
 {
 	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
 	FStorageInfoData infoData;
 	infoData.ProductType = StoredProducts.IsEmpty() ? EProductType::None : StoredProducts[0].ProductType;
 	infoData.StoredCount = StoredProducts.Num();
 	infoData.MaxCapacity = MaxCapacity;
 
-	commuSubsystem_UI->BroadcastOnStorageInfoUpdated(infoData);
-}
-
-void ACProductionEquipment_Storage::OnAutoShipTick()
-{
-	if (StoredProducts.IsEmpty())
-	{
-		FString logText = FString::Printf(TEXT("%s 재고 소진"), *EquipmentID);
-		SendLogMessage(ELogEventType::Warning, logText);
-		
-		StopAutoShip();
-		return;
-	}
-
-	ShipProduct();
+	uiSubsystem->BroadcastOnStorageInfoUpdated(infoData);
 }
 
 void ACProductionEquipment_Storage::OnSimulationStateChanged(bool InIsRunning)

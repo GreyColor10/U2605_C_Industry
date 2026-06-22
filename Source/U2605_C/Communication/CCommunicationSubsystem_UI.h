@@ -13,10 +13,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, In
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
 
 DECLARE_DELEGATE_OneParam(FUITargetChanged, AActor*);
-DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
 DECLARE_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UClass*, float);
 DECLARE_MULTICAST_DELEGATE(FProcessingTimeChangeEnded);
 DECLARE_MULTICAST_DELEGATE_OneParam(FSimulationStateChanged, bool);
+
+DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
 
 UCLASS()
 class U2605_C_API UCCommunicationSubsystem_UI : public UGameInstanceSubsystem
@@ -47,10 +48,11 @@ public:
 	void BroadcastOnProcessorProgressUpdated(float InProgress);
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
-	const AActor* GetCurrentUITarget();
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
 	void BroadcastOnProcessingTimeChangeEnded();
 	void BroadcastOnSimulationStateChanged(bool InIsRunning);
+
+	const AActor* GetCurrentUITarget();
 
 	FORCEINLINE FStorageInfoUpdated& GetOnStorageInfoUpdatedDel() { return OnStorageInfoUpdated; };
 	FORCEINLINE FProcessorInfoUpdated& GetOnProcessorInfoUpdatedDel() { return OnProcessorInfoUpdated; };
@@ -59,15 +61,17 @@ public:
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
 	
 	FORCEINLINE FUITargetChanged& GetOnUITargetChangedDel() { return OnUITargetChanged; };
-	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
 	FORCEINLINE FProcessingTimeChangeRequested& GetOnProcessingTimeChangeRequestedDel() { return OnProcessingTimeChangeRequested; }
 	FORCEINLINE FProcessingTimeChangeEnded& GetOnProcessingTimeChangeEnded() { return OnProcessingTimeChangeEnded; };
 	FORCEINLINE FSimulationStateChanged& GetOnSimulationStateChangedDel() { return OnSimulationStateChanged; }
 
+	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
+
 private:
 	FUITargetChanged OnUITargetChanged;
-	FUITargetGotten OnUITargetGotten;
 	FProcessingTimeChangeRequested OnProcessingTimeChangeRequested;
 	FProcessingTimeChangeEnded OnProcessingTimeChangeEnded;
 	FSimulationStateChanged OnSimulationStateChanged;
+
+	FUITargetGotten OnUITargetGotten;
 };

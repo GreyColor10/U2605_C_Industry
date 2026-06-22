@@ -11,6 +11,14 @@ void UCCommunicationSubsystem_IO::BroadcastOnProductStarted(AActor* InStartedEqu
 		OnProductStarted.Broadcast(InStartedEquip, InProductData);
 }
 
+const bool UCCommunicationSubsystem_IO::IsShipBlocked(const FVector& InSourceLocation)
+{
+	if (OnShipBlocked.IsBound())
+		return OnShipBlocked.Execute(InSourceLocation);
+
+	return false;
+}
+
 bool UCCommunicationSubsystem_IO::DeliverProductTo(AActor* InTargetActor, const FProductData& InProductData)
 {
 	CheckNotValidResult(InTargetActor, false);

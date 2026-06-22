@@ -18,8 +18,8 @@ void UCProductionStatSubsystem::ExportToCsv()
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
@@ -27,7 +27,7 @@ void UCProductionStatSubsystem::ExportToCsv()
         ProductionStatExporter->GetExportIndex());
     entry.TimestampText = FLogEntry::FormatTimestamp();
 
-    commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+    uiSubsystem->BroadcastOnLogEntryAdded(entry);
 
     ProductionStatExporter->IncreaseExportIndex();
 }
@@ -45,10 +45,10 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
+    uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
 }
 
 void UCProductionStatSubsystem::Deinitialize()
@@ -58,8 +58,8 @@ void UCProductionStatSubsystem::Deinitialize()
     {
         if (UGameInstance* game = world->GetGameInstance())
         {
-            if (UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>())
-                commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+            if (UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>())
+                uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
         }
     }
     Super::Deinitialize();
@@ -141,10 +141,10 @@ void UCProductionStatSubsystem::SendDashboardData()
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->BroadcastOnDashboardUpdated(BuildDashboardData());
+    uiSubsystem->BroadcastOnDashboardUpdated(BuildDashboardData());
 }
 
 FDashboardData UCProductionStatSubsystem::BuildDashboardData() const

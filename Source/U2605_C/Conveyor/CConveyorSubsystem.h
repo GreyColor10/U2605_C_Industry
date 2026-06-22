@@ -35,6 +35,8 @@ private:
 	void UpdateProductItemsFlow();
 	void DeliverArrivedProducts(TArray<FProductArrival>& InArrived);
 
+	const bool IsShipBlockedFrom(const FVector& InSourceLocation) const;
+
 private:
 	void OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData);
 

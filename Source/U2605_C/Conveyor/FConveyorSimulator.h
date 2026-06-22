@@ -27,6 +27,7 @@ public:
 	void Step(UCConveyorGraph* InGraph, TArray<FProductArrival>& OutArrived);
 	void SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices);
 	void RemoveProducts(const TArray<int32>& InIndices, UCConveyorGraph* InGraph);
+	bool IsEntryBlocked(AActor* InEntryConveyor) const;
 
 	FORCEINLINE int32 Num() const { return ProductsOnConveyer.Num(); }
 	FORCEINLINE bool IsEmpty() const { return ProductsOnConveyer.IsEmpty(); }

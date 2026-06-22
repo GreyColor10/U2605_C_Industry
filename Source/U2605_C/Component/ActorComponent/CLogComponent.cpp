@@ -16,13 +16,13 @@ void UCLogComponent::SendLogMessage(ELogEventType InEventType, FString InLogMess
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
 	FLogEntry entry;
 	entry.EventType = InEventType;
 	entry.Message = InLogMessage;
 	entry.TimestampText = FLogEntry::FormatTimestamp();
 
-	commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+	uiSubsystem->BroadcastOnLogEntryAdded(entry);
 }

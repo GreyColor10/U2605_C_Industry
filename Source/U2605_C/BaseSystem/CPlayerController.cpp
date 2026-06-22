@@ -51,10 +51,10 @@ void ACPlayerController::OnMouseClick(const FInputActionValue& Value)
 		UGameInstance* game = world->GetGameInstance();
 		CheckNotValid(game);
 
-		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		CheckNotValid(commuSubsystem_UI);
+		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		CheckNotValid(uiSubsystem);
 
-		commuSubsystem_UI->BroadcastOnUITargetChanged(hitActor);
+		uiSubsystem->BroadcastOnUITargetChanged(hitActor);
 
 		//초기화 순서 문제가 있어, 나중에 호출함
 		clickable->OnClicked(HitResult);

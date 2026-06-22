@@ -140,6 +140,22 @@ void FConveyorSimulator::RemoveProducts(const TArray<int32>& InIndices, UCConvey
 		ProductsOnConveyer.RemoveAt(idx);
 }
 
+bool FConveyorSimulator::IsEntryBlocked(AActor* InEntryConveyor) const
+{
+	CheckNotValidResult(InEntryConveyor, false);
+
+	for (const FProductOnConvoyor& item : ProductsOnConveyer)
+	{
+		if (item.EntryConveyor.Get() != InEntryConveyor) continue;
+		if (item.CurrentConveyor.Get() != InEntryConveyor) continue;
+		if (!FMath::IsNearlyZero(item.ProductData.CurrentDistance)) continue;
+
+		return item.ProductData.bBlocked;
+	}
+
+	return false;
+}
+
 void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices)
 {
 	CheckNotValid(InSplineComp);

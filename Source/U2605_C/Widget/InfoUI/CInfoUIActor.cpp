@@ -70,11 +70,11 @@ void ACInfoUIActor::BeginPlay()
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->GetOnUITargetChangedDel().BindUObject(this, &ACInfoUIActor::SetTarget);
-    commuSubsystem_UI->GetOnUITargetGotten().BindUObject(this, &ACInfoUIActor::GetTarget);
+    uiSubsystem->GetOnUITargetChangedDel().BindUObject(this, &ACInfoUIActor::SetTarget);
+    uiSubsystem->GetOnUITargetGotten().BindUObject(this, &ACInfoUIActor::GetTarget);
 }
 
 void ACInfoUIActor::Tick(float DeltaTime)

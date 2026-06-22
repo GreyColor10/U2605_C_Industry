@@ -23,12 +23,13 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
 	CheckNotValid(ioSubsystem);
 
-	ioSubsystem->GetProductStartedDel().AddUObject(this, &UCConveyorSubsystem::OnProductStarted);
+	ioSubsystem->GetOnProductStartedDel().AddUObject(this, &UCConveyorSubsystem::OnProductStarted);
+	ioSubsystem->GetOnShipBlockedDel().BindUObject(this, &UCConveyorSubsystem::IsShipBlockedFrom);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
+	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
 }
 
 void UCConveyorSubsystem::Deinitialize()
@@ -36,13 +37,19 @@ void UCConveyorSubsystem::Deinitialize()
 	UWorld* world = GetWorld();
 	if (IsValid(world))
 	{
-		if (UGameInstance* game = world->GetGameInstance())
+		UGameInstance* game = world->GetGameInstance();
+		if (IsValid(game))
 		{
-			if (UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>())
-				ioSubsystem->GetProductStartedDel().RemoveAll(this);
-
-			if (UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>())
-				commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+			UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
+			if (IsValid(ioSubsystem))
+			{
+				ioSubsystem->GetOnProductStartedDel().RemoveAll(this);
+				ioSubsystem->GetOnShipBlockedDel().Unbind();
+			}
+			
+			UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+			if (IsValid(uiSubsystem))
+				uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
 		}
 	}
 	Super::Deinitialize();
@@ -200,6 +207,24 @@ void UCConveyorSubsystem::DeliverArrivedProducts(TArray<FProductArrival>& InArri
 
 	if(!acceptedIndices.IsEmpty())
 		Simulator->RemoveProducts(acceptedIndices, Graph);
+}
+
+const bool UCConveyorSubsystem::IsShipBlockedFrom(const FVector& InSourceLocation) const
+{
+	CheckNotValidResult(Graph, false);
+	CheckNullResult(Simulator, false);
+
+	TArray<FConveyorNodeInfo*> entryNodes;
+	Graph->FindEntryNodesConnectedTo(InSourceLocation, entryNodes);
+
+	for (FConveyorNodeInfo* entryNode : entryNodes)
+	{
+		if (!entryNode->ConveyorActor.IsValid()) continue;
+		if (Simulator->IsEntryBlocked(entryNode->ConveyorActor.Get()))
+			return true;
+	}
+
+	return false;
 }
 
 void UCConveyorSubsystem::OnProductStarted(AActor* InSourceStorage, const FProductData& InProductData)

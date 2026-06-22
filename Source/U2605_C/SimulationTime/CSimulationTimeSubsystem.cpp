@@ -32,16 +32,16 @@ void UCSimulationTimeSubsystem::StartSimulation()
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
     entry.Message = TEXT("시뮬레이션 시작");
     entry.TimestampText = FLogEntry::FormatTimestamp();
-    commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+    uiSubsystem->BroadcastOnLogEntryAdded(entry);
 
-    commuSubsystem_UI->BroadcastOnSimulationStateChanged(true);
+    uiSubsystem->BroadcastOnSimulationStateChanged(true);
 }
 
 void UCSimulationTimeSubsystem::StopSimulation()
@@ -57,14 +57,14 @@ void UCSimulationTimeSubsystem::StopSimulation()
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
     entry.Message = TEXT("시뮬레이션 정지");
     entry.TimestampText = FLogEntry::FormatTimestamp();
-    commuSubsystem_UI->BroadcastOnLogEntryAdded(entry);
+    uiSubsystem->BroadcastOnLogEntryAdded(entry);
 
-    commuSubsystem_UI->BroadcastOnSimulationStateChanged(false);
+    uiSubsystem->BroadcastOnSimulationStateChanged(false);
 }

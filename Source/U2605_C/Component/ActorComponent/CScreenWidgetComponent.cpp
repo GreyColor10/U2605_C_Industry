@@ -39,10 +39,10 @@ void UCScreenWidgetComponent::BeginPlay()
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().AddUObject(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
+	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
 }
 
 void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -59,10 +59,10 @@ void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
-	commuSubsystem_UI->GetOnSimulationStateChangedDel().RemoveAll(this);
+	uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
 }

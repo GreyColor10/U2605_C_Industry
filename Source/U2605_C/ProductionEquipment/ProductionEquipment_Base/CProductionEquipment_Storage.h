@@ -37,26 +37,25 @@ public:
 
 protected:
 	void BeginPlay() override;
-	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	bool ShipProduct();
 	bool ReceiveProduct(const FProductData& InProductData) override;
 
-public:
+private:
+	bool IsFull() const;
+
+private:
+	void ShipProduct();
+	void OnAutoShipTick();
+
 	void StartAutoShip();
 	void PauseAutoShip();
 	void ResumeAutoShip();
 	void StopAutoShip();
 
-private:
-	bool IsFull() const;
+protected:
 	void BroadcastInfo() override;
-
-private:
-	void OnAutoShipTick();
-
-	void OnSimulationStateChanged(bool InIsRunning);
+	void OnSimulationStateChanged(bool InIsRunning) override;
 
 private:
 	FTimerHandle AutoShipHandle;

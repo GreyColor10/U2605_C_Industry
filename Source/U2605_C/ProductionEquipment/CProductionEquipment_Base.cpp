@@ -4,6 +4,7 @@
 
 #include "MeshInstancing/CInstancedMeshSubsystem.h"
 #include "Conveyor/CConveyorSubsystem.h"
+#include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "Component/ActorComponent/CLogComponent.h"
 
@@ -33,6 +34,14 @@ void ACProductionEquipment_Base::BeginPlay()
 	UCConveyorSubsystem* conveyorSubsystem = world->GetSubsystem<UCConveyorSubsystem>();
 	CheckNotValid(conveyorSubsystem);
 	conveyorSubsystem->RegisterSink(this);	
+
+	UGameInstance* game = GetGameInstance();
+	CheckNotValid(game);
+
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
+
+	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Base::OnSimulationStateChanged);
 }
 
 void ACProductionEquipment_Base::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -46,6 +55,14 @@ void ACProductionEquipment_Base::EndPlay(const EEndPlayReason::Type EndPlayReaso
 		}
 	}
 
+	UGameInstance* game = GetGameInstance();
+	if (game)
+	{
+		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		if (uiSubsystem)
+			uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+	}
+
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -57,16 +74,30 @@ void ACProductionEquipment_Base::UITargetBroadcastInfo()
 	UGameInstance* game = world->GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
-	const AActor* uiTarget = commuSubsystem_UI->GetCurrentUITarget();
+	const AActor* uiTarget = uiSubsystem->GetCurrentUITarget();
 	if (uiTarget == this) BroadcastInfo();
 }
 
 void ACProductionEquipment_Base::SendLogMessage(ELogEventType InEventType, FString InLogMessage)
 {
 	LogComponent->SendLogMessage(InEventType, InLogMessage);
+}
+
+const bool ACProductionEquipment_Base::IsShipBlocked() const
+{
+	UWorld* world = GetWorld();
+	CheckNotValidResult(world, false);
+
+	UGameInstance* game = world->GetGameInstance();
+	CheckNotValidResult(game, false);
+
+	UCCommunicationSubsystem_IO* ioSubsystem = game->GetSubsystem<UCCommunicationSubsystem_IO>();
+	CheckNotValidResult(ioSubsystem, false);
+
+	return ioSubsystem->IsShipBlocked(GetActorLocation());
 }
 
 void ACProductionEquipment_Base::OnClicked(const FHitResult& InHit)

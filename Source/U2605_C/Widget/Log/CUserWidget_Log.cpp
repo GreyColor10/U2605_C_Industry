@@ -10,10 +10,10 @@ void UCUserWidget_Log::NativeConstruct()
     UGameInstance* game = GetGameInstance();
     CheckNotValid(game);
 
-    UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(commuSubsystem_UI);
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
 
-    commuSubsystem_UI->GetOnLogEntryAddedDel().AddDynamic(this, &UCUserWidget_Log::OnLogEntryAddedInternal);
+    uiSubsystem->GetOnLogEntryAddedDel().AddDynamic(this, &UCUserWidget_Log::OnLogEntryAddedInternal);
 }
 
 void UCUserWidget_Log::NativeDestruct()
@@ -21,9 +21,9 @@ void UCUserWidget_Log::NativeDestruct()
     UGameInstance* game = GetGameInstance();
     if (game)
     {
-        UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-        if (commuSubsystem_UI)
-            commuSubsystem_UI->GetOnLogEntryAddedDel().RemoveAll(this);
+        UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+        if (uiSubsystem)
+            uiSubsystem->GetOnLogEntryAddedDel().RemoveAll(this);
     }
 
     Super::NativeDestruct();

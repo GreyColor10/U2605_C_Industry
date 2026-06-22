@@ -40,9 +40,11 @@ protected:
 
 protected:
 	virtual void BroadcastInfo() PURE_VIRTUAL(BroadcastInfo,);
+	virtual void OnSimulationStateChanged(bool InIsRunning) PURE_VIRTUAL(OnSimulationStateChanged, );
 	void UITargetBroadcastInfo();
 
 	void SendLogMessage(ELogEventType InEventType, FString InLogMessage);
+	const bool IsShipBlocked() const;
 
 public:
 	void OnClicked(const FHitResult& InHit) override;
@@ -55,4 +57,5 @@ public:
 protected:
 	int32 HISMInstanceIndex = -1;
 	EInfoUIType InfoUIType = EInfoUIType::None;
+	bool IsBlockLogSended = false;
 };

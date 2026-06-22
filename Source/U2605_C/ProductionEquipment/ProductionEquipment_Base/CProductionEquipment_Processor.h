@@ -38,10 +38,10 @@ private:
 
 	void OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
 	void OnProcessingTimeChangeEnded();
-	void OnSimulationStateChanged(bool InIsRunning);
 
 protected:
 	void BroadcastInfo() override;
+	void OnSimulationStateChanged(bool InIsRunning) override;
 
 private:
 	FTimerHandle ProcessingHandle;

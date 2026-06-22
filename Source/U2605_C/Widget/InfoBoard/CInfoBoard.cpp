@@ -33,10 +33,10 @@ void ACInfoBoard::BeginPlay()
 	UGameInstance* game = GetGameInstance();
 	CheckNotValid(game);
 
-	UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(commuSubsystem_UI);
+	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+	CheckNotValid(uiSubsystem);
 
-	commuSubsystem_UI->GetOnDashboardUpdatedDel().AddDynamic(
+	uiSubsystem->GetOnDashboardUpdatedDel().AddDynamic(
 		this, &ACInfoBoard::OnDashboardUpdated);
 }
 
@@ -45,9 +45,9 @@ void ACInfoBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UGameInstance* game = GetGameInstance();
 	if (game)
 	{
-		UCCommunicationSubsystem_UI* commuSubsystem_UI = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (commuSubsystem_UI)
-			commuSubsystem_UI->GetOnDashboardUpdatedDel().RemoveAll(this);
+		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+		if (uiSubsystem)
+			uiSubsystem->GetOnDashboardUpdatedDel().RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
