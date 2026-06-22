@@ -16,8 +16,9 @@ public class U2605_C : ModuleRules
 			"Engine",
 			"InputCore",
             "EnhancedInput",
-            "Niagara"
-			}
+            "Niagara",
+            "CinematicCamera"
+            }
 		);
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
