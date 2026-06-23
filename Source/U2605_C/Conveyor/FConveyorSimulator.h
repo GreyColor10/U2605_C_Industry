@@ -11,6 +11,7 @@ struct FProductOnConvoyor
 	FProductData ProductData;
 	TWeakObjectPtr<AActor> CurrentConveyor;
 	TWeakObjectPtr<AActor> EntryConveyor;
+	int32 SlotIndex = INDEX_NONE;
 };
 
 struct FProductArrival
@@ -23,6 +24,9 @@ struct FProductArrival
 class FConveyorSimulator
 {
 public:
+	FConveyorSimulator();
+
+public:
 	void AddProductAtEntry(AActor* InEntryConveyor, const FProductData& InProductData);
 	void Step(UCConveyorGraph* InGraph, TArray<FProductArrival>& OutArrived);
 	void SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVector>& OutPositions, TArray<int32>& OutMeshIndices);
@@ -33,9 +37,10 @@ public:
 	FORCEINLINE bool IsEmpty() const { return ProductsOnConveyer.IsEmpty(); }
 
 private:
-	void AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices);
 	void MoveBlockedProduct(const TArray<int32>& InIndices, UCConveyorGraph* InGraph);
 
 private:
 	TArray<FProductOnConvoyor> ProductsOnConveyer;
+	static constexpr int32 MaxSlots = 50;
+	TArray<bool> SlotInUse;
 };

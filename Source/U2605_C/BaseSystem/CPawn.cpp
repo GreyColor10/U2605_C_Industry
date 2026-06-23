@@ -103,7 +103,6 @@ void ACPawn::OnNiagaraCompSetParticlePosition(FName InParaName, const TArray<FVe
 {
 	CheckNotValid(GlobalDataParticleComponent);
 	GlobalDataParticleComponent->SetVectorArrayUserParameter(InParaName, InArrayData);
-	GlobalDataParticleComponent->SetIntUserParameter(TEXT("ParticleCount"), InArrayData.Num());
 }
 
 void ACPawn::OnNiagaraCompSetMeshIndices(FName InParaName, const TArray<int32>& InArrayData)

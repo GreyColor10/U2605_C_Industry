@@ -23,9 +23,3 @@ void UCNiagaraComponent::SetIntArrayUserParameter(FName InParaName, const TArray
 
 	MarkRenderStateDirty();
 }
-
-void UCNiagaraComponent::SetIntUserParameter(FName InParaName, int32 InValue)
-{
-	SetVariableInt(InParaName, InValue);
-	MarkRenderStateDirty();
-}

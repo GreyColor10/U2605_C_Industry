@@ -4,15 +4,33 @@
 
 #include "Conveyor/CConveyorGraph.h"
 
+FConveyorSimulator::FConveyorSimulator()
+{
+	SlotInUse.Init(false, MaxSlots);
+}
+
 void FConveyorSimulator::AddProductAtEntry(AActor* InEntryConveyor, const FProductData& InProductData)
 {
 	if (!IsValid(InEntryConveyor)) return;
+
+	int32 slot = INDEX_NONE;
+	for (int32 i = 0; i < MaxSlots; i++)
+	{
+		if (!SlotInUse[i]) 
+		{ 
+			slot = i; 
+			break; 
+		}
+	}
+	if (slot == INDEX_NONE) return;
 
 	FProductOnConvoyor newProduct;
 	newProduct.ProductData = InProductData;
 	newProduct.CurrentConveyor = InEntryConveyor;
 	newProduct.EntryConveyor = InEntryConveyor;
+	newProduct.SlotIndex = slot;
 
+	SlotInUse[slot] = true;
 	ProductsOnConveyer.Add(newProduct);
 }
 
@@ -117,17 +135,26 @@ void FConveyorSimulator::SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVec
 {
 	CheckNotValid(InGraph);
 
-	OutPositions.Reserve(ProductsOnConveyer.Num());
-	OutMeshIndices.Reserve(ProductsOnConveyer.Num());
+	const FVector HiddenPos(0.f, 0.f, 150.0f);
+	OutPositions.Init(HiddenPos, MaxSlots);
+	OutMeshIndices.Init(-1, MaxSlots);
 
 	for (FProductOnConvoyor& item : ProductsOnConveyer)
 	{
+		if (item.SlotIndex < 0 || item.SlotIndex >= MaxSlots) continue;
 		if (!item.CurrentConveyor.IsValid()) continue;
 
 		FConveyorNodeInfo* info = InGraph->FindNode(item.CurrentConveyor.Get());
 		if (!info) continue;
 
-		AddLocationArray(info->SplineComponent.Get(), item.ProductData, OutPositions, OutMeshIndices);
+		USplineComponent* spline = info->SplineComponent.Get();
+		if (!IsValid(spline)) continue;
+
+		FVector loc = spline->GetLocationAtDistanceAlongSpline(item.ProductData.CurrentDistance, ESplineCoordinateSpace::World);
+		loc.Z += 150.0f;
+
+		OutPositions[item.SlotIndex] = loc;
+		OutMeshIndices[item.SlotIndex] = item.ProductData.ProcessStage;
 	}
 }
 
@@ -137,7 +164,13 @@ void FConveyorSimulator::RemoveProducts(const TArray<int32>& InIndices, UCConvey
 	TArray<int32> sorted = InIndices;
 	sorted.Sort([](int32 A, int32 B) { return A > B; });
 	for (int32 idx : sorted)
+	{
+		int32 slot = ProductsOnConveyer[idx].SlotIndex;
+		if (slot >= 0 && slot < MaxSlots)
+			SlotInUse[slot] = false;
+
 		ProductsOnConveyer.RemoveAt(idx);
+	}
 }
 
 bool FConveyorSimulator::IsEntryBlocked(AActor* InEntryConveyor) const
@@ -154,16 +187,6 @@ bool FConveyorSimulator::IsEntryBlocked(AActor* InEntryConveyor) const
 	}
 
 	return false;
-}
-
-void FConveyorSimulator::AddLocationArray(USplineComponent* InSplineComp, FProductData& InProductData, TArray<FVector>& InLocations, TArray<int32>& InMeshIndices)
-{
-	CheckNotValid(InSplineComp);
-
-	FVector currLocation = InSplineComp->GetLocationAtDistanceAlongSpline(InProductData.CurrentDistance, ESplineCoordinateSpace::World);
-	currLocation.Z += 150.f;
-	InLocations.Add(currLocation);
-	InMeshIndices.Add(InProductData.ProcessStage);
 }
 
 void FConveyorSimulator::MoveBlockedProduct(const TArray<int32>& InIndices, UCConveyorGraph* InGraph )
