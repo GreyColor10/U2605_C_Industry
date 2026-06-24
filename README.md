@@ -7,6 +7,7 @@
 ![Niagara](https://img.shields.io/badge/VFX-Niagara-orange)
 ![HISM](https://img.shields.io/badge/Rendering-HISM%20Instancing-green)
 
+1인 개발 / 제작 기간 약 5주
 <!-- 대표 GIF: 전체 공정이 한눈에 보이는 장면 (상품 흐름 + 설비 가동 + 대시보드) -->
 ![전체 공정 데모](Docs/Images/overview.gif)
 
@@ -16,7 +17,7 @@
 
 <br>
 
-## 🎬 데모 영상
+## 포트폴리오 영상
 [![데모 영상 썸네일](Docs/Images/video_thumbnail.png)](https://youtu.be/DYClYahqHms)
 > 클릭하면 전체 시연 영상(1분 25초)으로 이동합니다.
 
@@ -30,7 +31,7 @@
 
 - 컨베이어를 레벨에 배치하면 **그리드 좌표(FIntVector) 매칭**으로 토폴로지가 자동 구성됩니다.
 - 연결 관계는 **그래프 자료구조(`UCConveyorGraph`)** 로 관리되며, 입구 노드(Entry)·다음 노드(Next)·도착 지점(Sink)을 빌드 타임에 한 번 계산합니다.
-- 상품은 0.5초 주기의 이산 시뮬레이션으로 스플라인 위를 이동합니다.
+- 상품은 0.5초 주기의 시뮬레이션으로 스플라인 위를 이동합니다.
 
 ### 2. Niagara 기반 상품 시각화 — Actor 스폰 없는 대량 표현
 
@@ -116,5 +117,4 @@ Source/U2605_C/
 ## 🗺 확장 로드맵
 
 - **설비 동적 배치** — 그리드 키 매칭 구조를 그대로 활용해 런타임 배치/연결 지원
-- **외부 데이터 연동 (HTTP 폴링)** — 실제 설비 데이터를 수신해 시뮬레이션에 반영하는 디지털 트윈 단계로 확장
 - 상품별 라우팅 분기 (한 출구 → 다중 입구 분배)
