@@ -52,5 +52,5 @@ private:
 	TMap<TWeakObjectPtr<AActor>, FEquipmentOperatingRecord> OperatingRecords;
 
 	FTimerHandle DashboardHandle;
-	
+	FDashboardData CachedDashboardData;
 };

@@ -6,7 +6,7 @@
 class U2605_C_API FProductionStatExporter
 {
 public:
-	void ExportToCsv(float elapsedSeconds, int InStoredFinalProductNum, TMap<EProductType, int32>& InProductCountByType) const;
+	void ExportToCsv(FDashboardData& InDashboardData, TMap<EProductType, int32>& InProductCountByType) const;
 	void InitializeExportIndex();
 
 	FORCEINLINE const int32 GetExportIndex() const { return ExportIndex; };

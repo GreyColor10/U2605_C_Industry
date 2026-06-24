@@ -16,7 +16,11 @@ float UCSimulationTimeSubsystem::GetElapsedSeconds() const
     UWorld* world = GetWorld();
     CheckNotValidResult(world, PausedElapsedSeconds);
 
-    return world->GetTimeSeconds() - SimulationStartTime;
+    float elapsedSecond;
+    if (bIsRunning) elapsedSecond = world->GetTimeSeconds() - SimulationStartTime;
+    else elapsedSecond = PausedElapsedSeconds;
+
+    return elapsedSecond;
 }
 
 void UCSimulationTimeSubsystem::StartSimulation()
@@ -28,6 +32,7 @@ void UCSimulationTimeSubsystem::StartSimulation()
     CheckNotValid(world);
 
     SimulationStartTime = world->GetTimeSeconds() - PausedElapsedSeconds;
+    PausedElapsedSeconds = 0.0f;
 
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);

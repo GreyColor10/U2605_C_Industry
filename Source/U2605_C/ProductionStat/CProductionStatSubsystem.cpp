@@ -7,13 +7,10 @@
 
 void UCProductionStatSubsystem::ExportToCsv()
 {
+    ProductionStatExporter->ExportToCsv(CachedDashboardData, ProductCountByType);
+
     UWorld* world = GetWorld();
     CheckNotValid(world);
-
-    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-    CheckNotValid(simTimeSubsystem);
-
-    ProductionStatExporter->ExportToCsv(simTimeSubsystem->GetElapsedSeconds(), StoredFinalProductNum, ProductCountByType);
 
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
@@ -144,7 +141,8 @@ void UCProductionStatSubsystem::SendDashboardData()
     UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(uiSubsystem);
 
-    uiSubsystem->BroadcastOnDashboardUpdated(BuildDashboardData());
+    CachedDashboardData = BuildDashboardData();
+    uiSubsystem->BroadcastOnDashboardUpdated(CachedDashboardData);
 }
 
 FDashboardData UCProductionStatSubsystem::BuildDashboardData() const
