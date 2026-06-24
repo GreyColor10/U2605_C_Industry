@@ -17,9 +17,9 @@
 
 <br>
 
-## 포트폴리오 영상
-[![데모 영상 썸네일](Docs/Images/video_thumbnail.png)](https://youtu.be/DYClYahqHms)
-> 클릭하면 전체 시연 영상(1분 25초)으로 이동합니다.
+## 🎬포트폴리오 영상
+[![데모 영상 썸네일](Docs/Images/video_thumbnail.png)](https://youtu.be/JH7bDwLXzuc)
+> 클릭하면 전체 시연 영상(1분 24초)으로 이동합니다.
 
 <br>
 
