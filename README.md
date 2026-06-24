@@ -7,7 +7,7 @@
 ![Niagara](https://img.shields.io/badge/VFX-Niagara-orange)
 ![HISM](https://img.shields.io/badge/Rendering-HISM%20Instancing-green)
 
-1인 개발 / 제작 기간 약 5주
+1인 기획·개발 / 제작 기간 약 5주 (2026.05 ~ 2026.06)
 <!-- 대표 GIF: 전체 공정이 한눈에 보이는 장면 (상품 흐름 + 설비 가동 + 대시보드) -->
 ![전체 공정 데모](Docs/Images/overview.gif)
 
@@ -17,7 +17,7 @@
 
 <br>
 
-## 🎬포트폴리오 영상
+## 🎬 포트폴리오 영상
 [![데모 영상 썸네일](Docs/Images/video_thumbnail.png)](https://youtu.be/JH7bDwLXzuc)
 > 클릭하면 전체 시연 영상(1분 24초)으로 이동합니다.
 
@@ -26,8 +26,6 @@
 ## ✨ 핵심 기능
 
 ### 1. 컨베이어 네트워크 — 그리드 기반 자동 연결
-
-![컨베이어 흐름](Docs/Images/conveyor_flow.gif)
 
 - 컨베이어를 레벨에 배치하면 **그리드 좌표(FIntVector) 매칭**으로 토폴로지가 자동 구성됩니다.
 - 연결 관계는 **그래프 자료구조(`UCConveyorGraph`)** 로 관리되며, 입구 노드(Entry)·다음 노드(Next)·도착 지점(Sink)을 빌드 타임에 한 번 계산합니다.
@@ -39,7 +37,6 @@
 
 - 상품을 Actor로 스폰하지 않고, **Niagara 파티클 위치 배열**(`SetVectorArrayUserParameter`)로 표현합니다.
 - **Mesh Renderer + MeshIndex 바인딩**으로 가공 단계에 따라 파티클 메시가 교체됩니다 (밀가루 포대 → 반죽 → 빵 → 크림빵).
-- 상품 수가 늘어나도 드로우콜·GC 부담이 거의 없는 구조입니다.
 
 ### 3. 클릭 인터랙션 + What-if 파라미터 조정
 
@@ -50,8 +47,6 @@
 - 창고의 자동 출고 주기 조정으로 병목 실험이 가능합니다.
 
 ### 4. 실시간 관제 대시보드 + 생산 리포트
-
-![대시보드](Docs/Images/dashboard.gif)
 
 - 월드 내 전광판(`ACInfoBoard`)에 **총 생산량 / 분당 처리량 / 경과 시간 / 설비 가동률**(OEE Availability 단순화)을 1초 주기로 갱신합니다.
 - 시뮬레이션 시작·정지, 재고 소진, 파라미터 변경 등 주요 이벤트를 **타임스탬프 로그**로 표시합니다.
