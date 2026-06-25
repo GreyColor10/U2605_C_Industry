@@ -5,7 +5,6 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
-#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
