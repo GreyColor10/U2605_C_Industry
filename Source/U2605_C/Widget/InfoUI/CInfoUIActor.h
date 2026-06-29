@@ -44,6 +44,7 @@ public:
 protected:
     void BeginPlay() override;
     void Tick(float DeltaTime) override;
+    void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
     void SetTarget(AActor* InActor);

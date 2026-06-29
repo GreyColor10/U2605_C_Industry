@@ -3,7 +3,7 @@
 
 #include "Conveyor/CConveyorGraph.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
-#include "Communication/CCommunicationSubsystem_UI.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -13,7 +13,7 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Simulator = MakeUnique<FConveyorSimulator>();
 
 	UWorld* world = GetWorld();
-	CheckNull(world);
+	CheckNotValid(world);
 
 	world->OnWorldBeginPlay.AddUObject(this, &UCConveyorSubsystem::BuildConveyorNetwork);
 
@@ -25,11 +25,19 @@ void UCConveyorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	ioSubsystem->GetOnProductStartedDel().AddUObject(this, &UCConveyorSubsystem::OnProductStarted);
 	ioSubsystem->GetOnShipBlockedDel().BindUObject(this, &UCConveyorSubsystem::IsShipBlockedFrom);
+}
 
-	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(uiSubsystem);
+void UCConveyorSubsystem::PostInitialize()
+{
+	Super::PostInitialize();
 
-	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+	CheckNotValid(timeSubsystem);
+
+	timeSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCConveyorSubsystem::OnSimulationStateChanged);
 }
 
 void UCConveyorSubsystem::Deinitialize()
@@ -37,6 +45,10 @@ void UCConveyorSubsystem::Deinitialize()
 	UWorld* world = GetWorld();
 	if (IsValid(world))
 	{
+		UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+		if (IsValid(timeSubsystem))
+			timeSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+
 		UGameInstance* game = world->GetGameInstance();
 		if (IsValid(game))
 		{
@@ -46,10 +58,6 @@ void UCConveyorSubsystem::Deinitialize()
 				ioSubsystem->GetOnProductStartedDel().RemoveAll(this);
 				ioSubsystem->GetOnShipBlockedDel().Unbind();
 			}
-			
-			UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-			if (IsValid(uiSubsystem))
-				uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
 		}
 	}
 	Super::Deinitialize();

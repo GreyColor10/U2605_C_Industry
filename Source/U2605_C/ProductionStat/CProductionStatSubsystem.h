@@ -18,11 +18,12 @@ class U2605_C_API UCProductionStatSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 private:
-	UFUNCTION(BlueprintCallable, Category = "ProductionStat")
+	UFUNCTION()
 	void ExportToCsv();
 
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
+	void PostInitialize() override;
 	void Deinitialize() override;
 
 public:
@@ -53,4 +54,10 @@ private:
 
 	FTimerHandle DashboardHandle;
 	FDashboardData CachedDashboardData;
+
+	TArray<FDashboardData> DashboardHistory;
+
+	bool bIsMeasuring = false;
+	float ScenarioStartTime = -1.0f;
+	float ScenarioEndTime = -1.0f;
 };

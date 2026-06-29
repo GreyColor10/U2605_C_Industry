@@ -24,7 +24,7 @@ void ACInfoUIActor::BeginPlay()
     if (StorageWidgetClass)
     {
         StorageWidget = CreateWidget<UCUserWidget_Info_Storage>(playerCon, StorageWidgetClass);
-        if (StorageWidget)
+        if (IsValid(StorageWidget))
         {
             StorageWidget->AddToViewport();
             StorageWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -34,7 +34,7 @@ void ACInfoUIActor::BeginPlay()
     if (ProcessorWidgetClass)
     {
         ProcessorWidget = CreateWidget<UCUserWidget_Info_Processor>(playerCon, ProcessorWidgetClass);
-        if (ProcessorWidget)
+        if (IsValid(ProcessorWidget))
         {
             ProcessorWidget->AddToViewport();
             ProcessorWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -59,7 +59,7 @@ void ACInfoUIActor::BeginPlay()
     if (IsValid(OutlineActor))
     {
         UStaticMeshComponent* outlineMeshComp = OutlineActor->GetStaticMeshComponent();
-        if (outlineMeshComp)
+        if (IsValid(outlineMeshComp))
         {
             outlineMeshComp->SetMobility(EComponentMobility::Movable);
             outlineMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -82,6 +82,21 @@ void ACInfoUIActor::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     UpdateWidgetPosition();
+}
+
+void ACInfoUIActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    UGameInstance* game = GetGameInstance();
+    if (IsValid(game))
+    {
+        UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+        if (IsValid(uiSubsystem))
+        {
+            uiSubsystem->GetOnUITargetChangedDel().Unbind();
+            uiSubsystem->GetOnUITargetGotten().Unbind();
+        }
+    }
+    Super::EndPlay(EndPlayReason);
 }
 
 void ACInfoUIActor::SetTarget(AActor* InActor)

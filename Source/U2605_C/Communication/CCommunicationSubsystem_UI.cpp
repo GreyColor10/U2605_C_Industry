@@ -1,6 +1,18 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
+void UCCommunicationSubsystem_UI::BroadcastOnExported()
+{
+	if (OnExported.IsBound())
+		OnExported.Broadcast();
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateUIChanged()
+{
+	if (OnSimulationStateUIChanged.IsBound())
+		OnSimulationStateUIChanged.Broadcast();
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)
 {
 	if (OnStorageInfoUpdated.IsBound())
@@ -46,12 +58,6 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessingTimeChangeEnded()
 {
 	if (OnProcessingTimeChangeEnded.IsBound())
 		OnProcessingTimeChangeEnded.Broadcast();
-}
-
-void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateChanged(bool InIsRunning)
-{
-	if (OnSimulationStateChanged.IsBound())
-		OnSimulationStateChanged.Broadcast(InIsRunning);
 }
 
 const AActor* UCCommunicationSubsystem_UI::GetCurrentUITarget()

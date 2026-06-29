@@ -43,10 +43,10 @@ void ACInfoBoard::BeginPlay()
 void ACInfoBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UGameInstance* game = GetGameInstance();
-	if (game)
+	if (IsValid(game))
 	{
 		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (uiSubsystem)
+		if (IsValid(uiSubsystem))
 			uiSubsystem->GetOnDashboardUpdatedDel().RemoveAll(this);
 	}
 

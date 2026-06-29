@@ -4,7 +4,7 @@
 #include "GameFramework/PlayerController.h"
 
 #include "Widget/CUserWidget_Screen.h"
-#include "Communication/CCommunicationSubsystem_UI.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 void UCScreenWidgetComponent::OnStoredFinalProductUpdated(int InStoredFinalProductNum)
 {
@@ -36,13 +36,10 @@ void UCScreenWidgetComponent::BeginPlay()
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
 
-	UGameInstance* game = world->GetGameInstance();
-	CheckNotValid(game);
+	UCSimulationTimeSubsystem* timeSubsystem= world->GetSubsystem<UCSimulationTimeSubsystem>();
+	CheckNotValid(timeSubsystem);
 
-	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(uiSubsystem);
-
-	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
+	timeSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCScreenWidgetComponent::OnSimulationStateChanged);
 }
 
 void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -54,16 +51,13 @@ void UCScreenWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 
 	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	UGameInstance* game = world->GetGameInstance();
-	CheckNotValid(game);
-
-	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(uiSubsystem);
-
-	uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
-
+	if (IsValid(world))
+	{
+		UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+		if(IsValid(timeSubsystem))
+			timeSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+	}
+	
 	Super::EndPlay(EndPlayReason);
 }
 

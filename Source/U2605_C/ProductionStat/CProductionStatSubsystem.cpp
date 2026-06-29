@@ -20,7 +20,7 @@ void UCProductionStatSubsystem::ExportToCsv()
 
     FLogEntry entry;
     entry.EventType = ELogEventType::Info;
-    entry.Message = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"), 
+    entry.Message = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"),
         ProductionStatExporter->GetExportIndex());
     entry.TimestampText = FLogEntry::FormatTimestamp();
 
@@ -37,7 +37,7 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     ProductionStatExporter->InitializeExportIndex();
 
     UWorld* world = GetWorld();
-    CheckNull(world);
+    CheckNotValid(world);
 
     UGameInstance* game = world->GetGameInstance();
     CheckNotValid(game);
@@ -45,7 +45,20 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(uiSubsystem);
 
-    uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
+    uiSubsystem->GetOnExportedDel().AddDynamic(this, &UCProductionStatSubsystem::ExportToCsv);
+}
+
+void UCProductionStatSubsystem::PostInitialize()
+{
+    Super::PostInitialize();
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+    CheckNotValid(timeSubsystem);
+
+    timeSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &UCProductionStatSubsystem::OnSimulationStateChanged);
 }
 
 void UCProductionStatSubsystem::Deinitialize()
@@ -53,12 +66,19 @@ void UCProductionStatSubsystem::Deinitialize()
     UWorld* world = GetWorld();
     if (IsValid(world))
     {
-        if (UGameInstance* game = world->GetGameInstance())
+        UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+        if (IsValid(timeSubsystem))
+            timeSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+
+        UGameInstance* game = world->GetGameInstance();
+        if (IsValid(game))
         {
-            if (UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>())
-                uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+            UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+            if (IsValid(uiSubsystem))
+                uiSubsystem->GetOnExportedDel().RemoveAll(this);
         }
     }
+
     Super::Deinitialize();
 }
 
@@ -142,6 +162,8 @@ void UCProductionStatSubsystem::SendDashboardData()
     CheckNotValid(uiSubsystem);
 
     CachedDashboardData = BuildDashboardData();
+    DashboardHistory.Add(CachedDashboardData);
+
     uiSubsystem->BroadcastOnDashboardUpdated(CachedDashboardData);
 }
 

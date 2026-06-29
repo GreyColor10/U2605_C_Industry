@@ -10,6 +10,7 @@
 void ACPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
 	bShowMouseCursor = true;
 	FInputModeGameAndUI inputMode;
 	inputMode.SetHideCursorDuringCapture(false);

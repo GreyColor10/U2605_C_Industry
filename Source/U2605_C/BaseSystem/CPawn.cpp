@@ -51,24 +51,34 @@ void ACPawn::BeginPlay()
 	conveyorSystem->GetOnNiagaraCompSetMeshIndices().AddUObject(this, &ACPawn::OnNiagaraCompSetMeshIndices);
 }
 
+void ACPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* world = GetWorld();
+	if (IsValid(world))
+	{
+		UCConveyorSubsystem* conveyorSystem = world->GetSubsystem<UCConveyorSubsystem>();
+		if (IsValid(conveyorSystem))
+		{
+			conveyorSystem->GetOnNiagaraCompActive().RemoveAll(this);
+			conveyorSystem->GetOnNiagaraCompSetParticlePosition().RemoveAll(this);
+			conveyorSystem->GetOnNiagaraCompSetMeshIndices().RemoveAll(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
 
 void ACPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	CheckNotValid(enhancedInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		if (MoveAction)
-		{
-			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACPawn::EnhancedMove);
-		}
+	if (IsValid(MoveAction))
+		enhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACPawn::EnhancedMove);
 
-		if (MoveUpAction)
-		{
-			EnhancedInputComponent->BindAction(MoveUpAction, ETriggerEvent::Triggered, this, &ACPawn::EnhancedMoveUp);
-		}
-	}
-
+	if (IsValid(MoveUpAction))
+		enhancedInputComponent->BindAction(MoveUpAction, ETriggerEvent::Triggered, this, &ACPawn::EnhancedMoveUp);
 }
 
 void ACPawn::EnhancedMove(const FInputActionValue& Value)

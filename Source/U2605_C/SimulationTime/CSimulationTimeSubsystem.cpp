@@ -9,6 +9,39 @@ void UCSimulationTimeSubsystem::ChangeSimulationState()
     else StartSimulation();
 }
 
+void UCSimulationTimeSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+    Super::Initialize(Collection);
+
+    UWorld* world = GetWorld();
+    CheckNull(world);
+
+    UGameInstance* game = world->GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
+
+    uiSubsystem->GetOnSimulationStateUIChangedDel().AddDynamic(this, &UCSimulationTimeSubsystem::ChangeSimulationState);
+}
+
+void UCSimulationTimeSubsystem::Deinitialize()
+{
+    UWorld* world = GetWorld();
+    if (IsValid(world))
+    {
+        UGameInstance* game = world->GetGameInstance();
+        if (IsValid(game))
+        {
+            UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+            if (IsValid(uiSubsystem))
+                uiSubsystem->GetOnSimulationStateUIChangedDel().RemoveAll(this);
+        }
+    }
+
+    Super::Deinitialize();
+}
+
 float UCSimulationTimeSubsystem::GetElapsedSeconds() const
 {
     CheckFalseResult(bIsRunning, PausedElapsedSeconds);
@@ -46,7 +79,7 @@ void UCSimulationTimeSubsystem::StartSimulation()
     entry.TimestampText = FLogEntry::FormatTimestamp();
     uiSubsystem->BroadcastOnLogEntryAdded(entry);
 
-    uiSubsystem->BroadcastOnSimulationStateChanged(true);
+    BroadcastOnSimulationStateChanged(bIsRunning);
 }
 
 void UCSimulationTimeSubsystem::StopSimulation()
@@ -71,5 +104,11 @@ void UCSimulationTimeSubsystem::StopSimulation()
     entry.TimestampText = FLogEntry::FormatTimestamp();
     uiSubsystem->BroadcastOnLogEntryAdded(entry);
 
-    uiSubsystem->BroadcastOnSimulationStateChanged(false);
+    BroadcastOnSimulationStateChanged(bIsRunning);
+}
+
+void UCSimulationTimeSubsystem::BroadcastOnSimulationStateChanged(bool InIsRunning)
+{
+    if (OnSimulationStateChanged.IsBound())
+        OnSimulationStateChanged.Broadcast(InIsRunning);
 }

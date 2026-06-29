@@ -11,11 +11,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorInfoUpdated, const FProces
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardData&, InDashboardData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExported);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSimulationStateUIChanged);
 
 DECLARE_DELEGATE_OneParam(FUITargetChanged, AActor*);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UClass*, float);
 DECLARE_MULTICAST_DELEGATE(FProcessingTimeChangeEnded);
-DECLARE_MULTICAST_DELEGATE_OneParam(FSimulationStateChanged, bool);
 
 DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
 
@@ -40,6 +41,19 @@ private:
 	UPROPERTY()
 	FProcessorProgressUpdated OnProcessorProgressUpdated;
 
+	UPROPERTY()
+	FExported OnExported;
+
+	UPROPERTY()
+	FSimulationStateUIChanged OnSimulationStateUIChanged;
+
+private:
+	UFUNCTION(BlueprintCallable, Category = "Export")
+	void BroadcastOnExported();
+
+	UFUNCTION(BlueprintCallable, Category = "SimulationState")
+	void BroadcastOnSimulationStateUIChanged();
+
 public:
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
 	void BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
@@ -50,7 +64,6 @@ public:
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
 	void BroadcastOnProcessingTimeChangeEnded();
-	void BroadcastOnSimulationStateChanged(bool InIsRunning);
 
 	const AActor* GetCurrentUITarget();
 
@@ -59,19 +72,19 @@ public:
 	FORCEINLINE FDashboardUpdated& GetOnDashboardUpdatedDel() { return OnDashboardUpdated; }
 	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
-	
+	FORCEINLINE FExported& GetOnExportedDel() { return OnExported; }
+	FORCEINLINE FSimulationStateUIChanged& GetOnSimulationStateUIChangedDel() { return OnSimulationStateUIChanged; }
+
 	FORCEINLINE FUITargetChanged& GetOnUITargetChangedDel() { return OnUITargetChanged; };
 	FORCEINLINE FProcessingTimeChangeRequested& GetOnProcessingTimeChangeRequestedDel() { return OnProcessingTimeChangeRequested; }
 	FORCEINLINE FProcessingTimeChangeEnded& GetOnProcessingTimeChangeEnded() { return OnProcessingTimeChangeEnded; };
-	FORCEINLINE FSimulationStateChanged& GetOnSimulationStateChangedDel() { return OnSimulationStateChanged; }
-
+	
 	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
 
 private:
 	FUITargetChanged OnUITargetChanged;
 	FProcessingTimeChangeRequested OnProcessingTimeChangeRequested;
 	FProcessingTimeChangeEnded OnProcessingTimeChangeEnded;
-	FSimulationStateChanged OnSimulationStateChanged;
-
+	
 	FUITargetGotten OnUITargetGotten;
 };

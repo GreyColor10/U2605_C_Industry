@@ -7,6 +7,7 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "Component/ActorComponent/CLogComponent.h"
+#include "SimulationTime/CSimulationTimeSubsystem.h"
 
 ACProductionEquipment_Base::ACProductionEquipment_Base()
 {
@@ -35,13 +36,10 @@ void ACProductionEquipment_Base::BeginPlay()
 	CheckNotValid(conveyorSubsystem);
 	conveyorSubsystem->RegisterSink(this);	
 
-	UGameInstance* game = GetGameInstance();
-	CheckNotValid(game);
+	UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+	CheckNotValid(timeSubsystem);
 
-	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(uiSubsystem);
-
-	uiSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Base::OnSimulationStateChanged);
+	timeSubsystem->GetOnSimulationStateChangedDel().AddUObject(this, &ACProductionEquipment_Base::OnSimulationStateChanged);
 }
 
 void ACProductionEquipment_Base::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -49,18 +47,13 @@ void ACProductionEquipment_Base::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	UWorld* world = GetWorld();
 	if (IsValid(world))
 	{
-		if (UCConveyorSubsystem* conveyorSubsystem = world->GetSubsystem<UCConveyorSubsystem>())
-		{
+		UCConveyorSubsystem* conveyorSubsystem = world->GetSubsystem<UCConveyorSubsystem>();
+		if (IsValid(conveyorSubsystem))
 			conveyorSubsystem->UnregisterSink(this);
-		}
-	}
 
-	UGameInstance* game = GetGameInstance();
-	if (game)
-	{
-		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (uiSubsystem)
-			uiSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+		UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+		if (IsValid(timeSubsystem))
+			timeSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);

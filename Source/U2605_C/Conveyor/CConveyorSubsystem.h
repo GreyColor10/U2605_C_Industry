@@ -19,8 +19,11 @@ private:
 	TObjectPtr<class UCConveyorGraph> Graph;
 
 public:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
+	void Initialize(FSubsystemCollectionBase& Collection) override;
+	void PostInitialize() override;
+	void Deinitialize() override;
+
+public:
 	void RegisterConveyor(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition);
 	void BuildConveyorNetwork();
 
