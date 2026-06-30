@@ -2,6 +2,7 @@
 #include "Global.h"
 
 #include "Communication/CCommunicationSubsystem_UI.h"
+#include "LogSender/FLogSender.h"
 
 void UCSimulationTimeSubsystem::ChangeSimulationState()
 {
@@ -12,6 +13,8 @@ void UCSimulationTimeSubsystem::ChangeSimulationState()
 void UCSimulationTimeSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
+    LogSender = MakePimpl<FLogSender>();
 
     UWorld* world = GetWorld();
     CheckNull(world);
@@ -67,17 +70,8 @@ void UCSimulationTimeSubsystem::StartSimulation()
     SimulationStartTime = world->GetTimeSeconds() - PausedElapsedSeconds;
     PausedElapsedSeconds = 0.0f;
 
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    FLogEntry entry;
-    entry.EventType = ELogEventType::Info;
-    entry.Message = TEXT("시뮬레이션 시작");
-    entry.TimestampText = FLogEntry::FormatTimestamp();
-    uiSubsystem->BroadcastOnLogEntryAdded(entry);
+    FString logText = TEXT("시뮬레이션 시작");
+    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
 
     BroadcastOnSimulationStateChanged(bIsRunning);
 }
@@ -92,17 +86,8 @@ void UCSimulationTimeSubsystem::StopSimulation()
 
     PausedElapsedSeconds = world->GetTimeSeconds() - SimulationStartTime;
 
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    FLogEntry entry;
-    entry.EventType = ELogEventType::Info;
-    entry.Message = TEXT("시뮬레이션 정지");
-    entry.TimestampText = FLogEntry::FormatTimestamp();
-    uiSubsystem->BroadcastOnLogEntryAdded(entry);
+    FString logText = TEXT("시뮬레이션 정지");
+    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
 
     BroadcastOnSimulationStateChanged(bIsRunning);
 }

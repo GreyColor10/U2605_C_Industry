@@ -30,7 +30,7 @@ public:
 	bool ReceiveProduct(const FProductData& InProductData) override;
 
 private:
-	void TryStartProcessing();
+	bool TryStartProcessing();
 
 private:
 	void OnProcessingComplete();

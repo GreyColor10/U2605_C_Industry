@@ -21,10 +21,11 @@ void ACProductionEquipment_Processor::BeginPlay()
 	CheckNotValid(game);
 
 	UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-	CheckNotValid(uiSubsystem);
-
-	uiSubsystem->GetOnProcessingTimeChangeRequestedDel().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
-	uiSubsystem->GetOnProcessingTimeChangeEnded().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeEnded);
+	if (IsValid(uiSubsystem))
+	{
+		uiSubsystem->GetOnProcessingTimeChangeRequestedDel().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeRequested);
+		uiSubsystem->GetOnProcessingTimeChangeEnded().AddUObject(this, &ACProductionEquipment_Processor::OnProcessingTimeChangeEnded);
+	}
 
 	PrevProcessingTime = ProcessingTime;
 
@@ -39,10 +40,10 @@ void ACProductionEquipment_Processor::BeginPlay()
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UGameInstance* game = GetGameInstance();
-	if (game)
+	if (IsValid(game))
 	{
 		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (uiSubsystem)
+		if (IsValid(uiSubsystem))
 		{
 			uiSubsystem->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
 			uiSubsystem->GetOnProcessingTimeChangeEnded().RemoveAll(this);
@@ -69,23 +70,21 @@ bool ACProductionEquipment_Processor::ReceiveProduct(const FProductData& InProdu
 
 	ArrivedProducts.FindOrAdd(InProductData.ProductType).Add(InProductData);
 	
-	UITargetBroadcastInfo();
-	TryStartProcessing();
+	if (!TryStartProcessing()) UITargetBroadcastInfo();
 	
 	return true;
 }
 
-void ACProductionEquipment_Processor::TryStartProcessing()
+bool ACProductionEquipment_Processor::TryStartProcessing()
 {
-	CheckNotValid(ProcessingComponent);
+	CheckNotValidResult(ProcessingComponent, false);
 
-	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return;
+	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return false;
 
-	if (!ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex))
-		return;
-
+	CheckFalseResult(ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex), false);
+		
 	UWorld* world = GetWorld();
-	CheckNotValid(world);
+	CheckNotValidResult(world, false);
 
 	ProcessingStartTime = world->GetTimeSeconds();
 	UITargetBroadcastInfo();
@@ -110,6 +109,8 @@ void ACProductionEquipment_Processor::TryStartProcessing()
 		true,
 		0.1f
 	);
+
+	return true;
 }
 
 void ACProductionEquipment_Processor::OnProcessingComplete()
@@ -121,9 +122,12 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 
 		if (PrevProcessingTime != ProcessingTime)
 		{
+			UWorld* world = GetWorld();
+			CheckNotValid(world);
+
 			FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"), 
 				*EquipmentID, PrevProcessingTime, ProcessingTime);
-			SendLogMessage(ELogEventType::Alert, logText);
+			SendLogMessage(world ,ELogEventType::Alert, logText);
 			
 			PrevProcessingTime = ProcessingTime;
 		}
@@ -141,14 +145,15 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 
 	FProductData processedProduct = ProcessingComponent->CompleteProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex);
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
+	
+	if (!TryStartProcessing())
+	{
+		UITargetBroadcastInfo();
 
-	UITargetBroadcastInfo();
-
-	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
-	if (IsValid(proStatSubsystem))
-		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
-
-	TryStartProcessing();
+		UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+		if (IsValid(proStatSubsystem))
+			proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
+	}
 }
 
 void ACProductionEquipment_Processor::OnProgressTick()
@@ -196,9 +201,12 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
 	if (uiTarget != this) return;
 	if (PrevProcessingTime == ProcessingTime) return;
 
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
 	FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"),
 		*EquipmentID, PrevProcessingTime, ProcessingTime);
-	SendLogMessage(ELogEventType::Alert, logText);
+	SendLogMessage(world ,ELogEventType::Alert, logText);
 
 	PrevProcessingTime = ProcessingTime;
 }
@@ -219,6 +227,9 @@ void ACProductionEquipment_Processor::BroadcastInfo()
 		else elapsed = PausedProcessingTime;
 			
 		infoData.Progress = FMath::Clamp(elapsed / ProcessingTime, 0.0f, 1.0f);
+
+		if (PendingProcessingTime > 0.0f)
+			infoData.ProcessingTime = PendingProcessingTime;
 	}
 	else infoData.Progress = 0.0f;
 	

@@ -42,5 +42,6 @@ private:
 private:
 	TArray<FProductOnConvoyor> ProductsOnConveyer;
 	static constexpr int32 MaxSlots = 50;
+	static constexpr float ProductZOffSet = 150.0f;
 	TArray<bool> SlotInUse;
 };

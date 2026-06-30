@@ -29,8 +29,6 @@ private:
 	UPROPERTY()
 	TMap<AActor*, FConveyorNodeInfo> ConveyorMap;
 
-	TArray<TWeakObjectPtr<AActor>> Sinks;
-
 public:
 	void RegisterNode(AActor* InActor, class USplineComponent* InSpline, const TArray<FIntVector>& InGridPoints, const FVector InSinkPosition);
 	void Build();
@@ -45,4 +43,7 @@ public:
 	void FindSinksConnectedTo(const FVector& InLocation, TArray<AActor*>& OutSinks);
 
 	FORCEINLINE const TMap<AActor*, FConveyorNodeInfo>& GetMap() const { return ConveyorMap; }
+
+private:
+	TArray<TWeakObjectPtr<AActor>> Sinks;
 };

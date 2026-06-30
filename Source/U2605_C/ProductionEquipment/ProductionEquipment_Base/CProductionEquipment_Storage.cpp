@@ -73,8 +73,11 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 {
 	if (StoredProducts.IsEmpty())
 	{
+		UWorld* world = GetWorld();
+		CheckNotValid(world);
+
 		FString logText = FString::Printf(TEXT("%s 재고 소진"), *EquipmentID);
-		SendLogMessage(ELogEventType::Warning, logText);
+		SendLogMessage(world , ELogEventType::Warning, logText);
 		
 		StopAutoShip();
 		return;
@@ -84,8 +87,11 @@ void ACProductionEquipment_Storage::OnAutoShipTick()
 	{
 		if (!IsBlockLogSended)
 		{
+			UWorld* world = GetWorld();
+			CheckNotValid(world);
+
 			FString logText = FString::Printf(TEXT("%s 입구 정체"), *EquipmentID);
-			SendLogMessage(ELogEventType::Warning, logText);
+			SendLogMessage(world ,ELogEventType::Warning, logText);
 			IsBlockLogSended = true;
 		}
 		

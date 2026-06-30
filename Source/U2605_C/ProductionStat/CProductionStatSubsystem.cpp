@@ -4,6 +4,7 @@
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 #include "ProductionStat/FProductionStatExporter.h"
+#include "LogSender/FLogSender.h"
 
 void UCProductionStatSubsystem::ExportToCsv()
 {
@@ -12,20 +13,10 @@ void UCProductionStatSubsystem::ExportToCsv()
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    FLogEntry entry;
-    entry.EventType = ELogEventType::Info;
-    entry.Message = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"),
+    FString logText = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"),
         ProductionStatExporter->GetExportIndex());
-    entry.TimestampText = FLogEntry::FormatTimestamp();
-
-    uiSubsystem->BroadcastOnLogEntryAdded(entry);
-
+    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
+    
     ProductionStatExporter->IncreaseExportIndex();
 }
 
@@ -35,6 +26,8 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
     ProductionStatExporter = MakePimpl<FProductionStatExporter>();
     ProductionStatExporter->InitializeExportIndex();
+
+    LogSender = MakePimpl<FLogSender>();
 
     UWorld* world = GetWorld();
     CheckNotValid(world);
@@ -217,4 +210,14 @@ void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)
     }
 
     else PauseSendingDashboardData();
+}
+
+void UCProductionStatSubsystem::StartMeasurement()
+{
+
+}
+
+void UCProductionStatSubsystem::EndMeasurement()
+{
+
 }

@@ -135,7 +135,7 @@ void FConveyorSimulator::SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVec
 {
 	CheckNotValid(InGraph);
 
-	const FVector HiddenPos(0.f, 0.f, 150.0f);
+	const FVector HiddenPos(0.f, 0.f, ProductZOffSet);
 	OutPositions.Init(HiddenPos, MaxSlots);
 	OutMeshIndices.Init(-1, MaxSlots);
 
@@ -151,7 +151,7 @@ void FConveyorSimulator::SnapshotPositions(UCConveyorGraph* InGraph, TArray<FVec
 		if (!IsValid(spline)) continue;
 
 		FVector loc = spline->GetLocationAtDistanceAlongSpline(item.ProductData.CurrentDistance, ESplineCoordinateSpace::World);
-		loc.Z += 150.0f;
+		loc.Z += ProductZOffSet;
 
 		OutPositions[item.SlotIndex] = loc;
 		OutMeshIndices[item.SlotIndex] = item.ProductData.ProcessStage;

@@ -6,7 +6,7 @@
 #include "Conveyor/CConveyorSubsystem.h"
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
-#include "Component/ActorComponent/CLogComponent.h"
+#include "LogSender/FLogSender.h"
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 
 ACProductionEquipment_Base::ACProductionEquipment_Base()
@@ -16,7 +16,7 @@ ACProductionEquipment_Base::ACProductionEquipment_Base()
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
 
-	LogComponent = CreateDefaultSubobject<UCLogComponent>(TEXT("LogComponent"));
+	LogSender = MakePimpl<FLogSender>();
 }
 
 void ACProductionEquipment_Base::BeginPlay()
@@ -74,9 +74,9 @@ void ACProductionEquipment_Base::UITargetBroadcastInfo()
 	if (uiTarget == this) BroadcastInfo();
 }
 
-void ACProductionEquipment_Base::SendLogMessage(ELogEventType InEventType, FString InLogMessage)
+void ACProductionEquipment_Base::SendLogMessage(UWorld* InWorld, ELogEventType InEventType, FString InLogMessage)
 {
-	LogComponent->SendLogMessage(InEventType, InLogMessage);
+	LogSender->SendLogMessage(InWorld, InEventType, InLogMessage);
 }
 
 const bool ACProductionEquipment_Base::IsShipBlocked() const

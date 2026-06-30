@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "StructData/CStructDatas.h"
-#include "Templates/PimplPtr.h"
 #include "CProductionStatSubsystem.generated.h"
 
 struct FEquipmentOperatingRecord
@@ -43,9 +42,12 @@ private:
 	FDashboardData BuildDashboardData() const;
 
 	void OnSimulationStateChanged(bool InIsRunning);
+	void StartMeasurement();
+	void EndMeasurement();
 
 private:
 	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;
+	TPimplPtr<class FLogSender> LogSender;
 
 private:
 	int StoredFinalProductNum = 0;

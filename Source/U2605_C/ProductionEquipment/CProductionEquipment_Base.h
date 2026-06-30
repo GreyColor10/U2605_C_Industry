@@ -25,9 +25,6 @@ private:
 	TObjectPtr<UStaticMesh> InstancingMesh;
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category = "Log")
-	TObjectPtr<class UCLogComponent> LogComponent;
-
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 	FString EquipmentID = TEXT("EQUIP-01");
 
@@ -43,7 +40,7 @@ protected:
 	virtual void OnSimulationStateChanged(bool InIsRunning) PURE_VIRTUAL(OnSimulationStateChanged, );
 	void UITargetBroadcastInfo();
 
-	void SendLogMessage(ELogEventType InEventType, FString InLogMessage);
+	void SendLogMessage(UWorld* InWorld, ELogEventType InEventType, FString InLogMessage);
 	const bool IsShipBlocked() const;
 
 public:
@@ -53,6 +50,9 @@ public:
 	FORCEINLINE const EInfoUIType GetInfoUIType() const override { return InfoUIType; };
 	FORCEINLINE const float GetUIZOffset() const override { return UIZOffset; };
 	FORCEINLINE UStaticMesh* GetInstancingMesh() const override { return InstancingMesh; };
+
+private:
+	TPimplPtr<class FLogSender> LogSender;
 
 protected:
 	int32 HISMInstanceIndex = -1;

@@ -32,6 +32,9 @@ private:
 	void BroadcastOnSimulationStateChanged(bool InIsRunning);
 
 private:
+	TPimplPtr<class FLogSender> LogSender;
+
+private:
 	bool bIsRunning = false;
 	float SimulationStartTime = -1.0f;
 	float PausedElapsedSeconds = 0.0f;
