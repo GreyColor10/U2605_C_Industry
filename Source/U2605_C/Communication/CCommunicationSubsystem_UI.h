@@ -11,6 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorInfoUpdated, const FProces
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardData&, InDashboardData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScenarioComparisonReady, const FScenarioComparisonResult&, InResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExported);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSimulationStateUIChanged);
 
@@ -42,6 +43,9 @@ private:
 	FProcessorProgressUpdated OnProcessorProgressUpdated;
 
 	UPROPERTY()
+	FScenarioComparisonReady OnScenarioComparisonReady;
+
+	UPROPERTY()
 	FExported OnExported;
 
 	UPROPERTY()
@@ -60,6 +64,7 @@ public:
 	void BroadcastOnDashboardUpdated(const FDashboardData& InData);
 	void BroadcastOnLogEntryAdded(const FLogEntry& InEntry);
 	void BroadcastOnProcessorProgressUpdated(float InProgress);
+	void BroadcastOnScenarioComparisonReady(const FScenarioComparisonResult& InResult);
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
@@ -72,6 +77,7 @@ public:
 	FORCEINLINE FDashboardUpdated& GetOnDashboardUpdatedDel() { return OnDashboardUpdated; }
 	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
+	FORCEINLINE FScenarioComparisonReady& GetOnScenarioComparisonReady() { return OnScenarioComparisonReady; }
 	FORCEINLINE FExported& GetOnExportedDel() { return OnExported; }
 	FORCEINLINE FSimulationStateUIChanged& GetOnSimulationStateUIChangedDel() { return OnSimulationStateUIChanged; }
 

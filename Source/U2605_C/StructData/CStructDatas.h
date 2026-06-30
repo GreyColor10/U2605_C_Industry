@@ -4,7 +4,7 @@
 #include "Types/CFacilityType.h"
 #include "CStructDatas.generated.h" 
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FProductData
 {
 	GENERATED_BODY()
@@ -111,4 +111,31 @@ struct FLogEntry
 		return FString::Printf(TEXT("[%02d:%02d:%02d]"),
 			now.GetHour(), now.GetMinute(), now.GetSecond());
 	}
+};
+
+USTRUCT(BlueprintType)
+struct FScenarioComparisonResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	float NormalProduction = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ScenarioProduction = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ProductionChangePercent = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float NormalThroughput = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ScenarioThroughput = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float DurationSeconds = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsValid = false;
 };

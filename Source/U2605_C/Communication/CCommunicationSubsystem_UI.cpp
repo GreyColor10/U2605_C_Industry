@@ -43,6 +43,12 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessorProgressUpdated(float InPr
 		OnProcessorProgressUpdated.Broadcast(InProgress);
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnScenarioComparisonReady(const FScenarioComparisonResult& InResult)
+{
+	if (OnScenarioComparisonReady.IsBound())
+		OnScenarioComparisonReady.Broadcast(InResult);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)
 {
 	OnUITargetChanged.ExecuteIfBound(InTarget);

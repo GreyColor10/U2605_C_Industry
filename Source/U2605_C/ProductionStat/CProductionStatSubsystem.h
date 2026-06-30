@@ -45,6 +45,9 @@ private:
 	void StartMeasurement();
 	void EndMeasurement();
 
+	bool FindProductionAtTime(float InTime, float& OutProduction) const;
+	FScenarioComparisonResult BuildComparisonResult() const;
+
 private:
 	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;
 	TPimplPtr<class FLogSender> LogSender;
@@ -62,4 +65,6 @@ private:
 	bool bIsMeasuring = false;
 	float ScenarioStartTime = -1.0f;
 	float ScenarioEndTime = -1.0f;
+
+	FScenarioComparisonResult CachedComparisonResult;
 };
