@@ -11,14 +11,14 @@ class U2605_C_API UCUserWidget_SimulationPanel : public UUserWidget
 	
 private:
 	UFUNCTION()
-	void OnOnScenarioActiveChangedInternal(bool InIsActive, const FString& InScenarioName);
+	void OnScenarioDeactivedInternal();
 
 	UFUNCTION()
 	void OnScenarioRemainingUpdatedInternal(float InRemainingSeconds);
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnScenarioActiveChanged(bool InIsActive, const FString& InScenarioName);
+	void OnScenarioDeactived();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnScenarioRemainingUpdated(float InRemainingSeconds);

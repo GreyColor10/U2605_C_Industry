@@ -36,6 +36,6 @@ FDashboardData FDashboardDataBuilder::BuildDashboardData(UWorld* InWorld, int In
     }
 
     data.OperatingRate = (equipCount > 0) ? (rateSum / equipCount) : 0.0f;
-
+    
     return data;
 }

@@ -14,9 +14,6 @@ private:
 	UFUNCTION()
 	void ExportToCsv();
 
-	UFUNCTION()
-	void OnShortageScenarioStarted(const float InDuration);
-
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	void PostInitialize() override;
@@ -37,17 +34,12 @@ private:
 
 private:
 	void OnSimulationStateChanged(bool InIsRunning);
-	void StartMeasurement(const float InDuration);
-	void EndMeasurement();
 
-	void StartScenarioRemainingTimer();
-	void StopScenarioRemainingTimer();
-	void ScenarioRemainingUpdated();
+public:
+	FScenarioComparisonResult BuildComparisonResult(float InScenarioStartTime, float InDuration) const;
 
+private:
 	bool FindProductionAtTime(float InTime, float& OutProduction) const;
-	FScenarioComparisonResult BuildComparisonResult() const;
-
-	float GetScenarioRemainingSeconds() const;
 
 private:
 	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;
@@ -55,21 +47,13 @@ private:
 	TPimplPtr<class FDashboardDataBuilder> DashboardDataBuilder;
 
 private:
+	FTimerHandle DashboardHandle;
+
+private:
 	int StoredFinalProductNum = 0;
 	TMap<EProductType, int32> ProductCountByType;        
 	TMap<TWeakObjectPtr<AActor>, FEquipmentOperatingRecord> OperatingRecords;
 
-	FTimerHandle DashboardHandle;
-	FTimerHandle ScenarioHandle;
-	FTimerHandle ScenarioRemainingHandle;
-
 	FDashboardData CachedDashboardData;
 	TArray<FDashboardData> DashboardHistory;
-
-	bool bIsMeasuring = false;
-	float ScenarioStartTime = -1.0f;
-	float ScenarioEndTime = -1.0f;
-	float ScenarioDuration = -1.0f;
-
-	FScenarioComparisonResult CachedComparisonResult;
 };

@@ -21,25 +21,6 @@ void UCProductionStatSubsystem::ExportToCsv()
     ProductionStatExporter->IncreaseExportIndex();
 }
 
-void UCProductionStatSubsystem::OnShortageScenarioStarted(const float InDuration)
-{
-    StartMeasurement(InDuration);
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    FString logText = FString::Printf(TEXT("전력 부족 시나리오(기간 %.1f초) 시작"), InDuration);
-    LogSender->SendLogMessage(world, ELogEventType::Alert, logText);
-
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    uiSubsystem->BroadcastOnScenarioActiveChanged(true, TEXT("전력 부족"));
-}
-
 void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
@@ -60,7 +41,6 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     CheckNotValid(uiSubsystem);
 
     uiSubsystem->GetOnExportedDel().AddDynamic(this, &UCProductionStatSubsystem::ExportToCsv);
-    uiSubsystem->GetOnShortageScenarioStart().AddDynamic(this, &UCProductionStatSubsystem::OnShortageScenarioStarted);
 }
 
 void UCProductionStatSubsystem::PostInitialize()
@@ -90,10 +70,7 @@ void UCProductionStatSubsystem::Deinitialize()
         {
             UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
             if (IsValid(uiSubsystem))
-            {
                 uiSubsystem->GetOnExportedDel().RemoveAll(this);
-                uiSubsystem->GetOnShortageScenarioStart().RemoveAll(this);
-            } 
         }
     }
 
@@ -120,7 +97,7 @@ void UCProductionStatSubsystem::RegisterEquipment(AActor* InEquipment)
 void UCProductionStatSubsystem::NotifyEquipmentProcessingStateChanged(AActor* InEquipment, bool InIsProcessing)
 {
     CheckNotValid(InEquipment);
-
+    
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
@@ -199,98 +176,40 @@ void UCProductionStatSubsystem::OnSimulationStateChanged(bool InIsRunning)
     else PauseSendingDashboardData();
 }
 
-void UCProductionStatSubsystem::StartMeasurement(const float InDuration)
+FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult(float InScenarioStartTime, float InDuration) const
 {
-    CheckTrue(bIsMeasuring);
+    FScenarioComparisonResult result;
 
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
+    CheckTrueResult(InDuration < 0.0f, result);
+    CheckTrueResult(FMath::IsNearlyZero(InDuration), result);
 
-    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-    CheckNotValid(simTimeSubsystem);
+    float scenarioEndTime = InScenarioStartTime + InDuration;
+    result.DurationSeconds = InDuration;
 
-    ScenarioStartTime = simTimeSubsystem->GetElapsedSeconds();
-    ScenarioEndTime = -1.0f;
-    ScenarioDuration = InDuration;
-    bIsMeasuring = true;
+    float scenarioStartProd, scenarioEndProd;
+    bool bScenarioOk =
+        FindProductionAtTime(InScenarioStartTime, scenarioStartProd) &&
+        FindProductionAtTime(scenarioEndTime, scenarioEndProd);
 
-    FTimerDelegate del;
-    del.BindUObject(this, &UCProductionStatSubsystem::EndMeasurement);
-    world->GetTimerManager().SetTimer(ScenarioHandle, del, InDuration, false);
+    float normalStartProd, normalEndProd;
+    bool bNormalOk =
+        FindProductionAtTime(InScenarioStartTime - InDuration, normalStartProd) &&
+        FindProductionAtTime(InScenarioStartTime, normalEndProd);
 
-    StartScenarioRemainingTimer();
-}
+    CheckFalseResult(bScenarioOk && bNormalOk, result);
 
-void UCProductionStatSubsystem::EndMeasurement()
-{
-    CheckFalse(bIsMeasuring);
+    result.ScenarioProduction = scenarioEndProd - scenarioStartProd;
+    result.NormalProduction = normalEndProd - normalStartProd;
 
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
+    result.ProductionChangePercent = (result.NormalProduction > 0.0f)
+        ? ((result.ScenarioProduction - result.NormalProduction) / result.NormalProduction) * 100.0f
+        : 0.0f;
 
-    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-    CheckNotValid(simTimeSubsystem);
+    result.NormalThroughput = result.NormalProduction / InDuration * 60.0f;
+    result.ScenarioThroughput = result.ScenarioProduction / InDuration * 60.0f;
 
-    ScenarioEndTime = simTimeSubsystem->GetElapsedSeconds();
-    bIsMeasuring = false;
-
-    FScenarioComparisonResult result = BuildComparisonResult();
-
-    if (result.bIsValid)
-    {
-        /*FLog::Print(FString::Printf(TEXT("정상 %.0f개 vs 시나리오 %.0f개 (%.1f%%)"),
-            result.NormalProduction, result.ScenarioProduction, result.ProductionChangePercent));*/
-
-        FString logText = FString::Printf(TEXT("시나리오 종료"));
-        LogSender->SendLogMessage(world, ELogEventType::Alert, logText);
-    }
-    else
-    {
-        FLog::Print(TEXT("비교 불가: 직전 정상 구간 데이터 부족"));
-    }
-
-    StopScenarioRemainingTimer();
-
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    uiSubsystem->BroadcastOnScenarioComparisonReady(CachedComparisonResult);
-    uiSubsystem->BroadcastOnScenarioActiveChanged(false, FString());
-}
-
-void UCProductionStatSubsystem::StartScenarioRemainingTimer()
-{
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    FTimerDelegate del;
-    del.BindUObject(this, &UCProductionStatSubsystem::ScenarioRemainingUpdated);
-    world->GetTimerManager().SetTimer(ScenarioRemainingHandle, del, 0.1f, true, 0.0f);
-}
-
-void UCProductionStatSubsystem::StopScenarioRemainingTimer()
-{
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    world->GetTimerManager().ClearTimer(ScenarioRemainingHandle);
-}
-
-void UCProductionStatSubsystem::ScenarioRemainingUpdated()
-{
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-    CheckNotValid(uiSubsystem);
-
-    uiSubsystem->BroadcastOnScenarioRemainingUpdated(GetScenarioRemainingSeconds());
+    result.bIsValid = true;
+    return result;
 }
 
 bool UCProductionStatSubsystem::FindProductionAtTime(float InTime, float& OutProduction) const
@@ -319,53 +238,4 @@ bool UCProductionStatSubsystem::FindProductionAtTime(float InTime, float& OutPro
     return true;
 }
 
-FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult() const
-{
-    FScenarioComparisonResult result;
 
-    float duration = ScenarioEndTime - ScenarioStartTime;
-    CheckTrueResult(duration <= 0.0f, result);
-
-    result.DurationSeconds = duration;
-
-    float scenarioStartProd, scenarioEndProd;
-    bool bScenarioOk =
-        FindProductionAtTime(ScenarioStartTime, scenarioStartProd) &&
-        FindProductionAtTime(ScenarioEndTime, scenarioEndProd);
-
-    float normalStartProd, normalEndProd;
-    bool bNormalOk =
-        FindProductionAtTime(ScenarioStartTime - duration, normalStartProd) &&
-        FindProductionAtTime(ScenarioStartTime, normalEndProd);
-
-    CheckFalseResult(bScenarioOk && bNormalOk, result);
-
-    result.ScenarioProduction = scenarioEndProd - scenarioStartProd;
-    result.NormalProduction = normalEndProd - normalStartProd;
-
-    result.ProductionChangePercent = (result.NormalProduction > 0.0f)
-        ? ((result.ScenarioProduction - result.NormalProduction) / result.NormalProduction) * 100.0f
-        : 0.0f;
-
-    result.NormalThroughput = (duration > 0.0f) ? (result.NormalProduction / duration) * 60.0f : 0.0f;
-    result.ScenarioThroughput = (duration > 0.0f) ? (result.ScenarioProduction / duration) * 60.0f : 0.0f;
-
-    result.bIsValid = true;
-    return result;
-}
-
-float UCProductionStatSubsystem::GetScenarioRemainingSeconds() const
-{
-    CheckFalseResult(bIsMeasuring, 0.0f);
-
-    UWorld* world = GetWorld();
-    CheckNotValidResult(world, 0.0f);
-
-    UCSimulationTimeSubsystem* simTimeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
-    CheckNotValidResult(simTimeSubsystem, 0.0f);
-
-    float elapsed = simTimeSubsystem->GetElapsedSeconds();
-    float remaining = ScenarioDuration - (elapsed - ScenarioStartTime);
-    
-    return FMath::Max(remaining, 0.0f);
-}

@@ -5,6 +5,7 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
+#include "CScenarioSubsystem.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {
@@ -32,6 +33,10 @@ void ACProductionEquipment_Processor::BeginPlay()
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
 
+	UCScenarioSubsystem* scenarioSubsystem = world->GetSubsystem<UCScenarioSubsystem>();
+	if (IsValid(scenarioSubsystem))
+		scenarioSubsystem->GetOnShortageScenarioActiveChanged().AddUObject(this, &ACProductionEquipment_Processor::OnShortageScenarioActiveChanged);
+
 	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
 	if (IsValid(proStatSubsystem))
 		proStatSubsystem->RegisterEquipment(this);
@@ -39,17 +44,25 @@ void ACProductionEquipment_Processor::BeginPlay()
 
 void ACProductionEquipment_Processor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UGameInstance* game = GetGameInstance();
-	if (IsValid(game))
+	UWorld* world = GetWorld();
+	if (IsValid(world))
 	{
-		UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
-		if (IsValid(uiSubsystem))
+		UCScenarioSubsystem* scenarioSubsystem = world->GetSubsystem<UCScenarioSubsystem>();
+		if (IsValid(scenarioSubsystem))
+			scenarioSubsystem->GetOnShortageScenarioActiveChanged().RemoveAll(this);
+
+		UGameInstance* game = world->GetGameInstance();
+		if (IsValid(game))
 		{
-			uiSubsystem->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
-			uiSubsystem->GetOnProcessingTimeChangeEnded().RemoveAll(this);
+			UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+			if (IsValid(uiSubsystem))
+			{
+				uiSubsystem->GetOnProcessingTimeChangeRequestedDel().RemoveAll(this);
+				uiSubsystem->GetOnProcessingTimeChangeEnded().RemoveAll(this);
+			}
 		}
 	}
-
+	
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -79,8 +92,7 @@ bool ACProductionEquipment_Processor::TryStartProcessing()
 {
 	CheckNotValidResult(ProcessingComponent, false);
 
-	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Idle) return false;
-
+	CheckFalseResult(ProcessingComponent->IsIdleState(), false);
 	CheckFalseResult(ProcessingComponent->StartProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex), false);
 		
 	UWorld* world = GetWorld();
@@ -92,7 +104,7 @@ bool ACProductionEquipment_Processor::TryStartProcessing()
 	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
 	if (IsValid(proStatSubsystem))
 		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, true);
-
+	
 	world->GetTimerManager().SetTimer(
 		ProcessingHandle,
 		this,
@@ -146,14 +158,11 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 	FProductData processedProduct = ProcessingComponent->CompleteProcessing(ArrivedProducts, GetInstancingMesh(), HISMInstanceIndex);
 	ioSubsystem->BroadcastOnProductStarted(this, processedProduct);
 	
-	if (!TryStartProcessing())
-	{
-		UITargetBroadcastInfo();
+	UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
+	if (IsValid(proStatSubsystem))
+		proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
 
-		UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
-		if (IsValid(proStatSubsystem))
-			proStatSubsystem->NotifyEquipmentProcessingStateChanged(this, false);
-	}
+	if (!TryStartProcessing()) UITargetBroadcastInfo();
 }
 
 void ACProductionEquipment_Processor::OnProgressTick()
@@ -179,7 +188,7 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* In
 {
 	if (GetClass() != InProcessorClass) return;
 
-	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
+	if (ProcessingComponent->IsProcessingState())
 	{
 		PendingProcessingTime = InProcessingTime;
 		return;
@@ -219,7 +228,7 @@ void ACProductionEquipment_Processor::BroadcastInfo()
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
 
-	if (ProcessingComponent->GetEquipmentState() == EEquipmentState::Processing)
+	if (ProcessingComponent->IsProcessingState())
 	{
 		float elapsed;
 		if (FMath::IsNearlyZero(PausedProcessingTime))
@@ -247,7 +256,7 @@ void ACProductionEquipment_Processor::BroadcastInfo()
 
 void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
 {
-	if (ProcessingComponent->GetEquipmentState() != EEquipmentState::Processing) return;
+	CheckFalse(ProcessingComponent->IsProcessingState());
 
 	UWorld* world = GetWorld();
 	CheckNotValid(world);
@@ -276,4 +285,18 @@ void ACProductionEquipment_Processor::OnSimulationStateChanged(bool InIsRunning)
 		if (manager.IsTimerActive(ProgressHandle))
 			manager.PauseTimer(ProgressHandle);
 	}
+}
+
+void ACProductionEquipment_Processor::OnShortageScenarioActiveChanged(bool IsActive)
+{
+	float scenarioProcessingTime;
+
+	if (IsActive) scenarioProcessingTime = ProcessingTime * 2.0f;
+	else scenarioProcessingTime = ProcessingTime * 0.5f;
+
+	if (ProcessingComponent->IsProcessingState())
+		PendingProcessingTime = scenarioProcessingTime;
+	else ProcessingTime = scenarioProcessingTime;
+
+	UITargetBroadcastInfo();
 }

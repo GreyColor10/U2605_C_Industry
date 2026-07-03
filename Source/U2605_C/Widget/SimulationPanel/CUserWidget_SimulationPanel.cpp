@@ -3,9 +3,9 @@
 
 #include "Communication/CCommunicationSubsystem_UI.h"
 
-void UCUserWidget_SimulationPanel::OnOnScenarioActiveChangedInternal(bool InIsActive, const FString& InScenarioName)
+void UCUserWidget_SimulationPanel::OnScenarioDeactivedInternal()
 {
-    OnScenarioActiveChanged(InIsActive,InScenarioName);
+    OnScenarioDeactived();
 }
 
 void UCUserWidget_SimulationPanel::OnScenarioRemainingUpdatedInternal(float InRemainingSeconds)
@@ -23,7 +23,7 @@ void UCUserWidget_SimulationPanel::NativeConstruct()
     UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(uiSubsystem);
 
-    uiSubsystem->GetOnScenarioActiveChanged().AddDynamic(this, &UCUserWidget_SimulationPanel::OnOnScenarioActiveChangedInternal);
+    uiSubsystem->GetOnScenarioDeactived().AddDynamic(this, &UCUserWidget_SimulationPanel::OnScenarioDeactivedInternal);
     uiSubsystem->GetOnScenarioRemainingUpdated().AddDynamic(this, &UCUserWidget_SimulationPanel::OnScenarioRemainingUpdatedInternal);
 }
 
@@ -35,7 +35,7 @@ void UCUserWidget_SimulationPanel::NativeDestruct()
         UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
         if (uiSubsystem)
         {
-            uiSubsystem->GetOnScenarioActiveChanged().RemoveAll(this);
+            uiSubsystem->GetOnScenarioDeactived().RemoveAll(this);
             uiSubsystem->GetOnScenarioRemainingUpdated().RemoveAll(this);
         }
     }

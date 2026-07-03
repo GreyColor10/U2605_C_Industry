@@ -29,9 +29,10 @@ public:
 	FProcessorInfoData GetProcessorInfoData() const;
 
 public:
-	const FORCEINLINE EEquipmentState GetEquipmentState() const { return State; };
 	const FORCEINLINE TMap<EProductType, int32> GetRequiredProducts() const { return RequiredProducts; };
 
+	const FORCEINLINE bool IsIdleState() const { return State == EEquipmentState::Idle; };
+	const FORCEINLINE bool IsProcessingState() const { return State == EEquipmentState::Processing; };
 private:
 	bool CanStartProcessing(const TMap<EProductType, TArray<FProductData>>& InArrivedProducts) const;
 };

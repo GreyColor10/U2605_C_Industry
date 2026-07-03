@@ -55,16 +55,16 @@ void UCCommunicationSubsystem_UI::BroadcastOnScenarioComparisonReady(const FScen
 		OnScenarioComparisonReady.Broadcast(InResult);
 }
 
-void UCCommunicationSubsystem_UI::BroadcastOnScenarioActiveChanged(bool InIsActive, const FString& InScenarioName)
-{
-	if (OnScenarioActiveChanged.IsBound())
-		OnScenarioActiveChanged.Broadcast(InIsActive, InScenarioName);
-}
-
 void UCCommunicationSubsystem_UI::BroadcastOnScenarioRemainingUpdated(float InRemainingSeconds)
 {
 	if (OnScenarioRemainingUpdated.IsBound())
 		OnScenarioRemainingUpdated.Broadcast(InRemainingSeconds);
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnScenarioDeactived()
+{
+	if (OnScenarioDeactived.IsBound())
+		OnScenarioDeactived.Broadcast();
 }
 
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)

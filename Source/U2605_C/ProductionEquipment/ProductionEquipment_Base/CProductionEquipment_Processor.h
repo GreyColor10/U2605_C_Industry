@@ -44,6 +44,9 @@ protected:
 	void OnSimulationStateChanged(bool InIsRunning) override;
 
 private:
+	void OnShortageScenarioActiveChanged(bool IsActive);
+
+private:
 	FTimerHandle ProcessingHandle;
 	FTimerHandle ProgressHandle;
 
