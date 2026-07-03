@@ -139,3 +139,9 @@ struct FScenarioComparisonResult
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsValid = false;
 };
+
+struct FEquipmentOperatingRecord
+{
+	float AccumulatedSeconds = 0.0f;
+	float CurrentStartTime = -1.0f;
+};

@@ -13,6 +13,12 @@ void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateUIChanged()
 		OnSimulationStateUIChanged.Broadcast();
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnShortageScenarioStarted(const float InShortageDuration)
+{
+	if (OnShortageScenarioStarted.IsBound())
+		OnShortageScenarioStarted.Broadcast(InShortageDuration);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)
 {
 	if (OnStorageInfoUpdated.IsBound())
@@ -47,6 +53,18 @@ void UCCommunicationSubsystem_UI::BroadcastOnScenarioComparisonReady(const FScen
 {
 	if (OnScenarioComparisonReady.IsBound())
 		OnScenarioComparisonReady.Broadcast(InResult);
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnScenarioActiveChanged(bool InIsActive, const FString& InScenarioName)
+{
+	if (OnScenarioActiveChanged.IsBound())
+		OnScenarioActiveChanged.Broadcast(InIsActive, InScenarioName);
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnScenarioRemainingUpdated(float InRemainingSeconds)
+{
+	if (OnScenarioRemainingUpdated.IsBound())
+		OnScenarioRemainingUpdated.Broadcast(InRemainingSeconds);
 }
 
 void UCCommunicationSubsystem_UI::BroadcastOnUITargetChanged(AActor* InTarget)

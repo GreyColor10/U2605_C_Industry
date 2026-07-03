@@ -31,8 +31,8 @@ public:
 	void RequestProcessingTimeChangeEnd();
 
 protected:
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
+	void NativeConstruct() override;
+	void NativeDestruct() override;
 
 public:
 	void ResetState();

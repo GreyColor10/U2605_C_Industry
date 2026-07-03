@@ -5,12 +5,6 @@
 #include "StructData/CStructDatas.h"
 #include "CProductionStatSubsystem.generated.h"
 
-struct FEquipmentOperatingRecord
-{
-	float AccumulatedSeconds = 0.0f;
-	float CurrentStartTime = -1.0f;
-};
-
 UCLASS()
 class U2605_C_API UCProductionStatSubsystem : public UWorldSubsystem
 {
@@ -19,6 +13,9 @@ class U2605_C_API UCProductionStatSubsystem : public UWorldSubsystem
 private:
 	UFUNCTION()
 	void ExportToCsv();
+
+	UFUNCTION()
+	void OnShortageScenarioStarted(const float InDuration);
 
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -36,21 +33,26 @@ private:
 	void StartSendingDashboardData();
 	void ResumeSendingDashboardData();
 	void PauseSendingDashboardData();
+	void SendDashboardData();
 
 private:
-	void SendDashboardData();
-	FDashboardData BuildDashboardData() const;
-
 	void OnSimulationStateChanged(bool InIsRunning);
-	void StartMeasurement();
+	void StartMeasurement(const float InDuration);
 	void EndMeasurement();
+
+	void StartScenarioRemainingTimer();
+	void StopScenarioRemainingTimer();
+	void ScenarioRemainingUpdated();
 
 	bool FindProductionAtTime(float InTime, float& OutProduction) const;
 	FScenarioComparisonResult BuildComparisonResult() const;
 
+	float GetScenarioRemainingSeconds() const;
+
 private:
 	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;
 	TPimplPtr<class FLogSender> LogSender;
+	TPimplPtr<class FDashboardDataBuilder> DashboardDataBuilder;
 
 private:
 	int StoredFinalProductNum = 0;
@@ -58,13 +60,16 @@ private:
 	TMap<TWeakObjectPtr<AActor>, FEquipmentOperatingRecord> OperatingRecords;
 
 	FTimerHandle DashboardHandle;
-	FDashboardData CachedDashboardData;
+	FTimerHandle ScenarioHandle;
+	FTimerHandle ScenarioRemainingHandle;
 
+	FDashboardData CachedDashboardData;
 	TArray<FDashboardData> DashboardHistory;
 
 	bool bIsMeasuring = false;
 	float ScenarioStartTime = -1.0f;
 	float ScenarioEndTime = -1.0f;
+	float ScenarioDuration = -1.0f;
 
 	FScenarioComparisonResult CachedComparisonResult;
 };

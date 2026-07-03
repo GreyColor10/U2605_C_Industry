@@ -12,6 +12,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardD
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScenarioComparisonReady, const FScenarioComparisonResult&, InResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShortageScenarioStarted, const float, InShortageDuration);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScenarioActiveChanged, bool, InIsActive, const FString&, InScenarioName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScenarioRemainingUpdated, float, InRemainingSeconds);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExported);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSimulationStateUIChanged);
 
@@ -46,6 +49,15 @@ private:
 	FScenarioComparisonReady OnScenarioComparisonReady;
 
 	UPROPERTY()
+	FShortageScenarioStarted OnShortageScenarioStarted;
+
+	UPROPERTY()
+	FScenarioActiveChanged OnScenarioActiveChanged;
+
+	UPROPERTY()
+	FScenarioRemainingUpdated OnScenarioRemainingUpdated;
+
+	UPROPERTY()
 	FExported OnExported;
 
 	UPROPERTY()
@@ -58,6 +70,9 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "SimulationState")
 	void BroadcastOnSimulationStateUIChanged();
 
+	UFUNCTION(BlueprintCallable, Category = "Scenario")
+	void BroadcastOnShortageScenarioStarted(const float InShortageDuration);
+
 public:
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
 	void BroadcastOnProcessorInfoUpdated(const FProcessorInfoData& InProcessorInfoData);
@@ -65,6 +80,8 @@ public:
 	void BroadcastOnLogEntryAdded(const FLogEntry& InEntry);
 	void BroadcastOnProcessorProgressUpdated(float InProgress);
 	void BroadcastOnScenarioComparisonReady(const FScenarioComparisonResult& InResult);
+	void BroadcastOnScenarioActiveChanged(bool InIsActive, const FString& InScenarioName);
+	void BroadcastOnScenarioRemainingUpdated(float InRemainingSeconds);
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
@@ -78,6 +95,9 @@ public:
 	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
 	FORCEINLINE FScenarioComparisonReady& GetOnScenarioComparisonReady() { return OnScenarioComparisonReady; }
+	FORCEINLINE FShortageScenarioStarted& GetOnShortageScenarioStart() { return OnShortageScenarioStarted; }
+	FORCEINLINE FScenarioActiveChanged& GetOnScenarioActiveChanged() { return OnScenarioActiveChanged; }
+	FORCEINLINE FScenarioRemainingUpdated& GetOnScenarioRemainingUpdated() { return OnScenarioRemainingUpdated; }
 	FORCEINLINE FExported& GetOnExportedDel() { return OnExported; }
 	FORCEINLINE FSimulationStateUIChanged& GetOnSimulationStateUIChangedDel() { return OnSimulationStateUIChanged; }
 
