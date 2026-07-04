@@ -116,7 +116,7 @@ void UCConveyorSubsystem::Resume()
 	{
 		TArray<FVector> locationsArray;
 		TArray<int32> meshIndicesArray;
-		TArray<int32> idsArray;
+		
 		Simulator->SnapshotPositions(Graph, locationsArray, meshIndicesArray);
 
 		if (OnNiagaraCompActive.IsBound())
@@ -159,7 +159,7 @@ void UCConveyorSubsystem::UpdateProductItemsFlow()
 
 	TArray<FVector> locationsArray;
 	TArray<int32> meshIndicesArray;
-	TArray<int32> idsArray;
+
 	Simulator->SnapshotPositions(Graph, locationsArray, meshIndicesArray);
 
 	if (OnNiagaraCompSetParticlePosition.IsBound())

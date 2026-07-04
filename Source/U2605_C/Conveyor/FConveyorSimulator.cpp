@@ -65,69 +65,7 @@ void FConveyorSimulator::Step(UCConveyorGraph* InGraph, TArray<FProductArrival>&
 		float prevGlobalDistance = FLT_MAX;
 
 		for (int32 idx : indices)
-		{
-			FProductOnConvoyor& item = ProductsOnConveyer[idx];
-			FProductData& data = item.ProductData;
-
-			if (!item.CurrentConveyor.IsValid()) continue;
-			FConveyorNodeInfo* currInfo = InGraph->FindNode(item.CurrentConveyor.Get());
-			if (!currInfo) continue;
-
-			float currentGlobal = currInfo->BaseDistance + data.CurrentDistance;
-
-			// 정체 체크
-			if (FMath::IsNearlyEqual(prevGlobalDistance - currentGlobal, GridConstants::HalfGridSize) 
-				|| prevGlobalDistance - currentGlobal < GridConstants::HalfGridSize)
-			{
-				prevGlobalDistance = currentGlobal;
-				data.bBlocked = true;
-				continue;
-			}
-
-			// 전진
-			data.bBlocked = false;
-			if(!data.bArrived) data.CurrentDistance += GridConstants::HalfGridSize;
-			if (FMath::IsNearlyZero(data.CurrentDistance)) data.CurrentDistance = 0.0f;
-			float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
-
-			if (FMath::IsNearlyZero(remainingDistance) || remainingDistance < 0.0f)
-			{
-				if (currInfo->NextConveyor.IsValid())
-				{
-					FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
-					if (!nextInfo) continue;
-
-					if (FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
-					else data.CurrentDistance = FMath::Abs(remainingDistance);
-
-					item.CurrentConveyor = currInfo->NextConveyor;
-					prevGlobalDistance = nextInfo->BaseDistance + data.CurrentDistance;
-				}
-				else
-				{
-					if (!data.bArrived)
-					{
-						data.bArrived = true;
-						prevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
-					}
-
-					else
-					{
-						FProductArrival arrival;
-						arrival.ProductData = data;
-						arrival.ArrivalLocation = currInfo->SinkPosition;
-						arrival.SimulatorIndex = idx;
-						OutArrived.Add(arrival);
-						prevGlobalDistance = currentGlobal;
-					}
-				}
-			}
-
-			else
-			{
-				prevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
-			}
-		}
+			ProcessProductMovement(idx, prevGlobalDistance, InGraph, OutArrived);
 	}
 }
 
@@ -231,4 +169,68 @@ void FConveyorSimulator::MoveBlockedProduct(const TArray<int32>& InIndices, UCCo
 			else data.bArrived = true;
 		}
 	}
+}
+
+void FConveyorSimulator::ProcessProductMovement(const int32 InIndx, float& InPrevGlobalDistance, UCConveyorGraph* InGraph, TArray<FProductArrival>& OutArrived)
+{
+	FProductOnConvoyor& item = ProductsOnConveyer[InIndx];
+	FProductData& data = item.ProductData;
+
+	if (!item.CurrentConveyor.IsValid()) return;
+	FConveyorNodeInfo* currInfo = InGraph->FindNode(item.CurrentConveyor.Get());
+	if (!currInfo) return;
+
+	float currentGlobal = currInfo->BaseDistance + data.CurrentDistance;
+
+	// 정체 체크
+	if (FMath::IsNearlyEqual(InPrevGlobalDistance - currentGlobal, GridConstants::HalfGridSize)
+		|| InPrevGlobalDistance - currentGlobal < GridConstants::HalfGridSize)
+	{
+		InPrevGlobalDistance = currentGlobal;
+		data.bBlocked = true;
+		return;
+	}
+
+	// 전진
+	data.bBlocked = false;
+	if (!data.bArrived) data.CurrentDistance += GridConstants::HalfGridSize;
+	if (FMath::IsNearlyZero(data.CurrentDistance)) data.CurrentDistance = 0.0f;
+	float remainingDistance = currInfo->NodeDistance - data.CurrentDistance;
+
+	if (FMath::IsNearlyZero(remainingDistance) || remainingDistance < 0.0f)
+	{
+		//다음 컨베이어로 이동
+		if (currInfo->NextConveyor.IsValid())
+		{
+			FConveyorNodeInfo* nextInfo = InGraph->FindNode(currInfo->NextConveyor.Get());
+			if (!nextInfo) return;
+
+			if (FMath::IsNearlyZero(remainingDistance)) data.CurrentDistance = 0.0f;
+			else data.CurrentDistance = FMath::Abs(remainingDistance);
+
+			item.CurrentConveyor = currInfo->NextConveyor;
+			InPrevGlobalDistance = nextInfo->BaseDistance + data.CurrentDistance;
+		}
+
+		else
+		{
+			if (!data.bArrived)
+			{
+				data.bArrived = true;
+				InPrevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
+			}
+
+			else
+			{
+				FProductArrival arrival;
+				arrival.ProductData = data;
+				arrival.ArrivalLocation = currInfo->SinkPosition;
+				arrival.SimulatorIndex = InIndx;
+				OutArrived.Add(arrival);
+				InPrevGlobalDistance = currentGlobal;
+			}
+		}
+	}
+
+	else InPrevGlobalDistance = currInfo->BaseDistance + data.CurrentDistance;
 }

@@ -38,6 +38,7 @@ public:
 
 private:
 	void MoveBlockedProduct(const TArray<int32>& InIndices, UCConveyorGraph* InGraph);
+	void ProcessProductMovement(const int32 InIndx, float& InPrevGlobalDistance, UCConveyorGraph* InGraph, TArray<FProductArrival>& OutArrived);
 
 private:
 	TArray<FProductOnConvoyor> ProductsOnConveyer;
