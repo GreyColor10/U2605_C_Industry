@@ -39,7 +39,7 @@ public:
 	FScenarioComparisonResult BuildComparisonResult(float InScenarioStartTime, float InDuration) const;
 
 private:
-	bool FindProductionAtTime(float InTime, float& OutProduction) const;
+	bool FindProductionAtTime(float InTime, int32& OutProduction) const;
 
 private:
 	TPimplPtr<class FProductionStatExporter> ProductionStatExporter;

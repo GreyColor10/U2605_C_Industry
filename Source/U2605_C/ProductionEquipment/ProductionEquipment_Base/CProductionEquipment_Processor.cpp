@@ -5,7 +5,7 @@
 #include "Communication/CCommunicationSubsystem_IO.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
-#include "CScenarioSubsystem.h"
+#include "Scenario/CScenarioSubsystem.h"
 
 ACProductionEquipment_Processor::ACProductionEquipment_Processor()
 {

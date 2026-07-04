@@ -186,12 +186,12 @@ FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult(float
     float scenarioEndTime = InScenarioStartTime + InDuration;
     result.DurationSeconds = InDuration;
 
-    float scenarioStartProd, scenarioEndProd;
+    int32 scenarioStartProd, scenarioEndProd;
     bool bScenarioOk =
         FindProductionAtTime(InScenarioStartTime, scenarioStartProd) &&
         FindProductionAtTime(scenarioEndTime, scenarioEndProd);
 
-    float normalStartProd, normalEndProd;
+    int32 normalStartProd, normalEndProd;
     bool bNormalOk =
         FindProductionAtTime(InScenarioStartTime - InDuration, normalStartProd) &&
         FindProductionAtTime(InScenarioStartTime, normalEndProd);
@@ -201,8 +201,8 @@ FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult(float
     result.ScenarioProduction = scenarioEndProd - scenarioStartProd;
     result.NormalProduction = normalEndProd - normalStartProd;
 
-    result.ProductionChangePercent = (result.NormalProduction > 0.0f)
-        ? ((result.ScenarioProduction - result.NormalProduction) / result.NormalProduction) * 100.0f
+    result.ProductionChangePercent = (result.NormalProduction > 0)
+        ? ((result.ScenarioProduction - result.NormalProduction) / (float)result.NormalProduction) * 100.0f
         : 0.0f;
 
     result.NormalThroughput = result.NormalProduction / InDuration * 60.0f;
@@ -212,7 +212,7 @@ FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult(float
     return result;
 }
 
-bool UCProductionStatSubsystem::FindProductionAtTime(float InTime, float& OutProduction) const
+bool UCProductionStatSubsystem::FindProductionAtTime(float InTime, int32& OutProduction) const
 {
     CheckTrueResult(DashboardHistory.Num() == 0, false);
     CheckTrueResult(InTime < DashboardHistory[0].ElapsedSeconds, false);

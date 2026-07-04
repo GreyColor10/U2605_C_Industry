@@ -119,10 +119,10 @@ struct FScenarioComparisonResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
-	float NormalProduction = 0.0f;
+	int32 NormalProduction = 0;
 
 	UPROPERTY(BlueprintReadOnly)
-	float ScenarioProduction = 0.0f;
+	int32 ScenarioProduction = 0;
 
 	UPROPERTY(BlueprintReadOnly)
 	float ProductionChangePercent = 0.0f;
