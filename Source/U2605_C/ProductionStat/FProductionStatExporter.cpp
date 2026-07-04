@@ -4,7 +4,7 @@
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
 
-void FProductionStatExporter::ExportToCsv(FDashboardData& InDashboardData, TMap<EProductType, int32>& InProductCountByType) const
+void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType) const
 {
     const UEnum* enumPtr = StaticEnum<EProductType>();
 

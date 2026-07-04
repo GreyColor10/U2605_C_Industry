@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "StructData/CStructDatas.h"
 
-class U2605_C_API FProductionStatExporter
+class U2605_C_API FScenarioResultExporter
 {
 public:
-	void ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType) const;
+	void ExportToCsv(const FScenarioComparisonResult& InResult) const;
 	void InitializeExportIndex();
 
 	FORCEINLINE const int32 GetExportIndex() const { return ExportIndex; };

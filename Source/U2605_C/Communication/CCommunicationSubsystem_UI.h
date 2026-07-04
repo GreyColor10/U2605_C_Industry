@@ -12,15 +12,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDashboardUpdated, const FDashboardD
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogEntryAdded, const FLogEntry&, InLogEntry);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProcessorProgressUpdated, float, InProgress);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScenarioComparisonReady, const FScenarioComparisonResult&, InResult);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FShortageScenarioStarted, const float, InShortageDuration);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScenarioRemainingUpdated, float, InRemainingSeconds);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExported);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FProductionStatExported);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSimulationStateUIChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScenarioDeactived);
 
 DECLARE_DELEGATE_OneParam(FUITargetChanged, AActor*);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FProcessingTimeChangeRequested, UClass*, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FShortageScenarioStarted, const float);
 DECLARE_MULTICAST_DELEGATE(FProcessingTimeChangeEnded);
+DECLARE_MULTICAST_DELEGATE(FScenarioResultExported);
 
 DECLARE_DELEGATE_RetVal(const AActor*, FUITargetGotten)
 
@@ -49,13 +50,10 @@ private:
 	FScenarioComparisonReady OnScenarioComparisonReady;
 
 	UPROPERTY()
-	FShortageScenarioStarted OnShortageScenarioStarted;
-
-	UPROPERTY()
 	FScenarioRemainingUpdated OnScenarioRemainingUpdated;
 
 	UPROPERTY()
-	FExported OnExported;
+	FProductionStatExported OnProductionStatExported;
 
 	UPROPERTY()
 	FSimulationStateUIChanged OnSimulationStateUIChanged;
@@ -65,13 +63,10 @@ private:
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Export")
-	void BroadcastOnExported();
+	void BroadcastOnProductionStatExported();
 
 	UFUNCTION(BlueprintCallable, Category = "SimulationState")
 	void BroadcastOnSimulationStateUIChanged();
-
-	UFUNCTION(BlueprintCallable, Category = "Scenario")
-	void BroadcastOnShortageScenarioStarted(const float InShortageDuration);
 
 public:
 	void BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData);
@@ -85,7 +80,9 @@ public:
 
 	void BroadcastOnUITargetChanged(AActor* InTarget);
 	void BroadcastOnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime);
+	void BroadcastOnShortageScenarioStarted(const float InShortageDuration);
 	void BroadcastOnProcessingTimeChangeEnded();
+	void BroadcastOnScenarioResultExported();
 
 	const AActor* GetCurrentUITarget();
 
@@ -95,22 +92,25 @@ public:
 	FORCEINLINE FLogEntryAdded& GetOnLogEntryAddedDel() { return OnLogEntryAdded; }
 	FORCEINLINE FProcessorProgressUpdated& GetOnProcessorProgressUpdatedDel() { return OnProcessorProgressUpdated; }
 	FORCEINLINE FScenarioComparisonReady& GetOnScenarioComparisonReady() { return OnScenarioComparisonReady; }
-	FORCEINLINE FShortageScenarioStarted& GetOnShortageScenarioStart() { return OnShortageScenarioStarted; }
 	FORCEINLINE FScenarioRemainingUpdated& GetOnScenarioRemainingUpdated() { return OnScenarioRemainingUpdated; }
-	FORCEINLINE FExported& GetOnExportedDel() { return OnExported; }
+	FORCEINLINE FProductionStatExported& GetOnProductionStatExportedDel() { return OnProductionStatExported; }
 	FORCEINLINE FSimulationStateUIChanged& GetOnSimulationStateUIChangedDel() { return OnSimulationStateUIChanged; }
 	FORCEINLINE FScenarioDeactived& GetOnScenarioDeactived() { return OnScenarioDeactived; }
 
 	FORCEINLINE FUITargetChanged& GetOnUITargetChangedDel() { return OnUITargetChanged; };
 	FORCEINLINE FProcessingTimeChangeRequested& GetOnProcessingTimeChangeRequestedDel() { return OnProcessingTimeChangeRequested; }
+	FORCEINLINE FShortageScenarioStarted& GetOnShortageScenarioStart() { return OnShortageScenarioStarted; }
 	FORCEINLINE FProcessingTimeChangeEnded& GetOnProcessingTimeChangeEnded() { return OnProcessingTimeChangeEnded; };
+	FORCEINLINE FScenarioResultExported& GetOnScenarioResultExported() { return OnScenarioResultExported; };
 	
 	FORCEINLINE FUITargetGotten& GetOnUITargetGotten() { return OnUITargetGotten; };
 
 private:
 	FUITargetChanged OnUITargetChanged;
 	FProcessingTimeChangeRequested OnProcessingTimeChangeRequested;
+	FShortageScenarioStarted OnShortageScenarioStarted;
 	FProcessingTimeChangeEnded OnProcessingTimeChangeEnded;
-	
+	FScenarioResultExported OnScenarioResultExported;
+
 	FUITargetGotten OnUITargetGotten;
 };

@@ -18,6 +18,28 @@ void UCUserWidget_ScenarioPanel::OnScenarioComparisonReadyInternal(const FScenar
     OnScenarioComparisonReady(InResult);
 }
 
+void UCUserWidget_ScenarioPanel::BroadcastShortageScenarioStarted(const float InShortageDuration)
+{
+    UGameInstance* game = GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
+
+    uiSubsystem->BroadcastOnShortageScenarioStarted(InShortageDuration);
+}
+
+void UCUserWidget_ScenarioPanel::BroadcastScenarioResultExported()
+{
+    UGameInstance* game = GetGameInstance();
+    CheckNotValid(game);
+
+    UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
+    CheckNotValid(uiSubsystem);
+
+    uiSubsystem->BroadcastOnScenarioResultExported();
+}
+
 void UCUserWidget_ScenarioPanel::NativeConstruct()
 {
     Super::NativeConstruct();

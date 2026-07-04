@@ -30,6 +30,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnScenarioComparisonReady(const FScenarioComparisonResult& InResult);
 
+	UFUNCTION(BlueprintCallable)
+	void BroadcastShortageScenarioStarted(const float InShortageDuration);
+
+	UFUNCTION(BlueprintCallable)
+	void BroadcastScenarioResultExported();
+
 protected:
 	void NativeConstruct() override;
 	void NativeDestruct() override;

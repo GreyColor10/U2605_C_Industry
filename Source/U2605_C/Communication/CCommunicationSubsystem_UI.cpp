@@ -1,22 +1,16 @@
 ﻿#include "Communication/CCommunicationSubsystem_UI.h"
 #include "Global.h"
 
-void UCCommunicationSubsystem_UI::BroadcastOnExported()
+void UCCommunicationSubsystem_UI::BroadcastOnProductionStatExported()
 {
-	if (OnExported.IsBound())
-		OnExported.Broadcast();
+	if (OnProductionStatExported.IsBound())
+		OnProductionStatExported.Broadcast();
 }
 
 void UCCommunicationSubsystem_UI::BroadcastOnSimulationStateUIChanged()
 {
 	if (OnSimulationStateUIChanged.IsBound())
 		OnSimulationStateUIChanged.Broadcast();
-}
-
-void UCCommunicationSubsystem_UI::BroadcastOnShortageScenarioStarted(const float InShortageDuration)
-{
-	if (OnShortageScenarioStarted.IsBound())
-		OnShortageScenarioStarted.Broadcast(InShortageDuration);
 }
 
 void UCCommunicationSubsystem_UI::BroadcastOnStorageInfoUpdated(const FStorageInfoData& InStorageInfoData)
@@ -78,10 +72,22 @@ void UCCommunicationSubsystem_UI::BroadcastOnProcessingTimeChangeRequested(UClas
 		OnProcessingTimeChangeRequested.Broadcast(InProcessorClass, InProcessingTime);
 }
 
+void UCCommunicationSubsystem_UI::BroadcastOnShortageScenarioStarted(const float InShortageDuration)
+{
+	if (OnShortageScenarioStarted.IsBound())
+		OnShortageScenarioStarted.Broadcast(InShortageDuration);
+}
+
 void UCCommunicationSubsystem_UI::BroadcastOnProcessingTimeChangeEnded()
 {
 	if (OnProcessingTimeChangeEnded.IsBound())
 		OnProcessingTimeChangeEnded.Broadcast();
+}
+
+void UCCommunicationSubsystem_UI::BroadcastOnScenarioResultExported()
+{
+	if (OnScenarioResultExported.IsBound())
+		OnScenarioResultExported.Broadcast();
 }
 
 const AActor* UCCommunicationSubsystem_UI::GetCurrentUITarget()

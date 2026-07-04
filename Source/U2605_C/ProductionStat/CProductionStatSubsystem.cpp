@@ -40,7 +40,7 @@ void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(uiSubsystem);
 
-    uiSubsystem->GetOnExportedDel().AddDynamic(this, &UCProductionStatSubsystem::ExportToCsv);
+    uiSubsystem->GetOnProductionStatExportedDel().AddDynamic(this, &UCProductionStatSubsystem::ExportToCsv);
 }
 
 void UCProductionStatSubsystem::PostInitialize()
@@ -70,7 +70,7 @@ void UCProductionStatSubsystem::Deinitialize()
         {
             UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
             if (IsValid(uiSubsystem))
-                uiSubsystem->GetOnExportedDel().RemoveAll(this);
+                uiSubsystem->GetOnProductionStatExportedDel().RemoveAll(this);
         }
     }
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "StructData/CStructDatas.h"
 #include "CScenarioSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FShortageScenarioActiveChanged, bool);
@@ -11,10 +12,6 @@ class U2605_C_API UCScenarioSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 	
-private:
-	UFUNCTION()
-	void OnShortageScenarioStarted(const float InDuration);
-
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	void PostInitialize() override;
@@ -34,12 +31,15 @@ private:
 	void PauseScenario();
 
 private:
+	void OnShortageScenarioStarted(const float InDuration);
+	void ExportToCsv();
 	void OnSimulationStateChanged(bool InIsRunning);
 
 public:
 	FORCEINLINE FShortageScenarioActiveChanged& GetOnShortageScenarioActiveChanged() { return OnShortageScenarioActiveChanged; }
 	
 private:
+	TPimplPtr<class FScenarioResultExporter> ScenarioResultExporter;
 	TPimplPtr<class FLogSender> LogSender;
 
 private:
@@ -53,4 +53,6 @@ private:
 	bool bIsMeasuring = false;
 	float ScenarioStartTime = -1.0f;
 	float ScenarioDuration = -1.0f;
+
+	FScenarioComparisonResult LastResult;
 };

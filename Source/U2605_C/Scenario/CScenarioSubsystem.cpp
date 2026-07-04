@@ -5,27 +5,14 @@
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
-
-void UCScenarioSubsystem::OnShortageScenarioStarted(const float InDuration)
-{
-    StartMeasurement(InDuration);
-
-    UWorld* world = GetWorld();
-    CheckNotValid(world);
-
-    FString logText = FString::Printf(TEXT("전력 부족 시나리오(기간 %.1f초) 시작"), InDuration);
-    LogSender->SendLogMessage(world, ELogEventType::Alert, logText);
-
-    UGameInstance* game = world->GetGameInstance();
-    CheckNotValid(game);
-
-    if (OnShortageScenarioActiveChanged.IsBound())
-        OnShortageScenarioActiveChanged.Broadcast(true);
-}
+#include "Scenario/FScenarioResultExporter.h"
 
 void UCScenarioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
+    ScenarioResultExporter = MakePimpl<FScenarioResultExporter>();
+    ScenarioResultExporter->InitializeExportIndex();
 
     LogSender = MakePimpl<FLogSender>();
 
@@ -38,7 +25,8 @@ void UCScenarioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
     CheckNotValid(uiSubsystem);
 
-    uiSubsystem->GetOnShortageScenarioStart().AddDynamic(this, &UCScenarioSubsystem::OnShortageScenarioStarted);
+    uiSubsystem->GetOnShortageScenarioStart().AddUObject(this, &UCScenarioSubsystem::OnShortageScenarioStarted);
+    uiSubsystem->GetOnScenarioResultExported().AddUObject(this, &UCScenarioSubsystem::ExportToCsv);
 }
 
 void UCScenarioSubsystem::PostInitialize()
@@ -59,12 +47,19 @@ void UCScenarioSubsystem::Deinitialize()
     UWorld* world = GetWorld();
     if (IsValid(world))
     {
+        UCSimulationTimeSubsystem* timeSubsystem = world->GetSubsystem<UCSimulationTimeSubsystem>();
+        if (IsValid(timeSubsystem))
+            timeSubsystem->GetOnSimulationStateChangedDel().RemoveAll(this);
+        
         UGameInstance* game = world->GetGameInstance();
         if (IsValid(game))
         {
             UCCommunicationSubsystem_UI* uiSubsystem = game->GetSubsystem<UCCommunicationSubsystem_UI>();
             if (IsValid(uiSubsystem))
+            {
                 uiSubsystem->GetOnShortageScenarioStart().RemoveAll(this);
+                uiSubsystem->GetOnScenarioResultExported().RemoveAll(this);
+            }
         }
     }
 
@@ -100,13 +95,12 @@ void UCScenarioSubsystem::EndMeasurement()
     CheckNotValid(world);
 
     bIsMeasuring = false;
-    FScenarioComparisonResult result;
 
     UCProductionStatSubsystem* proStatSubsystem = world->GetSubsystem<UCProductionStatSubsystem>();
     if(IsValid(proStatSubsystem))
-        result = proStatSubsystem->BuildComparisonResult(ScenarioStartTime, ScenarioDuration);
+        LastResult = proStatSubsystem->BuildComparisonResult(ScenarioStartTime, ScenarioDuration);
 
-    if (result.bIsValid)
+    if (LastResult.bIsValid)
     {
         /*FLog::Print(FString::Printf(TEXT("정상 %.0f개 vs 시나리오 %.0f개 (%.1f%%)"),
             result.NormalProduction, result.ScenarioProduction, result.ProductionChangePercent));*/
@@ -131,7 +125,7 @@ void UCScenarioSubsystem::EndMeasurement()
     CheckNotValid(uiSubsystem);
 
     uiSubsystem->BroadcastOnScenarioDeactived();
-    uiSubsystem->BroadcastOnScenarioComparisonReady(result);
+    uiSubsystem->BroadcastOnScenarioComparisonReady(LastResult);
 }
 
 void UCScenarioSubsystem::StartScenarioRemainingTimer()
@@ -198,6 +192,37 @@ void UCScenarioSubsystem::PauseScenario()
 
     world->GetTimerManager().PauseTimer(ScenarioHandle);
     world->GetTimerManager().PauseTimer(ScenarioRemainingHandle);
+}
+
+void UCScenarioSubsystem::OnShortageScenarioStarted(const float InDuration)
+{
+    StartMeasurement(InDuration);
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    FString logText = FString::Printf(TEXT("전력 부족 시나리오(기간 %.1f초) 시작"), InDuration);
+    LogSender->SendLogMessage(world, ELogEventType::Alert, logText);
+
+    UGameInstance* game = world->GetGameInstance();
+    CheckNotValid(game);
+
+    if (OnShortageScenarioActiveChanged.IsBound())
+        OnShortageScenarioActiveChanged.Broadcast(true);
+}
+
+void UCScenarioSubsystem::ExportToCsv()
+{
+    ScenarioResultExporter->ExportToCsv(LastResult);
+
+    UWorld* world = GetWorld();
+    CheckNotValid(world);
+
+    FString logText = FString::Printf(TEXT("ScenarioResult_%d.csv 저장 완료"),
+        ScenarioResultExporter->GetExportIndex());
+    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
+
+    ScenarioResultExporter->IncreaseExportIndex();
 }
 
 void UCScenarioSubsystem::OnSimulationStateChanged(bool InIsRunning)
