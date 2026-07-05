@@ -7,7 +7,7 @@
 ![Niagara](https://img.shields.io/badge/VFX-Niagara-orange)
 ![HISM](https://img.shields.io/badge/Rendering-HISM%20Instancing-green)
 
-1인 기획·개발 / 제작 기간 약 5주 (2026.05 ~ 2026.06)
+1인 기획·개발 / 제작 기간 약 6주 (2026.05 ~ 2026.06)
 <!-- 대표 GIF: 전체 공정이 한눈에 보이는 장면 (상품 흐름 + 설비 가동 + 대시보드) -->
 ![전체 공정 데모](Docs/Images/overview.gif)
 
@@ -51,6 +51,14 @@
 - 시뮬레이션 시작·정지, 재고 소진, 파라미터 변경 등 주요 이벤트를 **타임스탬프 로그**로 표시합니다.
 - 생산 통계는 **CSV로 저장 가능합니다.** (한글 컬럼, UTF-8 BOM, 최근 5개 파일 순환 보관 + 재시작 시 인덱스 자동 복원).
 
+### 5. 시나리오 분석 — 정상 구간 대비 생산량 비교
+
+![시나리오 결과 비교](Docs/Images/scenario.gif)
+
+- **전력 부족 시나리오**를 정해진 기간 동안 발동하면 모든 설비의 처리 속도가 일시적으로 2배가 되고, 기간이 끝나면 원래 속도로 복구됩니다.
+- 시나리오 구간의 생산량을 **직전 정상 구간과 비교**해, 종료 시 결과 창에 정상 대비 생산량과 변화율(%)을 표시합니다.
+- 시나리오 진행 중에는 **남은 시간을 실시간(0.1초 주기)으로 갱신**하며, 시뮬레이션 일시정지/재개에 맞춰 시나리오 타이머도 함께 멈추고 이어집니다.
+- 비교 결과는 **CSV로 내보낼 수 있습니다.** (`ScenarioResult_N.csv`, 인덱스 자동 순환).
 <br>
 
 ## 🧠 기술적 의사결정
@@ -89,6 +97,7 @@ Source/U2605_C/
 ├── MeshInstancing/      # HISM 통합 관리 Subsystem
 ├── ProductionStat/      # 생산 통계 집계 + CSV 익스포터
 ├── SimulationTime/      # 시뮬레이션 경과 시간 단일 출처
+├── Scenario/            # 시나리오 적용 및 분석 + CSV 익스포터
 ├── Component/           # Niagara 래퍼, 가공 로직, 화면 위젯 컴포넌트
 ├── Widget/              # 정보 UI, 대시보드, 이벤트 로그
 ├── Interface/           # IClickable, IProductReceiver
