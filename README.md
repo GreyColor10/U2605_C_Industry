@@ -109,7 +109,7 @@ Source/U2605_C/
 
 ## 📦 사용 에셋
 - [Factory Environment Collection (Denys Rutkovskyi)](https://www.fab.com/listings/2ee66462-8c2b-4303-892c-83f7fc0d9b3e)
-- LPGenericPropsSet24 (MadHoundGames)(https://www.fab.com/listings/fca3b2ad-db1a-4dd1-978d-6e272d01c1ac)
+- [LPGenericPropsSet24 (MadHoundGames)](https://www.fab.com/listings/fca3b2ad-db1a-4dd1-978d-6e272d01c1ac)
 <br>
 
 ## 🚀 실행 환경
