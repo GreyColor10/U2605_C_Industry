@@ -38,7 +38,7 @@
 - 상품을 Actor로 스폰하지 않고, **Niagara 파티클 위치 배열**(`SetVectorArrayUserParameter`)로 표현합니다.
 - **Mesh Renderer + MeshIndex 바인딩**으로 가공 단계에 따라 파티클 메시가 교체됩니다 (밀가루 포대 → 반죽 → 빵 → 크림빵).
 
-### 3. 클릭 인터랙션 + What-if 파라미터 조정
+### 3. 클릭 인터랙션 + 파라미터 조정
 
 ![정보 UI와 슬라이더](Docs/Images/info_ui.gif)
 
@@ -55,7 +55,7 @@
 
 ![시나리오 결과 비교](Docs/Images/scenario.gif)
 
-- **전력 부족 시나리오**를 정해진 기간 동안 발동하면 모든 설비의 처리 속도가 일시적으로 2배가 되고, 기간이 끝나면 원래 속도로 복구됩니다.
+- **전력 부족 시나리오**를 정해진 기간 동안 발동하면 모든 설비의 작동 시간이 일시적으로 2배가 되고, 기간이 끝나면 원래대로 복구됩니다.
 - 시나리오 구간의 생산량을 **직전 정상 구간과 비교**해, 종료 시 결과 창에 정상 대비 생산량과 변화율(%)을 표시합니다.
 - 시나리오 진행 중에는 **남은 시간을 실시간(0.1초 주기)으로 갱신**하며, 시뮬레이션 일시정지/재개에 맞춰 시나리오 타이머도 함께 멈추고 이어집니다.
 - 비교 결과는 **CSV로 내보낼 수 있습니다.** (`ScenarioResult_N.csv`, 인덱스 자동 순환).
@@ -105,6 +105,11 @@ Source/U2605_C/
 └── Utilities/           # 조기 반환 매크로, 로그 헬퍼, 그리드 상수
 ```
 
+<br>
+
+## 📦 사용 에셋
+- [Factory Environment Collection (Denys Rutkovskyi)](https://www.fab.com/listings/2ee66462-8c2b-4303-892c-83f7fc0d9b3e)
+- LPGenericPropsSet24 (MadHoundGames)(https://www.fab.com/listings/fca3b2ad-db1a-4dd1-978d-6e272d01c1ac)
 <br>
 
 ## 🚀 실행 환경
