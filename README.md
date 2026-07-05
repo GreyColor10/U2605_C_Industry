@@ -59,6 +59,7 @@
 - 시나리오 구간의 생산량을 **직전 정상 구간과 비교**해, 종료 시 결과 창에 정상 대비 생산량과 변화율(%)을 표시합니다.
 - 시나리오 진행 중에는 **남은 시간을 실시간(0.1초 주기)으로 갱신**하며, 시뮬레이션 일시정지/재개에 맞춰 시나리오 타이머도 함께 멈추고 이어집니다.
 - 비교 결과는 **CSV로 내보낼 수 있습니다.** (`ScenarioResult_N.csv`, 인덱스 자동 순환).
+  
 <br>
 
 ## 🧠 기술적 의사결정
@@ -110,6 +111,7 @@ Source/U2605_C/
 ## 📦 사용 에셋
 - [Factory Environment Collection (Denys Rutkovskyi)](https://www.fab.com/listings/2ee66462-8c2b-4303-892c-83f7fc0d9b3e)
 - [LPGenericPropsSet24 (MadHoundGames)](https://www.fab.com/listings/fca3b2ad-db1a-4dd1-978d-6e272d01c1ac)
+  
 <br>
 
 ## 🚀 실행 환경
