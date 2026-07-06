@@ -5,7 +5,7 @@
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 #include "Communication/CCommunicationSubsystem_UI.h"
 #include "ProductionStat/CProductionStatSubsystem.h"
-#include "Scenario/FScenarioResultExporter.h"
+#include "CsvExporter/CsvExporter/FScenarioResultExporter.h"
 
 void UCScenarioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
