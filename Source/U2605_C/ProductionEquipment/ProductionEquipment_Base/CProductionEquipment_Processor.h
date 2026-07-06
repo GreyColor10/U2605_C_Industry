@@ -31,6 +31,7 @@ public:
 
 private:
 	bool TryStartProcessing();
+	void ApplyProcessingTimeChange();
 
 private:
 	void OnProcessingComplete();

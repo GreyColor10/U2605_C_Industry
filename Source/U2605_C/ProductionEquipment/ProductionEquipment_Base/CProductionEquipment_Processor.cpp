@@ -125,6 +125,18 @@ bool ACProductionEquipment_Processor::TryStartProcessing()
 	return true;
 }
 
+void ACProductionEquipment_Processor::ApplyProcessingTimeChange()
+{
+	UWorld* world = GetWorld();
+	CheckNotValid(world);
+
+	FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"),
+		*EquipmentID, PrevProcessingTime, ProcessingTime);
+	SendLogMessage(world, ELogEventType::Alert, logText);
+
+	PrevProcessingTime = ProcessingTime;
+}
+
 void ACProductionEquipment_Processor::OnProcessingComplete()
 {
 	if (PendingProcessingTime > 0.0f)
@@ -133,16 +145,7 @@ void ACProductionEquipment_Processor::OnProcessingComplete()
 		PendingProcessingTime = -1.0f;
 
 		if (PrevProcessingTime != ProcessingTime)
-		{
-			UWorld* world = GetWorld();
-			CheckNotValid(world);
-
-			FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"), 
-				*EquipmentID, PrevProcessingTime, ProcessingTime);
-			SendLogMessage(world ,ELogEventType::Alert, logText);
-			
-			PrevProcessingTime = ProcessingTime;
-		}
+			ApplyProcessingTimeChange();
 	}
 
 	UWorld* world = GetWorld();
@@ -210,14 +213,7 @@ void ACProductionEquipment_Processor::OnProcessingTimeChangeEnded()
 	if (uiTarget != this) return;
 	if (PrevProcessingTime == ProcessingTime) return;
 
-	UWorld* world = GetWorld();
-	CheckNotValid(world);
-
-	FString logText = FString::Printf(TEXT("%s 가공 시간 %.1fs → %.1fs"),
-		*EquipmentID, PrevProcessingTime, ProcessingTime);
-	SendLogMessage(world ,ELogEventType::Alert, logText);
-
-	PrevProcessingTime = ProcessingTime;
+	ApplyProcessingTimeChange();
 }
 
 void ACProductionEquipment_Processor::BroadcastInfo()
@@ -296,7 +292,11 @@ void ACProductionEquipment_Processor::OnShortageScenarioActiveChanged(bool IsAct
 
 	if (ProcessingComponent->IsProcessingState())
 		PendingProcessingTime = scenarioProcessingTime;
-	else ProcessingTime = scenarioProcessingTime;
-
+	else
+	{
+		ProcessingTime = scenarioProcessingTime;
+		ApplyProcessingTimeChange();
+	}
+		
 	UITargetBroadcastInfo();
 }

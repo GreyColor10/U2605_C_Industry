@@ -2,11 +2,11 @@
 #include "Global.h"
 
 FScenarioResultExporter::FScenarioResultExporter()
+    : CsvExporter(TEXT("ScenarioResult"))
 {
-    FolderName = TEXT("ScenarioResult");
 }
 
-void FScenarioResultExporter::ExportToCsv(const FScenarioComparisonResult& InResult) const
+void FScenarioResultExporter::ExportToCsv(const FScenarioComparisonResult& InResult)
 {
     CheckFalse(InResult.bIsValid);
 

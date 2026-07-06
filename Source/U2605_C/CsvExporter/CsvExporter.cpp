@@ -1,11 +1,16 @@
 ﻿#include "CsvExporter/CsvExporter.h"
 #include "Global.h"
 
-void CsvExporter::SaveToCsv(const FString& InCsv) const
+CsvExporter::CsvExporter(const FString& InFolderName)
+    : FolderName(InFolderName)
+{
+}
+
+void CsvExporter::SaveToCsv(const FString& InCsv)
 {
     CheckTrue(FolderName.IsEmpty());
-
-    FString directory = FPaths::ProjectSavedDir() + FolderName + TEXT("/");
+    
+    FString directory = FString::Printf(TEXT("%s%s/"), *FPaths::ProjectSavedDir(), *FolderName);
     FString filePath = FString::Printf(TEXT("%s%s_%d.csv"), *directory, *FolderName, ExportIndex);
 
     FFileHelper::SaveStringToFile(InCsv, *filePath, FFileHelper::EEncodingOptions::ForceUTF8);
@@ -17,20 +22,25 @@ void CsvExporter::SaveToCsv(const FString& InCsv) const
         if (FPaths::FileExists(oldFilePath))
             IFileManager::Get().Delete(*oldFilePath);
     }
+
+    ExportIndex++;
 }
 
 void CsvExporter::SetExportIndexByFolder()
 {
     CheckTrue(FolderName.IsEmpty());
 
-    FString directory = FPaths::ProjectSavedDir() + FolderName + TEXT("/");
+    FString directory = FString::Printf(TEXT("%s%s/"), *FPaths::ProjectSavedDir(), *FolderName);
+    FString existFileName = FString::Printf(TEXT("%s%s_*.csv"), *directory, *FolderName);
     TArray<FString> foundFiles;
-    IFileManager::Get().FindFiles(foundFiles, *(directory + FolderName + TEXT("_*.csv")), true, false);
+    
+    IFileManager::Get().FindFiles(foundFiles, *existFileName, true, false);
 
     int32 maxIndex = 0;
     for (const FString& fileName : foundFiles)
     {
-        FString indexStr = fileName.Replace(*(FolderName + TEXT("_")), TEXT(""));
+        FString forwardReplacePart = FString::Printf(TEXT("%s_"), *FolderName);
+        FString indexStr = fileName.Replace(*forwardReplacePart, TEXT(""));
         indexStr = indexStr.Replace(TEXT(".csv"), TEXT(""));
 
         int32 index = FCString::Atoi(*indexStr);

@@ -218,11 +218,7 @@ void UCScenarioSubsystem::ExportToCsv()
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
-    FString logText = FString::Printf(TEXT("ScenarioResult_%d.csv 저장 완료"),
-        ScenarioResultExporter->GetExportIndex());
-    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
-
-    ScenarioResultExporter->IncreaseExportIndex();
+    LogSender->SendLogMessage(world, ELogEventType::Info, ScenarioResultExporter->GetSavedLogText());
 }
 
 void UCScenarioSubsystem::OnSimulationStateChanged(bool InIsRunning)

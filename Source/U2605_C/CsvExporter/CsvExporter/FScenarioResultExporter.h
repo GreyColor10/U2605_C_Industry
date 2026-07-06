@@ -10,6 +10,6 @@ public:
 	FScenarioResultExporter();
 
 public:
-	void ExportToCsv(const FScenarioComparisonResult& InResult) const;
+	void ExportToCsv(const FScenarioComparisonResult& InResult);
 	void InitializeExportIndex() override;
 };

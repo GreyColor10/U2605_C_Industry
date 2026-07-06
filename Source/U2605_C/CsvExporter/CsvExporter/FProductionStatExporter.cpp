@@ -2,11 +2,12 @@
 #include "Global.h"
 
 FProductionStatExporter::FProductionStatExporter()
+    : CsvExporter(TEXT("ProductionStat"))
 {
-    FolderName = TEXT("ProductionStat");
+
 }
 
-void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType) const
+void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType)
 {
     const UEnum* enumPtr = StaticEnum<EProductType>();
 

@@ -14,11 +14,7 @@ void UCProductionStatSubsystem::ExportToCsv()
     UWorld* world = GetWorld();
     CheckNotValid(world);
 
-    FString logText = FString::Printf(TEXT("ProductionStat_%d.csv 저장 완료"),
-        ProductionStatExporter->GetExportIndex());
-    LogSender->SendLogMessage(world, ELogEventType::Info, logText);
-    
-    ProductionStatExporter->IncreaseExportIndex();
+    LogSender->SendLogMessage(world, ELogEventType::Info, ProductionStatExporter->GetSavedLogText());
 }
 
 void UCProductionStatSubsystem::Initialize(FSubsystemCollectionBase& Collection)
