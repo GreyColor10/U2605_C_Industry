@@ -1,6 +1,11 @@
 ﻿#include "CsvExporter/CsvExporter/FScenarioResultExporter.h"
 #include "Global.h"
 
+FScenarioResultExporter::FScenarioResultExporter()
+{
+    FolderName = TEXT("ScenarioResult");
+}
+
 void FScenarioResultExporter::ExportToCsv(const FScenarioComparisonResult& InResult) const
 {
     CheckFalse(InResult.bIsValid);
@@ -29,10 +34,10 @@ void FScenarioResultExporter::ExportToCsv(const FScenarioComparisonResult& InRes
         InResult.ProductionChangePercent
     );
 
-    SaveToCsv(TEXT("ScenarioResult"), csv);
+    SaveToCsv(csv);
 }
 
 void FScenarioResultExporter::InitializeExportIndex()
 {
-    SetExportIndexByFolder(TEXT("ScenarioResult"));
+    SetExportIndexByFolder();
 }

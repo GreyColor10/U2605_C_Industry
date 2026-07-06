@@ -1,6 +1,11 @@
 ﻿#include "CsvExporter/CsvExporter/FProductionStatExporter.h"
 #include "Global.h"
 
+FProductionStatExporter::FProductionStatExporter()
+{
+    FolderName = TEXT("ProductionStat");
+}
+
 void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType) const
 {
     const UEnum* enumPtr = StaticEnum<EProductType>();
@@ -31,10 +36,10 @@ void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData,
         csv += FString::Printf(TEXT("%s,%d\n"), *typeName, pair.Value);
     }
 
-    SaveToCsv(TEXT("ProductionStat"), csv);
+    SaveToCsv(csv);
 }
 
 void FProductionStatExporter::InitializeExportIndex()
 {
-    SetExportIndexByFolder(TEXT("ProductionStat"));
+    SetExportIndexByFolder();
 }

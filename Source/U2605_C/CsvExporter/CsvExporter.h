@@ -11,9 +11,10 @@ public:
 	FORCEINLINE void IncreaseExportIndex() { ExportIndex++; };
 
 protected:
-	void SaveToCsv(const FString& InFolderName, const FString& InCsv) const;
-	void SetExportIndexByFolder(const FString& InFolderName);
+	void SaveToCsv(const FString& InCsv) const;
+	void SetExportIndexByFolder();
 
 protected:
 	int32 ExportIndex = 1;
+	FString FolderName;
 };
