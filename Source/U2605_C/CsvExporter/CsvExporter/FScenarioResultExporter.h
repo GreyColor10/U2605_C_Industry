@@ -11,5 +11,4 @@ public:
 
 public:
 	void ExportToCsv(const FScenarioComparisonResult& InResult);
-	void InitializeExportIndex() override;
 };

@@ -39,8 +39,3 @@ void FProductionStatExporter::ExportToCsv(const FDashboardData& InDashboardData,
 
     SaveToCsv(csv);
 }
-
-void FProductionStatExporter::InitializeExportIndex()
-{
-    SetExportIndexByFolder();
-}

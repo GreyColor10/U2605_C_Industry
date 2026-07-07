@@ -11,5 +11,4 @@ public:
 
 public:
 	void ExportToCsv(const FDashboardData& InDashboardData, const TMap<EProductType, int32>& InProductCountByType);
-	void InitializeExportIndex() override;
 };

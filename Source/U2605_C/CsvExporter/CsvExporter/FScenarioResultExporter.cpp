@@ -36,8 +36,3 @@ void FScenarioResultExporter::ExportToCsv(const FScenarioComparisonResult& InRes
 
     SaveToCsv(csv);
 }
-
-void FScenarioResultExporter::InitializeExportIndex()
-{
-    SetExportIndexByFolder();
-}

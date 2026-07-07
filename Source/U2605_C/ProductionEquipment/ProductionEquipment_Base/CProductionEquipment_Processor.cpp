@@ -190,6 +190,7 @@ void ACProductionEquipment_Processor::OnProgressTick()
 void ACProductionEquipment_Processor::OnProcessingTimeChangeRequested(UClass* InProcessorClass, float InProcessingTime)
 {
 	if (GetClass() != InProcessorClass) return;
+	CheckTrue(FMath::IsNearlyEqual(InProcessingTime, ProcessingTime));
 
 	if (ProcessingComponent->IsProcessingState())
 	{
