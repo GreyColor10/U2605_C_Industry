@@ -33,6 +33,7 @@ public:
 
 	const FORCEINLINE bool IsIdleState() const { return State == EEquipmentState::Idle; };
 	const FORCEINLINE bool IsProcessingState() const { return State == EEquipmentState::Processing; };
+
 private:
 	bool CanStartProcessing(const TMap<EProductType, TArray<FProductData>>& InArrivedProducts) const;
 };

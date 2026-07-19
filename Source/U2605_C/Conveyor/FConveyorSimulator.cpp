@@ -117,7 +117,6 @@ bool FConveyorSimulator::IsEntryBlocked(AActor* InEntryConveyor) const
 
 	for (const FProductOnConvoyor& item : ProductsOnConveyer)
 	{
-		if (item.EntryConveyor.Get() != InEntryConveyor) continue;
 		if (item.CurrentConveyor.Get() != InEntryConveyor) continue;
 		if (!FMath::IsNearlyZero(item.ProductData.CurrentDistance)) continue;
 

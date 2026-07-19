@@ -6,11 +6,6 @@
 #include "Widget/CUserWidget_Screen.h"
 #include "SimulationTime/CSimulationTimeSubsystem.h"
 
-void UCScreenWidgetComponent::OnStoredFinalProductUpdated(int InStoredFinalProductNum)
-{
-	UI_Player->OnStoredFinalProductUpdated(InStoredFinalProductNum);
-}
-
 UCScreenWidgetComponent::UCScreenWidgetComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;

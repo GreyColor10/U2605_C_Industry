@@ -17,10 +17,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<UCUserWidget_Screen> UI_Player = nullptr;
 
-private:
-	UFUNCTION()
-	void OnStoredFinalProductUpdated(int InStoredFinalProductNum);
-
 public:	
 	UCScreenWidgetComponent();
 

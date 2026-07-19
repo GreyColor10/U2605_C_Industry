@@ -210,7 +210,7 @@ FScenarioComparisonResult UCProductionStatSubsystem::BuildComparisonResult(float
 
 bool UCProductionStatSubsystem::FindProductionAtTime(float InTime, int32& OutProduction) const
 {
-    CheckTrueResult(DashboardHistory.Num() == 0, false);
+    CheckTrueResult(DashboardHistory.IsEmpty(), false);
     CheckTrueResult(InTime < DashboardHistory[0].ElapsedSeconds, false);
 
     int32 low = 0;

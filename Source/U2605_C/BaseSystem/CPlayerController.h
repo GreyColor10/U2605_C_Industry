@@ -8,6 +8,7 @@
 
 struct FInputActionValue;
 class ACineCameraActor;
+class UInputAction;
 
 UCLASS()
 class U2605_C_API ACPlayerController : public APlayerController
@@ -16,22 +17,22 @@ class U2605_C_API ACPlayerController : public APlayerController
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input")
-	class UInputMappingContext* DefaultMappingContext = nullptr;
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	class UInputAction* MouseClickAction = nullptr;
+	TObjectPtr<UInputAction> MouseClickAction = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input|Camera")
-	class UInputAction* Camera0Action = nullptr;
+	TObjectPtr<UInputAction> Camera0Action = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input|Camera")
-	class UInputAction* Camera1Action = nullptr;
+	TObjectPtr<UInputAction> Camera1Action = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input|Camera")
-	class UInputAction* Camera2Action = nullptr;
+	TObjectPtr<UInputAction> Camera2Action = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input|Camera")
-	class UInputAction* Camera3Action = nullptr;
+	TObjectPtr<UInputAction> Camera3Action = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	TArray<FName> CineCameraTags;
